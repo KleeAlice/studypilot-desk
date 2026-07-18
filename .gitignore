@@ -1,0 +1,56 @@
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.egg-info/
+.coverage
+htmlcov/
+
+# Node / Electron
+node_modules/
+dist/
+dist-electron/
+release/
+out/
+*.log
+npm-debug.log*
+
+# Local StudyPilot data (keep only deterministic seeds)
+data/*
+!data/seeds/
+!data/seeds/**
+*.db
+*.db-shm
+*.db-wal
+backups/
+
+# Tests and local captures
+test-results/
+playwright-report/
+screenshots/
+.playwright/
+
+# Environment and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# IDE / OS
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Local planning notes
+findings.md
+progress.md
+task_plan.md

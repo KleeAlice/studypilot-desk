@@ -1,0 +1,2234 @@
+{
+  "schema_version": 1,
+  "source": {
+    "filename": "半年内转向大模型应用算法岗_优化精校版.docx",
+    "path": "C:\\Users\\Administrator\\Downloads\\半年内转向大模型应用算法岗_优化精校版.docx",
+    "size_bytes": 5664760,
+    "modified_at": "2026-07-14T08:04:19.928796+00:00",
+    "extracted_at": "2026-07-15T12:28:08.858932+00:00",
+    "paragraph_count": 995,
+    "table_count": 152
+  },
+  "title": "半年内转向大模型应用算法岗",
+  "workstreams": [
+    "StudyPilot",
+    "ToolShift-CN"
+  ],
+  "phases": [
+    {
+      "phase": 1,
+      "title": "基础可运行",
+      "start_week": 1,
+      "end_week": 4,
+      "gate": "G1",
+      "timing": "W4",
+      "acceptance": "PyTorch 训练流程、项目数据结构、100 个知识点 DAG 草案",
+      "remediation": "取消 AIGC 与复杂推荐，补基础一周内完成",
+      "exit_criteria": "阶段 1 出口：仓库、基线诊断、数据模型、知识 DAG 与评测计划都可运行；若 G1 未过，优先补 PyTorch 与项目骨架，不进入复杂 RAG。"
+    },
+    {
+      "phase": 2,
+      "title": "RAG 可评测",
+      "start_week": 5,
+      "end_week": 8,
+      "gate": "G2",
+      "timing": "W8",
+      "acceptance": "至少 80 条 Golden Query；检索、引用和生成指标可复现",
+      "remediation": "不进入多 Agent；优先修检索数据和评测",
+      "exit_criteria": "阶段 2 出口：RAG 不只“能回答”，还要有 Golden Set、召回/引用指标与错误分类；研究候选在此完成第一次新颖性排序。"
+    },
+    {
+      "phase": 3,
+      "title": "MVP 闭环",
+      "start_week": 9,
+      "end_week": 12,
+      "gate": "G3",
+      "timing": "W12",
+      "acceptance": "四条核心流程端到端可跑；工具和状态均有测试",
+      "remediation": "冻结新功能，只修闭环与错误",
+      "exit_criteria": "阶段 3 出口：四条核心流程端到端可跑，工具、状态和错误都有测试；任何循环或副作用重复都必须进入回归集。"
+    },
+    {
+      "phase": 4,
+      "title": "研究锁题",
+      "start_week": 13,
+      "end_week": 16,
+      "gate": "G4",
+      "timing": "W16",
+      "acceptance": "文献差异清楚、数据可用、基线跑通、至少一个有效结果",
+      "remediation": "切到备选题或改为复现型技术报告",
+      "exit_criteria": "阶段 4 出口：项目进入 Beta，研究题通过 W16 锁题；若研究仍不稳定，收缩为复现与分析报告，不牺牲项目冻结。"
+    },
+    {
+      "phase": 5,
+      "title": "项目冻结",
+      "start_week": 17,
+      "end_week": 20,
+      "gate": "G5",
+      "timing": "W20",
+      "acceptance": "一键启动、回归评测、Demo、README、成本与延迟数据",
+      "remediation": "不再加功能，只修质量和表达",
+      "exit_criteria": "阶段 5 出口：一键启动、监控、成本、延迟与回归 CI 完整；微调只有在 Go/No-Go 条件同时满足时才做。"
+    },
+    {
+      "phase": 6,
+      "title": "求职就绪",
+      "start_week": 21,
+      "end_week": 24,
+      "gate": "G6",
+      "timing": "W24",
+      "acceptance": "项目、论文、简历、面试讲稿与代码题记录完整",
+      "remediation": "以项目质量优先，论文可标为在研技术报告",
+      "exit_criteria": "阶段 6 出口：实验冻结、报告收口、README/Demo/简历与讲稿相互一致；最后两周不再加新功能。"
+    }
+  ],
+  "weeks": [
+    {
+      "week": 1,
+      "phase": 1,
+      "gate": "G1",
+      "foundation": "基线诊断；数组/哈希/双指针；Python 工程、SQL 基础",
+      "tasks": [
+        "StudyPilot：建仓库",
+        "写范围、用户故事、P0",
+        "P1",
+        "P2",
+        "定义项目风险",
+        "研究：建研究仓库",
+        "建立文献表",
+        "阅读 ReAct、RAG、一个 Agent benchmark"
+      ],
+      "studypilot": [
+        "StudyPilot：建仓库"
+      ],
+      "research": [
+        "研究：建研究仓库"
+      ],
+      "deliverables": [
+        "baseline_assessment.md 、项目 product_scope.md 、实验模板",
+        "一条命令跑通假实验"
+      ]
+    },
+    {
+      "week": 2,
+      "phase": 1,
+      "gate": "G1",
+      "foundation": "线性代数、概率、分类指标；链表/栈/队列；PyTorch Tensor、Dataset、训练循环",
+      "tasks": [
+        "StudyPilot：定义用户画像、知识点、任务、测验、Trace 数据模型",
+        "研究：阅读工具调用和 function-calling 评测",
+        "整理任务与指标差异"
+      ],
+      "studypilot": [
+        "StudyPilot：定义用户画像、知识点、任务、测验、Trace 数据模型"
+      ],
+      "research": [
+        "研究：阅读工具调用和 function-calling 评测"
+      ],
+      "deliverables": [
+        "mini_text_classifier",
+        "、 data_model.md 、5 张 Paper Card",
+        "训练",
+        "验证",
+        "保存完整"
+      ]
+    },
+    {
+      "week": 3,
+      "phase": 1,
+      "gate": "G1",
+      "foundation": "Attention、Embedding、复杂度；树/BFS/DFS；SQL JOIN/窗口函数",
+      "tasks": [
+        "StudyPilot：构建 100–140 个知识点 DAG 草案",
+        "实现环检测和拓扑排序",
+        "研究：阅读 BFCL、ToolSandbox、τ",
+        "τ²-bench",
+        "复现一个最小调用评测"
+      ],
+      "studypilot": [
+        "StudyPilot：构建 100–140 个知识点 DAG 草案"
+      ],
+      "research": [
+        "研究：阅读 BFCL、ToolSandbox、τ"
+      ],
+      "deliverables": [
+        "knowledge_units.yaml 、 dag_validator.py 、 transformer_notes.md",
+        "DAG 无环且有测试"
+      ]
+    },
+    {
+      "week": 4,
+      "phase": 1,
+      "gate": "G1",
+      "foundation": "机器学习基础、过拟合、数据泄漏；二分/回溯；PyTorch 调试",
+      "tasks": [
+        "StudyPilot：冻结 MVP 架构、工具边界、Golden Set 计划与仓库结构",
+        "研究：形成 3 个候选题和初步比较"
+      ],
+      "studypilot": [
+        "StudyPilot：冻结 MVP 架构、工具边界、Golden Set 计划与仓库结构"
+      ],
+      "research": [
+        "研究：形成 3 个候选题和初步比较"
+      ],
+      "deliverables": [
+        "system_design.md 、 evaluation_plan.md 、 research_candidates.md",
+        "通过 G1"
+      ]
+    },
+    {
+      "week": 5,
+      "phase": 2,
+      "gate": "G2",
+      "foundation": "倒排索引、TF-IDF、BM25；堆/优先队列",
+      "tasks": [
+        "StudyPilot：文档解析、标题层级、Chunk、Metadata",
+        "构造前 30 条 Golden Query",
+        "研究：阅读检索",
+        "RAG 评测与 Agent 数据集卡"
+      ],
+      "studypilot": [
+        "StudyPilot：文档解析、标题层级、Chunk、Metadata"
+      ],
+      "research": [
+        "研究：阅读检索"
+      ],
+      "deliverables": [
+        "ingest.py 、 chunking.py 、 chunks.jsonl",
+        "每个 Chunk 可回溯来源"
+      ]
+    },
+    {
+      "week": 6,
+      "phase": 2,
+      "gate": "G2",
+      "foundation": "向量、余弦、ANN；图与拓扑题",
+      "tasks": [
+        "StudyPilot：实现 BM25、Dense、RRF",
+        "Golden Query 扩到 60 条",
+        "研究：跑通候选题所需的一个公开评测环境"
+      ],
+      "studypilot": [
+        "StudyPilot：实现 BM25、Dense、RRF"
+      ],
+      "research": [
+        "研究：跑通候选题所需的一个公开评测环境"
+      ],
+      "deliverables": [
+        "retrieval_baselines.py 、 retrieval_report_v1.md",
+        "三组基线可复现"
+      ]
+    },
+    {
+      "week": 7,
+      "phase": 2,
+      "gate": "G2",
+      "foundation": "排序指标、nDCG、MRR；动态规划入门",
+      "tasks": [
+        "StudyPilot：加 Rerank、引用、无证据拒答",
+        "Golden Query 扩到 80–100 条",
+        "研究：为三个候选题写任务定义、数据和风险"
+      ],
+      "studypilot": [
+        "StudyPilot：加 Rerank、引用、无证据拒答"
+      ],
+      "research": [
+        "研究：为三个候选题写任务定义、数据和风险"
+      ],
+      "deliverables": [
+        "citations.py 、 answer_eval.py 、 candidate_specs",
+        "引用可定位原文"
+      ]
+    },
+    {
+      "week": 8,
+      "phase": 2,
+      "gate": "G2",
+      "foundation": "实验设计、多随机种子、Bootstrap；DP/贪心",
+      "tasks": [
+        "StudyPilot：完成 Chunk",
+        "召回",
+        "Rerank",
+        "Top-k 对照与错误分类",
+        "研究：完成最近两年文献矩阵和新颖性闸门"
+      ],
+      "studypilot": [
+        "StudyPilot：完成 Chunk"
+      ],
+      "research": [
+        "研究：完成最近两年文献矩阵和新颖性闸门"
+      ],
+      "deliverables": [
+        "rag_report.md 、 novelty_matrix.md",
+        "通过 G2，研究候选排序明确"
+      ]
+    },
+    {
+      "week": 9,
+      "phase": 3,
+      "gate": "G3",
+      "foundation": "JSON Schema、Pydantic、HTTP；图搜索",
+      "tasks": [
+        "StudyPilot：定义 8–10 个工具",
+        "参数、错误码、超时、幂等测试",
+        "研究：从公开 benchmark 抽取可复用任务结构"
+      ],
+      "studypilot": [
+        "StudyPilot：定义 8–10 个工具"
+      ],
+      "research": [
+        "研究：从公开 benchmark 抽取可复用任务结构"
+      ],
+      "deliverables": [
+        "tool_schemas",
+        "、 test_tools.py",
+        "正常与失败用例齐全"
+      ]
+    },
+    {
+      "week": 10,
+      "phase": 3,
+      "gate": "G3",
+      "foundation": "状态机、并发、重试；中等图题",
+      "tasks": [
+        "StudyPilot：实现 Router 和显式状态图",
+        "跑通计划与问答两条路径",
+        "研究：复现最接近候选题的基础 Agent"
+      ],
+      "studypilot": [
+        "StudyPilot：实现 Router 和显式状态图"
+      ],
+      "research": [
+        "研究：复现最接近候选题的基础 Agent"
+      ],
+      "deliverables": [
+        "state.py 、 workflow.py 、Trace v1",
+        "无无限循环"
+      ]
+    },
+    {
+      "week": 11,
+      "phase": 3,
+      "gate": "G3",
+      "foundation": "概率校准、Rubric；DP/字符串",
+      "tasks": [
+        "StudyPilot：实现 Quiz、Grade、错因标签和 Beta-Binomial 掌握度",
+        "研究：构造 30–50 个研究 pilot 样本"
+      ],
+      "studypilot": [
+        "StudyPilot：实现 Quiz、Grade、错因标签和 Beta-Binomial 掌握度"
+      ],
+      "research": [
+        "研究：构造 30–50 个研究 pilot 样本"
+      ],
+      "deliverables": [
+        "quiz.py 、 grading.py 、 mastery.py 、 pilot_data.jsonl"
+      ]
+    },
+    {
+      "week": 12,
+      "phase": 3,
+      "gate": "G3",
+      "foundation": "系统设计：缓存、幂等、事务；综合模拟",
+      "tasks": [
+        "StudyPilot：四条核心流程端到端",
+        "建立 80+ Agent 离线任务",
+        "研究：跑第一个研究基线和小规模误差分析"
+      ],
+      "studypilot": [
+        "StudyPilot：四条核心流程端到端"
+      ],
+      "research": [
+        "研究：跑第一个研究基线和小规模误差分析"
+      ],
+      "deliverables": [
+        "agent_report_v1.md 、 pilot_results.csv",
+        "通过 G3"
+      ]
+    },
+    {
+      "week": 13,
+      "phase": 4,
+      "gate": "G4",
+      "foundation": "推荐基础、Recall/NDCG；滑窗/二分复习",
+      "tasks": [
+        "StudyPilot：实现薄弱点资源召回与规则重排",
+        "Popularity",
+        "Content",
+        "Hybrid 基线",
+        "研究：完成候选 A 的 clean",
+        "perturbed 生成器原型，或备选 B 的数据管道"
+      ],
+      "studypilot": [
+        "StudyPilot：实现薄弱点资源召回与规则重排"
+      ],
+      "research": [
+        "研究：完成候选 A 的 clean"
+      ],
+      "deliverables": [
+        "resource_ranker.py 、 recommendation_report_v1.md"
+      ]
+    },
+    {
+      "week": 14,
+      "phase": 4,
+      "gate": "G4",
+      "foundation": "安全、权限、提示注入；SQL 与系统设计",
+      "tasks": [
+        "StudyPilot：加高风险确认、非可信工具输出隔离、状态冲突与重复执行测试",
+        "研究：扩展 pilot，写标注指南与 Dataset Card"
+      ],
+      "studypilot": [
+        "StudyPilot：加高风险确认、非可信工具输出隔离、状态冲突与重复执行测试"
+      ],
+      "research": [
+        "研究：扩展 pilot，写标注指南与 Dataset Card"
+      ],
+      "deliverables": [
+        "safety_model.md 、 safety_eval.py 、 dataset_card.md"
+      ]
+    },
+    {
+      "week": 15,
+      "phase": 4,
+      "gate": "G4",
+      "foundation": "统计显著性、置信区间；算法模拟",
+      "tasks": [
+        "StudyPilot：加周报、复习调度和回归评测",
+        "修 W12 失败",
+        "研究：研究数据达到可跑规模",
+        "完成 B0–B3 基线"
+      ],
+      "studypilot": [
+        "StudyPilot：加周报、复习调度和回归评测"
+      ],
+      "research": [
+        "研究：研究数据达到可跑规模"
+      ],
+      "deliverables": [
+        "regression_suite",
+        "、 baseline_results.csv"
+      ]
+    },
+    {
+      "week": 16,
+      "phase": 4,
+      "gate": "G4",
+      "foundation": "全面模拟面试；补基础弱项",
+      "tasks": [
+        "StudyPilot：项目 Beta",
+        "冻结功能清单和 P95",
+        "成本埋点",
+        "研究：运行核心 pilot、差异表、风险复审，最终锁题或切换"
+      ],
+      "studypilot": [
+        "StudyPilot：项目 Beta"
+      ],
+      "research": [
+        "研究：运行核心 pilot、差异表、风险复审，最终锁题或切换"
+      ],
+      "deliverables": [
+        "research_decision.md 、 pilot_report.md",
+        "通过 G4"
+      ]
+    },
+    {
+      "week": 17,
+      "phase": 5,
+      "gate": "G5",
+      "foundation": "API、数据库、事务、索引；系统设计",
+      "tasks": [
+        "StudyPilot：FastAPI、SQLite",
+        "Postgres、迁移、鉴权和错误处理",
+        "研究：扩展研究数据，冻结开发",
+        "测试划分"
+      ],
+      "studypilot": [
+        "StudyPilot：FastAPI、SQLite"
+      ],
+      "research": [
+        "研究：扩展研究数据，冻结开发"
+      ],
+      "deliverables": [
+        "api",
+        "、数据库 schema、 splits.json"
+      ]
+    },
+    {
+      "week": 18,
+      "phase": 5,
+      "gate": "G5",
+      "foundation": "LoRA 原理与训练调试；算法综合",
+      "tasks": [
+        "StudyPilot：仅满足条件时做意图分类",
+        "重排微调",
+        "否则优化 RAG",
+        "Agent",
+        "研究：运行更多模型和恢复策略"
+      ],
+      "studypilot": [
+        "StudyPilot：仅满足条件时做意图分类"
+      ],
+      "research": [
+        "研究：运行更多模型和恢复策略"
+      ],
+      "deliverables": [
+        "lora_report.md 或 system_optimization.md"
+      ]
+    },
+    {
+      "week": 19,
+      "phase": 5,
+      "gate": "G5",
+      "foundation": "Docker、缓存、异步、限流；模拟面试",
+      "tasks": [
+        "StudyPilot：Docker Compose、日志、回归 CI、负载与故障注入",
+        "研究：跑主实验第一轮，检查异常与缺失结果"
+      ],
+      "studypilot": [
+        "StudyPilot：Docker Compose、日志、回归 CI、负载与故障注入"
+      ],
+      "research": [
+        "研究：跑主实验第一轮，检查异常与缺失结果"
+      ],
+      "deliverables": [
+        "docker-compose.yml 、 load_test.md 、 main_results_v1.csv"
+      ]
+    },
+    {
+      "week": 20,
+      "phase": 5,
+      "gate": "G5",
+      "foundation": "项目讲解与架构题",
+      "tasks": [
+        "StudyPilot：UI、Dashboard、Demo",
+        "项目冻结，只允许修 bug",
+        "研究：冻结研究协议和最终测试集"
+      ],
+      "studypilot": [
+        "StudyPilot：UI、Dashboard、Demo"
+      ],
+      "research": [
+        "研究：冻结研究协议和最终测试集"
+      ],
+      "deliverables": [
+        "demo.mp4 、 final_project_report.md",
+        "通过 G5"
+      ]
+    },
+    {
+      "week": 21,
+      "phase": 6,
+      "gate": "G6",
+      "foundation": "每日模拟题；RAG/Agent 高频问答",
+      "tasks": [
+        "StudyPilot：修回归问题，完善指标图和失败案例",
+        "研究：跑最终主实验，多次运行并保存完整配置"
+      ],
+      "studypilot": [
+        "StudyPilot：修回归问题，完善指标图和失败案例"
+      ],
+      "research": [
+        "研究：跑最终主实验，多次运行并保存完整配置"
+      ],
+      "deliverables": [
+        "main_results.csv 、 run_manifest.jsonl"
+      ]
+    },
+    {
+      "week": 22,
+      "phase": 6,
+      "gate": "G6",
+      "foundation": "系统设计、ML/NLP 深挖",
+      "tasks": [
+        "StudyPilot：完成项目技术报告和安全说明",
+        "研究：消融、分组、成本与错误分析"
+      ],
+      "studypilot": [
+        "StudyPilot：完成项目技术报告和安全说明"
+      ],
+      "research": [
+        "研究：消融、分组、成本与错误分析"
+      ],
+      "deliverables": [
+        "ablation_results.csv 、 error_analysis.md"
+      ]
+    },
+    {
+      "week": 23,
+      "phase": 6,
+      "gate": "G6",
+      "foundation": "简历项目深挖；两次模拟面试",
+      "tasks": [
+        "StudyPilot：README、架构图、三分钟",
+        "十五分钟 Demo 讲稿",
+        "研究：完成论文初稿、图表、相关工作与局限"
+      ],
+      "studypilot": [
+        "StudyPilot：README、架构图、三分钟"
+      ],
+      "research": [
+        "研究：完成论文初稿、图表、相关工作与局限"
+      ],
+      "deliverables": [
+        "paper_draft.md 、最终 README、简历 v1"
+      ]
+    },
+    {
+      "week": 24,
+      "phase": 6,
+      "gate": "G6",
+      "foundation": "综合模拟面试；岗位匹配与投递",
+      "tasks": [
+        "StudyPilot：发布作品集，检查一键运行",
+        "研究：导师",
+        "同伴审阅并修订",
+        "整理可公开材料"
+      ],
+      "studypilot": [
+        "StudyPilot：发布作品集，检查一键运行"
+      ],
+      "research": [
+        "研究：导师"
+      ],
+      "deliverables": [
+        "resume_ai_algorithm.md 、 interview_qa.md 、作品集主页",
+        "通过 G6"
+      ]
+    }
+  ],
+  "templates": {
+    "weekly_review": {
+      "title": "周复盘模板",
+      "guide": "使用说明：每周日填写；“失败案例”和“下周删掉什么”不能为空，否则复盘会退化成进度汇报。",
+      "content": [
+        "MARKDOWN / # Week XX Review / ## 1. 本周目标 / - 基础与算法题： / - StudyPilot： / - 研究： / - 面试/求职： / ## 2. 实际完成 / - 代码提交： / - 测试与评测： / - 文档： / - 论文： / - 算法题： / ## 3. 指标 / | 指标 | 本周 | 上周 | 变化 | 解释 | / |---|---:|---:|---:|---| / | 核心测试通过率 | | | | | / | RAG Recall@5 | | | | | / | Citation Precision | | | | | / | Agent Task Success | | | | |",
+        "MARKDOWN（续 2/2） / | 算法题完成数 | | | | | / | 计划完成率 | | | | | / ## 4. 失败案例 / ### Case 1 / - 输入： / - 预期： / - 实际： / - 根因： / - 修复： / - 是否加入回归集： / ## 5. 时间复盘 / - 计划小时： / - 实际小时： / - 最大时间浪费： / - 下周删掉什么： / ## 6. 下周计划 / - 必须完成： / - 可以延期： / - 闸门风险："
+      ]
+    },
+    "experiment_record": {
+      "title": "实验记录模板",
+      "guide": "使用说明：先写可证伪假设，再运行代码，避免看到结果后倒推故事。每次正式对照实验单独建文件。",
+      "content": [
+        "MARKDOWN / # Experiment: EXP-YYYYMMDD-001 / ## Hypothesis / 明确写出可证伪假设。 / ## Variables / - Independent variable: / - Controlled variables: / - Random seeds: / - Budget constraints: / ## Dataset / - Name/version: / - Split: / - Number of examples: / - Leakage check: / ## Model/System / - Model name and date: / - Prompt/config hash: / - Code commit: / - Tool/schema version:",
+        "MARKDOWN（续 2/2） / ## Metrics / - Primary: / - Secondary: / - Cost/latency: / ## Results / | Method | Metric 1 | Metric 2 | Cost | Notes | / |---|---:|---:|---:|---| / ## Error Analysis / - Error type distribution: / - Representative cases: / - Unexpected result: / ## Conclusion / - Hypothesis supported? / - What cannot be concluded? / - Next experiment:"
+      ]
+    },
+    "error_case": {
+      "title": "错误案例模板",
+      "guide": "使用说明：一个案例只记录一个主要根因；修复后必须注明是否加入回归集。",
+      "content": [
+        "YAML / case_id: ERR_RAG_0042 / module: retrieval / input: \"...\" / expected: / relevant_chunk_ids: [DOC_12_C07] / actual: / retrieved_chunk_ids: [DOC_02_C11, DOC_08_C03] / error_type: terminology_mismatch / root_cause: query使用缩写，文档只出现全称 / fix_candidate: / - acronym_expansion / - query_rewrite / regression_test_added: true / status: fixed"
+      ]
+    },
+    "paper_card": {
+      "title": "Paper Card 模板",
+      "guide": "使用说明：关键字段是最强基线、最小复现实验和与自身课题的差异，不是摘要搬运。",
+      "content": [
+        "MARKDOWN / # Paper Card / ## Metadata / - Title: / - Authors: / - Venue/Year: / - URL: / - Code/Data: / ## One-sentence Summary / ## Problem Definition / - Input: / - Output: / - Assumptions: / - Evaluation target: / ## Method / - Core components: / - What is actually new: / ## Experiments",
+        "MARKDOWN（续 2/3） / - Dataset: / - Baselines: / - Metrics: / - Main result: / - Statistical evidence: / ## Failure and Limitation / - Reported limitations: / - My concerns: / ## Relation to My Work / | Dimension | This paper | My candidate | / |---|---|---| / | Task | | | / | Data | | | / | Method | | | / | Metric | | | / | Gap | | | / ## Reproduction Plan / - Minimum runnable experiment: / - Estimated compute/cost:",
+        "MARKDOWN（续 3/3） / - Expected output:"
+      ]
+    },
+    "novelty_matrix": {
+      "title": "新颖性矩阵模板",
+      "guide": "使用说明：逐篇比较任务、数据、方法和指标；“换成中文”或“加一个 Reviewer”不能自动算新颖性。",
+      "content": [
+        "MARKDOWN / # Novelty Matrix / | Paper | Task | Data | Setting | Method | Metrics | Key Finding | Overlap | Remaining Gap | / |---|---|---|---|---|---|---|---|---| / | | | | | | | | | | / ## Candidate Claim Audit / 1. Claim: / - Closest prior work: / - Exact difference: / - Experiment that proves the difference: / - Risk of being only an implementation detail: / ## Decision / - Continue / Narrow / Switch / Reproduction report / - Reason:"
+      ]
+    },
+    "dataset_card": {
+      "title": "Dataset Card 模板",
+      "guide": "使用说明：数据来源、许可证、划分和质量控制必须先于模型实验；自建数据尤其要写验证规则。",
+      "content": [
+        "MARKDOWN / # Dataset Card / ## Purpose / ## Domains and Tasks / ## Construction / - Human-written / generated / transformed: / - Source data and license: / - Validation rules: / ## Schema / ## Splits / - Train: / - Dev: / - Test: / - How leakage is prevented: / ## Quality Control / - Automatic checks: / - Human review:",
+        "MARKDOWN（续 2/2） / - Agreement: / ## Known Biases / ## Privacy and Safety / ## Intended and Out-of-scope Use"
+      ]
+    },
+    "run_manifest": {
+      "title": "Run Manifest 模板",
+      "guide": "使用说明：每次主实验生成一条记录，保证模型、提示词、工具 Schema、数据和代码版本可追溯。",
+      "content": [
+        "JSON / { / \"run_id\": \"RUN_20260713_001\", / \"timestamp\": \"2026-07-13T10:00:00-07:00\", / \"git_commit\": \"abc1234\", / \"dataset_version\": \"toolshift-cn-0.2.0\", / \"model\": \"provider/model-id\", / \"model_endpoint_date\": \"2026-07-13\", / \"temperature\": 0, / \"max_output_tokens\": 2048, / \"prompt_hash\": \"sha256:...\", / \"tool_schema_hash\": \"sha256:...\", / \"seed\": 42, / \"num_examples\": 200, / \"metrics_file\": \"outputs/RUN_20260713_001/metrics.json\", / \"predictions_file\": \"outputs/RUN_20260713_001/predictions.jsonl\" / }"
+      ]
+    },
+    "project_readme": {
+      "title": "项目 README 模板",
+      "guide": "使用说明：目标是让陌生人在不听作者讲解的情况下完成 Quickstart、运行测试并看懂结果。",
+      "content": [
+        "MARKDOWN / # StudyPilot / ## What It Solves / ## Demo / ## Core Workflow / ## Architecture / ## Why Workflow-first / ## Data Model / ## RAG Pipeline / ## Tools and State / ## Evaluation Dataset / ## Results",
+        "MARKDOWN（续 2/2） / ## Failure Cases / ## Safety and Privacy / ## Quickstart / ## Configuration / ## Tests / ## Limitations / ## Roadmap"
+      ]
+    },
+    "research_readme": {
+      "title": "研究 README 模板",
+      "guide": "使用说明：先讲研究问题和评价协议，再讲方法；主结果、消融与错误分析必须链接到可复现文件。",
+      "content": [
+        "MARKDOWN / # ToolShift-CN / ## Research Question / ## Relation to Prior Work / ## Task and Perturbation Taxonomy / ## Dataset / ## Baselines / ## Recovery Strategies / ## Metrics / ## Main Results / ## Ablations / ## Error Analysis",
+        "MARKDOWN（续 2/2） / ## Reproduction / ## Limitations and Ethics / ## Citation"
+      ]
+    },
+    "interview_card": {
+      "title": "面试卡片模板",
+      "guide": "使用说明：每张卡只解决一个问题：30 秒答案负责结论，其余字段负责深挖和追问。",
+      "content": [
+        "MARKDOWN / # Question / ## 30-second Answer / ## Mechanism / ## Project Example / ## Metric or Experiment / ## Failure Mode / ## Follow-up Questions"
+      ]
+    },
+    "pre_commit_check": {
+      "title": "每次提交前检查",
+      "guide": "使用说明：把清单接入日常提交与阶段冻结；敏感信息、不可复现结果和虚构指标属于阻断项。",
+      "content": [
+        "结构化流程 / 代码 / □ 格式与静态检查通过 / □ 单元测试通过 / □ 核心回归通过 / □ 没有密钥和隐私数据 / 实验 / □ 配置和随机种子已保存 / □ 数据版本已记录 / □ 结果可复现 / □ 失败样本已保留 / 文档 / □ README与代码一致 / □ 没有虚构指标 / □ 局限和未完成项明确 / □ 图表来源可追溯"
+      ]
+    }
+  },
+  "learning_modules": [
+    {
+      "heading": "4. 学习内容与验收标准",
+      "content": [
+        "统一读法：每一节都按五个问题推进：为什么学、学到什么深度、最小实现是什么、如何评测、面试如何表达。",
+        "本章聚焦 | 算法基础 · RAG · Agent · 评测 · 部署",
+        "本章按“理解什么、实现什么、如何验收、面试要会什么”组织。每个模块必须留下代码、指标和错误案例，只有笔记不算完成。"
+      ]
+    },
+    {
+      "heading": "4.0 一个学习模块何时算真正完成",
+      "content": [
+        "图 4｜学习模块完成定义",
+        "读图提示：机制、最小实现、对照评测、项目连接和面试表达缺一不可。",
+        "完成定义：笔记只是输入；代码、评测、失败分析和可复述表达同时具备，才算把知识转化为算法岗能力。"
+      ]
+    },
+    {
+      "heading": "4.1 数据结构、算法与计算机基础",
+      "content": [
+        "本节目标：既服务编码面试，也支撑知识 DAG、任务调度、缓存、并发和失败恢复。目标不是刷题数量，而是稳定识别模式并写出可解释实现。"
+      ]
+    },
+    {
+      "heading": "学习范围",
+      "content": [
+        "结构化分类树 / 编码面试底座 / └── 数据结构 / ├── 数组与字符串 / ├── 哈希表 / ├── 链表 / ├── 栈、队列、单调栈与优先队列 / ├── 二叉树、Trie与并查集 / └── 图、邻接表与拓扑排序 / └── 算法模式 / ├── 双指针与滑动窗口 / ├── 二分查找 / ├── 前缀和与差分 / ├── DFS、BFS与回溯 / ├── 贪心 / ├── 动态规划 / └── 最短路与拓扑依赖 / └── 工程基础 / ├── 时间与空间复杂度 / ├── Linux常用命令、进程、权限和日志 / ├── HTTP、REST、JSON、状态码与超时 / ├── SQL连接、聚合、窗口函数与索引 / ├── 线程、进程、协程与异步I/O概念 / └── Git分支、回滚、rebase与冲突处理"
+      ]
+    },
+    {
+      "heading": "练习方式",
+      "content": [
+        "每周 5–8 道题，以同一模式集中训练，不按题库随机刷。",
+        "每道错题记录：错误原因、正确模式、复杂度、可复用模板。",
+        "每四周做一次 90 分钟模拟：2 道中等题 + 1 道 SQL。",
+        "项目中的知识图谱依赖、任务调度和工作流 DAG 要主动关联图算法与拓扑排序。"
+      ]
+    },
+    {
+      "heading": "验收标准",
+      "content": [
+        "累计完成 120–160 道高质量题，其中中等题不少于 70 道。",
+        "高频模式能在 20–35 分钟内完成中等题。",
+        "能写出常见 SQL 并解释索引、全表扫描、连接与窗口函数。",
+        "能解释同步/异步、超时、重试、幂等性和并发下的重复写入问题。"
+      ]
+    },
+    {
+      "heading": "4.2 数学、统计与机器学习基础",
+      "content": [
+        "本节目标：数学用于选择损失、指标和实验，而不是背公式。每个概念都要落到一个可计算例子或一次对照实验。"
+      ]
+    },
+    {
+      "heading": "必学内容",
+      "content": [
+        "主题 | 重点 | 最小实践",
+        "线性代数 | 向量、矩阵乘法、转置、范数、余弦相似度、特征值直觉、低秩分解 | 手算 Attention 维度；实现余弦检索；解释 LoRA 的低秩更新",
+        "概率统计 | 条件概率、贝叶斯、期望、方差、常见分布、最大似然、置信区间 | 计算分类指标区间；做 Bootstrap 比较两个策略",
+        "微积分与优化 | 导数、偏导、链式法则、梯度下降、学习率、正则化 | 手推逻辑回归/交叉熵梯度的直觉",
+        "监督学习 | 线性/逻辑回归、树模型、数据泄漏、类别不平衡 | 做一个文本意图分类基线",
+        "评估指标 | Accuracy、Precision、Recall、F1、ROC-AUC、PR-AUC、Calibration | 针对错误成本选择指标并解释原因",
+        "实验设计 | Train/Dev/Test、交叉验证、随机种子、显著性、消融 | 写标准实验配置和结果表"
+      ]
+    },
+    {
+      "heading": "必须能解释的问题",
+      "content": [
+        "1. 为什么类别极不平衡时 Accuracy 可能误导？",
+        "2. 训练集、验证集和测试集分别用来做什么？",
+        "3. 数据泄漏有哪些常见形式？",
+        "4. 交叉熵为什么适合分类？",
+        "5. 正则化、Dropout、Early Stopping 分别解决什么问题？",
+        "6. 为什么一次单随机种子的提升不能直接证明方法有效？",
+        "7. 离线指标提升为什么不一定转化为线上收益？"
+      ]
+    },
+    {
+      "heading": "验收标准",
+      "content": [
+        "完成一个传统机器学习基线和一个神经网络基线，保持同一数据划分。",
+        "结果报告包含类别分布、混淆矩阵、主要指标、置信区间或多随机种子结果。",
+        "能从数据、目标函数、模型、评测和失败样本五个角度讲完整实验。"
+      ]
+    },
+    {
+      "heading": "4.3 Python 工程与实验管理",
+      "content": [
+        "本节目标：让项目能被别人运行和复现：配置、日志、测试、版本与产物管理缺一不可。"
+      ]
+    },
+    {
+      "heading": "必学内容",
+      "content": [
+        "pathlib 、 json 、 csv 、 yaml 、 dataclasses 、 typing 。",
+        "numpy 、 pandas 的向量化处理与缺失值处理。",
+        "logging 、异常分类、自定义异常和错误上下文。",
+        "pytest 、fixture、参数化测试、mock 与覆盖率。",
+        "argparse 或 typer ，支持命令行运行实验。",
+        "uv / venv / conda 中任选一种稳定环境管理方式。",
+        "配置驱动实验、随机种子、运行目录、指标文件和模型产物管理。",
+        "ruff 、 mypy 或等价静态检查工具。"
+      ]
+    },
+    {
+      "heading": "推荐实验目录",
+      "content": [
+        "代码目录树 / experiment_name/ / ├── pyproject.toml / ├── README.md / ├── configs/ / │ ├── baseline.yaml / │ └── ablation.yaml / ├── src/ / │ ├── data.py / │ ├── model.py / │ ├── train.py / │ ├── evaluate.py / │ └── utils.py / ├── tests/ / ├── scripts/ / ├── reports/ / └── outputs/ / └── run_YYYYMMDD_HHMMSS/ / ├── config.yaml / ├── metrics.json / ├── predictions.jsonl / └── run.log"
+      ]
+    },
+    {
+      "heading": "验收标准",
+      "content": [
+        "一条命令能从配置启动实验。",
+        "同一配置和随机种子可以复现同一结果范围。",
+        "失败时日志包含任务 ID、输入摘要、异常类型和堆栈。",
+        "关键模块有单元测试，端到端路径有集成测试。"
+      ]
+    },
+    {
+      "heading": "4.4 PyTorch 与深度学习",
+      "content": [
+        "本节目标：能独立写训练—验证—保存—推理流程，并定位 shape、梯度、数据和 train/eval 模式问题。"
+      ]
+    },
+    {
+      "heading": "核心内容",
+      "content": [
+        "结构化分类树 / PyTorch训练能力 / └── Tensor与Shape / ├── dtype与device / ├── broadcasting / ├── view/reshape/transpose / └── batch与sequence维度 / └── 数据管道 / ├── Dataset / ├── DataLoader / ├── collate_fn / ├── padding与mask / └── train/dev/test隔离 / └── 模型与训练 / ├── nn.Module / ├── forward / ├── loss / ├── autograd / ├── optimizer与scheduler / ├── gradient clipping / └── mixed precision概念 / └── 验证与调试 / ├── model.train/eval / ├── no_grad/inference_mode / ├── checkpoint / ├── learning curve / ├── overfitting诊断",
+        "结构化分类树（续 2/2） / └── NaN、梯度与显存排查"
+      ]
+    },
+    {
+      "heading": "最小项目",
+      "content": [
+        "做一个文本意图分类器，类别可选：概念问答、生成计划、请求测验、查看进度、上传资料、请求复盘。至少包含：",
+        "词袋/TF-IDF + 逻辑回归基线。",
+        "小型神经网络或预训练编码器分类基线。",
+        "Macro-F1、混淆矩阵和错误样本。",
+        "保存、加载和批量推理。"
+      ]
+    },
+    {
+      "heading": "验收标准",
+      "content": [
+        "能不看教程写出训练与验证循环。",
+        "能解释 Batch Size、学习率、Epoch、优化器和验证集的作用。",
+        "能定位至少三类常见问题：维度错、标签错、训练/验证模式错。"
+      ]
+    },
+    {
+      "heading": "4.5 Transformer、LLM 与文本表示",
+      "content": [
+        "本节目标：建立机制模型：输入如何变成表示、Attention 如何聚合、解码为何变化，以及结构化输出为什么仍需程序校验。"
+      ]
+    },
+    {
+      "heading": "必学内容",
+      "content": [
+        "主题 | 要会到什么程度 | 实践",
+        "Tokenizer | 子词、特殊符号、长度截断、padding、中文与英文差异 | 比较同一文本在不同 tokenizer 下的长度",
+        "Embedding | 词向量、句向量、池化、余弦相似度、归一化 | 构建 1000 条文本的向量检索",
+        "Attention | Q/K/V、缩放点积、mask、多头、维度变化 | 用 NumPy/PyTorch 实现最小 Attention",
+        "位置编码 | 绝对位置、旋转位置编码的直觉 | 解释为什么序列顺序不能被忽略",
+        "Decoder-only | 自回归、因果 mask、KV Cache 概念 | 画出 token 到下一 token 的路径",
+        "解码 | Greedy、Temperature、Top-k、Top-p、重复惩罚 | 对比稳定性与多样性",
+        "指令与结构化输出 | System/User/Assistant、JSON schema、约束解码概念 | 输出可验证的工具参数",
+        "上下文与幻觉 | 长上下文稀释、证据丢失、提示注入、冲突信息 | 构造失败样例并记录"
+      ]
+    },
+    {
+      "heading": "面试要求",
+      "content": [
+        "三分钟解释 Attention；五分钟解释 Transformer Block。",
+        "能说明 Encoder、Decoder-only 和 Embedding 模型的用途差异。",
+        "能解释“模型知道答案”与“系统有证据”不是一回事。",
+        "能说明为什么结构化输出仍然需要程序端校验。"
+      ]
+    },
+    {
+      "heading": "4.6 信息检索与 RAG",
+      "content": [
+        "本节目标：把解析、切分、召回、重排、上下文、生成和引用分层评测，避免一遇到失败就换更大模型。"
+      ]
+    },
+    {
+      "heading": "知识结构",
+      "content": [
+        "图 5｜RAG 完整链路",
+        "读图提示：评测必须能定位到数据进入、召回、排序、生成和引用，而不是只看最终答案是否顺眼。",
+        "调试顺序：先确认文档解析与支持片段，再看召回和重排，最后才调生成。若召回没有证据，生成再流畅也只是“无依据的好看答案”。"
+      ]
+    },
+    {
+      "heading": "必做实验",
+      "content": [
+        "1. Chunk 大小与 overlap 对 Recall@5 的影响。",
+        "2. BM25、Dense、Hybrid 三种召回对比。",
+        "3. 无 Rerank 与有 Rerank 的 nDCG/答案正确率对比。",
+        "4. Top-k 和上下文长度对准确率、延迟和费用的影响。",
+        "5. 无证据问题上的拒答率和错误引用率。"
+      ]
+    },
+    {
+      "heading": "Golden Set 设计",
+      "content": [
+        "至少 80–120 个真实问题。",
+        "每个问题标注一个或多个支持片段。",
+        "覆盖：定义题、比较题、跨段题、代码题、数字/术语题、无答案题。",
+        "划分为开发集和锁定测试集；测试集在参数调优期间不可反复查看。"
+      ]
+    },
+    {
+      "heading": "验收标准",
+      "content": [
+        "建议项目门槛，不是行业统一标准：",
+        "开发集 Recall@5 达到 0.80 以上；锁定测试集不过度回落。",
+        "引用精确率达到 0.90 左右，错误引用有明确记录。",
+        "无答案问题能稳定拒答，而不是编造来源。",
+        "报告能区分解析、切分、召回、重排、上下文和生成六类失败。"
+      ]
+    },
+    {
+      "heading": "4.7 Tool Calling 与 Agent 工作流",
+      "content": [
+        "本节目标：把 Agent 视为受状态、工具、规则、预算和终止条件约束的执行系统；能确定的部分尽量确定化。"
+      ]
+    },
+    {
+      "heading": "设计原则",
+      "content": [
+        "1. 工作流优先于自由自治。 能用确定性节点、条件边和状态机解决的任务，不交给模型自由规划。",
+        "2. 状态显式化。 用户目标、已知约束、缺失信息、工具结果和任务状态必须放在结构化 state 中。",
+        "3. 工具最小化。 工具名称、用途、参数和返回值要清晰，避免多个工具语义重叠。",
+        "4. 执行前校验。 程序端检查类型、范围、权限、前置状态和用户确认。",
+        "5. 副作用幂等。 创建、发送、更新等操作必须有幂等键、重试边界和审计记录。",
+        "6. 失败分层处理。 瞬时错误重试；参数错误返回修复；缺信息询问用户；高风险动作暂停审批。",
+        "7. 终止条件明确。 限制最大步数、最大工具调用、总 token、时间和费用。"
+      ]
+    },
+    {
+      "heading": "必学内容",
+      "content": [
+        "JSON Schema / Pydantic 模型。",
+        "Tool selection、argument filling、tool result parsing。",
+        "Router、planner、executor、validator 的职责边界。",
+        "DAG/状态图、条件分支、重试和回退。",
+        "短期状态、长期记忆、用户偏好与事实记忆的区别。",
+        "Human-in-the-loop、审批、撤销与审计。",
+        "Tool output 视为非可信输入，防范间接提示注入。",
+        "轨迹日志、状态快照、成本、延迟和错误标签。"
+      ]
+    },
+    {
+      "heading": "Agent 与普通聊天的区别",
+      "content": [
+        "结构化树图 / 普通聊天 / └── 输入文本 / └── 生成文本 / 可评测Agent / └── 读取显式状态 / └── 判断任务阶段 / └── 选择或拒绝工具 / └── 生成并校验参数 / └── 执行工具 / └── 解析结果并更新状态 / └── 判断继续、澄清、回退或结束 / └── 保存完整轨迹和可验证结果"
+      ]
+    },
+    {
+      "heading": "验收标准",
+      "content": [
+        "至少 8 个工具有 schema、单元测试和失败用例。",
+        "至少 80 个离线任务有预期工具、关键参数或最终状态。",
+        "能统计工具选择准确率、参数字段 F1、任务成功率、无效调用率和循环率。",
+        "高风险或不可逆动作必须有确认节点。"
+      ]
+    },
+    {
+      "heading": "4.8 Agent 评测、可靠性与安全",
+      "content": [
+        "本节目标：先看最终状态是否完成，再用工具、参数和轨迹定位。可由规则判断的内容优先不用 LLM Judge。"
+      ]
+    },
+    {
+      "heading": "评测层级",
+      "content": [
+        "层级 | 问题 | 指标",
+        "单工具 | 工具和参数是否正确 | Tool Accuracy、Argument EM/F1、Schema Validity",
+        "单步骤 | 当前动作是否合理 | Action Validity、Constraint Adherence、Clarification Accuracy",
+        "轨迹 | 多步过程是否有效 | Step Efficiency、Loop Rate、Recovery Rate、Trajectory Consistency",
+        "最终状态 | 是否真正完成任务 | Goal State Match、Task Success Rate",
+        "系统 | 是否可上线运行 | P95 Latency、Cost/Success、Error Rate、Availability",
+        "安全 | 是否越权或受污染信息影响 | Policy Violation、Unsafe Action Rate、Prompt Injection Success Rate",
+        "指标优先级：最终状态与安全违规是硬指标；工具选择与参数字段用于定位；轨迹效率、延迟与成本用于比较方案。不要用一个总分掩盖不同失败类型。"
+      ]
+    },
+    {
+      "heading": "自动评测的边界",
+      "content": [
+        "代码或规则能判断的内容优先用确定性 evaluator。",
+        "LLM-as-a-Judge 只用于语义质量，必须有清晰 rubric。",
+        "对 judge 做人工抽样、模型间一致性和偏差检查。",
+        "不用同一模型既生成又无校准地评价自身。",
+        "报告 Judge 的假阳性、假阴性和成本。"
+      ]
+    },
+    {
+      "heading": "安全清单",
+      "content": [
+        "结构化分类树 / Agent安全 / └── 输入 / ├── 文件类型与大小限制 / ├── 恶意指令与提示注入测试 / ├── 隐私与敏感字段脱敏 / └── 用户身份与权限 / └── 工具 / ├── 最小权限 / ├── 参数白名单与范围校验 / ├── 沙箱或只读模式 / ├── 高风险动作确认 / └── 幂等键与回滚 / └── 状态 / ├── 来源标记 / ├── 新旧值冲突 / ├── 记忆过期与删除 / └── 不可信工具输出隔离 / └── 输出 / ├── 证据与引用 / ├── 拒答条件 / ├── 不暴露内部密钥和系统提示 / └── 审计日志"
+      ]
+    },
+    {
+      "heading": "4.9 推荐算法基础：辅助轨",
+      "content": [
+        "边界说明：只服务“薄弱点 → 学习资源”的最小闭环，不建设完整工业推荐系统，也不抢占 RAG/Agent 主线。",
+        "主项目只需做到“可解释的学习资源召回与重排”，不要求搭建完整工业推荐系统。"
+      ]
+    },
+    {
+      "heading": "必学内容",
+      "content": [
+        "流行度、内容相似度和协同过滤基线。",
+        "召回、粗排、精排、重排的职责。",
+        "双塔模型和负采样的直觉。",
+        "Recall@K、MRR、NDCG@K、Coverage、Diversity。",
+        "冷启动、热门偏置、长尾曝光和反馈回路。",
+        "多目标重排：相关性、难度匹配、前置依赖和多样性。"
+      ]
+    },
+    {
+      "heading": "StudyPilot 中的最小实现",
+      "content": [
+        "结构化分类树 / 学习资源推荐 / └── 候选召回 / ├── 按薄弱知识点匹配 / ├── BM25召回 / ├── Embedding召回 / └── 最近错题关联召回 / └── 重排特征 / ├── 相关性 / ├── 难度差 / ├── 前置知识满足度 / ├── 资源质量 / ├── 最近是否已学习 / └── 内容多样性 / └── 输出 / ├── 推荐资源 / ├── 推荐理由 / └── 可验证特征分数"
+      ]
+    },
+    {
+      "heading": "验收标准",
+      "content": [
+        "至少有 popularity/content-only/hybrid 三个基线。",
+        "用离线任务验证相关性和覆盖率；不要把“LLM 觉得不错”当唯一指标。",
+        "能解释为什么资源推荐不是把所有内容交给 LLM 排序。"
+      ]
+    },
+    {
+      "heading": "4.10 LoRA、QLoRA 与微调：条件式选修",
+      "content": [
+        "Go/No-Go：没有稳定基线、隔离数据和自动指标时直接不做。微调是可证伪实验，不是简历装饰。"
+      ]
+    },
+    {
+      "heading": "只有满足以下条件才进入微调",
+      "content": [
+        "已有稳定的 prompt-only 或 RAG 基线。",
+        "任务边界窄且重复，例如意图分类、工具选择、重排或格式修复。",
+        "有不少于数百条高质量训练样本，开发集和测试集严格隔离。",
+        "有可自动运行的任务指标，不依赖主观印象。",
+        "有足够算力与时间，不影响主项目冻结和论文主实验。"
+      ]
+    },
+    {
+      "heading": "推荐的微调任务",
+      "content": [
+        "1. StudyPilot 意图分类。",
+        "2. 工具候选初筛。",
+        "3. Query rewrite 或检索难例分类。",
+        "4. 小型 Cross-Encoder Reranker。",
+        "5. 研究线中的错误类型分类或恢复动作分类。"
+      ]
+    },
+    {
+      "heading": "不建议的做法",
+      "content": [
+        "为了简历写“微调过大模型”而随便拼接数据。",
+        "用项目测试集生成训练样本。",
+        "只比较训练前后几个案例，不做正式评测。",
+        "直接微调聊天风格，却无法说明对任务成功率的贡献。"
+      ]
+    },
+    {
+      "heading": "验收标准",
+      "content": [
+        "与 prompt-only、传统分类器或无微调模型公平比较。",
+        "报告数据规模、LoRA 参数、随机种子、显存、训练时间和成本。",
+        "至少有一个负结果或失败分析，说明微调何时不值得。"
+      ]
+    },
+    {
+      "heading": "4.11 部署、服务化与可观测性",
+      "content": [
+        "本节目标：回答“能否一键启动、故障能否定位、改动是否回归”。界面美观排在可运行、可监控、可回滚之后。"
+      ]
+    },
+    {
+      "heading": "推荐技术栈",
+      "content": [
+        "层 | MVP | 增强版",
+        "API | FastAPI | FastAPI + 异步任务队列",
+        "UI | Streamlit 或 Gradio | Next.js/React 可选",
+        "关系数据 | SQLite | PostgreSQL",
+        "向量索引 | FAISS | pgvector/Qdrant 可选",
+        "模型 | API 或本地小模型 | vLLM/Transformers 服务",
+        "追踪 | JSONL + 自建 Dashboard | OpenTelemetry/LangSmith 等可选",
+        "部署 | Docker Compose | 云主机/Kubernetes 仅作扩展"
+      ]
+    },
+    {
+      "heading": "必学内容",
+      "content": [
+        "API 输入输出 schema、错误码、鉴权、超时、限流。",
+        "数据库迁移、事务、唯一键、幂等更新。",
+        "缓存、批处理、并发和资源清理。",
+        "Dockerfile、Compose、环境变量与密钥管理。",
+        "P50/P95 延迟、吞吐、错误率、Token 与费用统计。",
+        "回归评测进入 CI：代码或提示词变化后自动跑核心测试集。"
+      ]
+    },
+    {
+      "heading": "验收标准",
+      "content": [
+        "docker compose up 或一条命令启动。",
+        "四条核心用户流程有端到端测试。",
+        "记录模型、提示词、检索参数和代码 commit，能够追溯每次结果。",
+        "项目 README 不依赖作者现场解释也能运行。"
+      ]
+    },
+    {
+      "heading": "4.12 论文阅读、复现与研究写作",
+      "content": [
+        "本节目标：阅读必须导向问题定义、基线、实验或写作。说不清最小可复现实验，就还没有真正读懂。"
+      ]
+    },
+    {
+      "heading": "每篇论文的阅读顺序",
+      "content": [
+        "1. 摘要：研究问题与结论。",
+        "2. 引言：为什么重要，现有方法缺什么。",
+        "3. 任务定义：输入、输出、假设和评价。",
+        "4. 实验：数据、基线、指标、主结果。",
+        "5. 方法：只有在任务和实验明确后再细读。",
+        "6. 局限和附录：复现细节、失败案例和隐藏假设。"
+      ]
+    },
+    {
+      "heading": "每篇论文必须留下",
+      "content": [
+        "一句话问题定义。",
+        "贡献是否真由实验支持。",
+        "最强基线是什么。",
+        "可复现的最小实验是什么。",
+        "与自身研究题的相同点和差异。",
+        "可能的数据泄漏、评测偏差和未覆盖失败。"
+      ]
+    },
+    {
+      "heading": "每月阅读目标",
+      "content": [
+        "月份 | 阅读重点 | 建议数量",
+        "第 1 月 | Transformer、RAG、ReAct、基础评测 | 6–8 篇",
+        "第 2 月 | 检索、Rerank、RAG 评测 | 6–8 篇",
+        "第 3 月 | Tool calling、状态 Agent、Agent benchmark | 8–10 篇",
+        "第 4 月 | 候选研究题最近两年工作 | 10–12 篇",
+        "第 5 月 | 与最终方法直接相关的论文 | 6–8 篇",
+        "第 6 月 | 写作引用、补充实验和反例 | 按需",
+        "阅读数量不是产出：宁可少读两篇，也要完成一次复现、一张差异表或一组失败分析。",
+        "本章收束｜学习模块的完成标准不是“看过”，而是机制能讲、代码能跑、指标可复现、失败能解释，并能连接到 StudyPilot。",
+        "CHAPTER 05 · 核心项目"
+      ]
+    }
+  ],
+  "studypilot_reference": [
+    {
+      "heading": "5. 主项目：StudyPilot 学习助手 Agent",
+      "content": [
+        "项目的一句话定义：StudyPilot 是“可评测的学习工作流系统”，不是功能堆叠的聊天机器人。所有模块最终都要回到状态变化、可验证结果和下一步任务。",
+        "本章聚焦 | StudyPilot · 显式状态 · 可评测工作流"
+      ]
+    },
+    {
+      "heading": "5.1 项目定义",
+      "content": [
+        "MVP 的最短闭环：目标与基线 → 周计划 → 资料检索问答 → 测验评分 → 掌握度更新 → 复习安排。不能加强这条闭环的功能都放到 P1/P2。",
+        "StudyPilot 是一个面向“大模型应用算法学习”的长期学习工作流系统。它根据目标岗位、当前能力、可投入时间和历史表现生成学习计划；从用户上传的资料中进行可引用问答；生成测验并按 rubric 评分；更新知识点掌握度；安排复习和资源推荐；记录完整工具轨迹与评测结果。",
+        "项目的核心不是“陪聊”，而是以下闭环：",
+        "结构化流程图 / 目标输入 / └── 基线诊断 / └── 知识依赖检查 / └── 生成周计划 / └── 学习资料检索与问答 / └── 测验与代码任务 / └── 评分和错误归因 / └── 掌握度更新 / └── 复习与资源推荐 / └── 周报与下一轮计划"
+      ]
+    },
+    {
+      "heading": "5.2 非目标",
+      "content": [
+        "为保证半年可交付，项目明确不做：",
+        "全学科、全年龄段的通用教育平台。",
+        "以聊天体验为主、没有离线评测的数据壳子。",
+        "一开始就使用多个自治 Agent 相互讨论。",
+        "自研大型语言模型或从零训练 Embedding 模型。",
+        "复杂的社交、直播、支付或课程交易系统。",
+        "没有真实数据支持的“学习效果显著提升”结论。",
+        "用一个主观雷达图代替掌握度证据和评测。"
+      ]
+    },
+    {
+      "heading": "5.3 架构原则",
+      "content": []
+    },
+    {
+      "heading": "原则一：确定性核心，生成式边界",
+      "content": [
+        "知识依赖、状态更新、权限、时间预算和任务完成判断由程序控制。",
+        "LLM 用于解释、摘要、题目生成、语义判断和非结构化内容处理。",
+        "能写成规则和测试的逻辑，不交给 LLM 猜。"
+      ]
+    },
+    {
+      "heading": "原则二：单工作流优先",
+      "content": [
+        "MVP 使用一个显式状态图。所谓 Planner、Tutor、Quiz、Evaluator 可以先作为不同节点或函数，而不是独立自治 Agent。只有在实验表明分离模型/提示词能显著提升指标时，才升级为多 Agent。"
+      ]
+    },
+    {
+      "heading": "原则三：每个动作可验证",
+      "content": [
+        "计划必须满足知识依赖和时间预算。",
+        "回答必须有支持片段或明确拒答。",
+        "测验必须绑定知识点和 rubric。",
+        "评分必须给出逐条证据。",
+        "掌握度变化必须能回溯到答题和任务记录。",
+        "工具调用必须有 schema、日志和错误码。"
+      ]
+    },
+    {
+      "heading": "原则四：先离线评测，再做界面",
+      "content": [
+        "前 12 周的完成标准是测试集和指标，不是页面美观。UI 在核心闭环稳定后再做。"
+      ]
+    },
+    {
+      "heading": "StudyPilot 算法证据的单侧导图",
+      "content": [
+        "图 6｜StudyPilot 的算法证据",
+        "读图提示：每个功能分支都配有约束、指标和 Trace，避免项目沦为“功能截图合集”。",
+        "如何读这张证据图：每个分支都同时给出输入、约束、指标和可追溯证据。面试时不要只讲功能，要讲系统如何判断“做对了”。"
+      ]
+    },
+    {
+      "heading": "5.4 目标用户与使用场景",
+      "content": []
+    },
+    {
+      "heading": "用户画像",
+      "content": [
+        "有 Python 基础，正在转向大模型应用算法岗。",
+        "每周可投入 20–30 小时。",
+        "需要把论文、课程、代码和面试内容组织成可执行计划。",
+        "希望看到证据、指标和错误，而不是泛泛鼓励。"
+      ]
+    },
+    {
+      "heading": "核心用户故事",
+      "content": []
+    },
+    {
+      "heading": "场景 A：生成可执行路线",
+      "content": [
+        "结构化流程 / 输入：24周转向Agent/NLP应用算法岗，每周25小时 / 系统： / 1. 读取基线诊断与历史记录 / 2. 查询岗位能力图谱 / 3. 检查知识点前置关系 / 4. 分配每周主题和交付物 / 5. 校验时间预算和阶段闸门 / 输出：周计划、任务、验收标准、风险和调整理由"
+      ]
+    },
+    {
+      "heading": "场景 B：资料问答",
+      "content": [
+        "结构化流程 / 输入：上传论文、课程笔记和项目文档，询问“RRF为什么比直接加分更稳？” / 系统： / 1. 解析资料并保留章节元数据 / 2. BM25与向量混合召回 / 3. 重排与上下文去重 / 4. 生成带引用解释 / 5. 对无证据部分拒答 / 输出：答案、引用片段、来源、置信提示和相关知识点"
+      ]
+    },
+    {
+      "heading": "场景 C：测验与错因分析",
+      "content": [
+        "结构化流程 / 输入：完成RAG模块后请求测验 / 系统： / 1. 读取目标知识点和当前掌握度 / 2. 生成不同认知层次的题目 / 3. 绑定标准答案和rubric / 4. 对用户答案逐项评分 / 5. 标注“概念混淆/证据不足/推理跳步/代码错误”等错因 / 输出：得分、依据、错误标签、补救任务和掌握度变化"
+      ]
+    },
+    {
+      "heading": "场景 D：动态调整",
+      "content": [
+        "结构化流程 / 触发：连续两次混淆BM25与Dense Retrieval / 系统： / 1. 降低该知识点掌握度 / 2. 插入对比实验任务 / 3. 推荐更基础的资料 / 4. 将相关测验安排到2天、7天和21天后 / 5. 在周报中解释调整原因"
+      ]
+    },
+    {
+      "heading": "场景 E：论文阅读卡片",
+      "content": [
+        "结构化流程 / 输入：一篇Agent benchmark论文 / 系统： / 1. 提取问题、任务、方法、数据、基线和指标 / 2. 标记可复现组件 / 3. 生成与研究候选题的差异表 / 4. 保存引用和个人评议 / 输出：结构化Paper Card与后续实验建议"
+      ]
+    },
+    {
+      "heading": "5.5 功能优先级",
+      "content": []
+    },
+    {
+      "heading": "P0：必须完成",
+      "content": [
+        "用户目标、时间预算与基础能力录入。",
+        "知识点 DAG 与前置依赖检查。",
+        "Markdown/TXT/PDF 文本资料入库。",
+        "BM25 + Dense + RRF 的混合检索。",
+        "带引用问答与无证据拒答。",
+        "约束式学习计划生成。",
+        "测验生成、rubric 评分与错因标签。",
+        "掌握度更新和复习任务生成。",
+        "显式状态图、工具 schema 和 trace。",
+        "离线 Golden Set、指标和错误分析报告。"
+      ]
+    },
+    {
+      "heading": "P1：应该完成",
+      "content": [
+        "Reranker。",
+        "学习资源推荐与多目标重排。",
+        "周报与风险提示。",
+        "论文卡片管理。",
+        "人工审批节点和高风险操作保护。",
+        "Web Demo、Dashboard 和 Docker 部署。"
+      ]
+    },
+    {
+      "heading": "P2：有余力再做",
+      "content": [
+        "BKT 或更复杂知识追踪。",
+        "LoRA 意图分类、重排或错误分类。",
+        "多用户和权限系统。",
+        "多模型路由。",
+        "语音、图像学习卡片或多模态输入。",
+        "多 Agent 协作。"
+      ]
+    },
+    {
+      "heading": "5.6 系统架构",
+      "content": [
+        "图 7｜StudyPilot 系统架构",
+        "读图提示：生成式能力被限制在可测试工作流中，规则、数据与评测层承担确定性责任。",
+        "架构分层的意义：交互层接收任务，工作流层管理状态与路径，规则/工具层做确定性校验，数据层保存事实，评测层判断结果。分层后才能单独测试与替换模型。"
+      ]
+    },
+    {
+      "heading": "5.7 状态模型",
+      "content": [
+        "工作流使用显式状态，而不是把所有历史直接塞进对话。",
+        "PYTHON / from typing import Literal, TypedDict / class StudyPilotState(TypedDict, total=False): / session_id: str / learner_id: str / intent: Literal[ / \"plan\", \"ask\", \"quiz\", \"grade\", \"review\", \"report\", \"paper_card\" / ] / goal: str / current_week: int / selected_knowledge_units: list[str] / known_constraints: dict[str, object] / missing_information: list[str] / retrieved_chunk_ids: list[str] / pending_quiz_ids: list[str] / proposed_actions: list[dict[str, object]] / approval_required: bool / error_code: str | None / final_output: dict[str, object] | None",
+        "状态字段不是越多越好：只保留后续节点真正需要的事实、约束、缺失信息与执行结果。对话历史可以摘要，但不能替代结构化状态。",
+        "状态设计要求：",
+        "每个字段有唯一含义，避免同一信息在消息历史和数据库中各存一份不同值。",
+        "每个节点只读取必要字段并返回增量更新。",
+        "副作用操作先写 proposed_action ，通过校验后再执行。",
+        "恢复执行时使用 session_id 和幂等键防止重复创建任务。"
+      ]
+    },
+    {
+      "heading": "5.8 数据模型",
+      "content": []
+    },
+    {
+      "heading": "KnowledgeUnit",
+      "content": [
+        "YAML / knowledge_unit_id: KU_RAG_HYBRID_001 / title: BM25、Dense Retrieval与Hybrid Search / domain: RAG / level: intermediate / prerequisites: / - KU_IR_BM25_001 / - KU_NLP_EMBEDDING_001 / learning_objectives: / - 解释稀疏与稠密检索的匹配机制 / - 识别术语、编号与语义问题上的差异 / - 实现RRF并比较Recall@5和nDCG@10 / required_evidence: / - note / - code / - experiment / - quiz / resources: / - RES_RAG_014 / - RES_RAG_019"
+      ]
+    },
+    {
+      "heading": "LearnerProfile",
+      "content": [
+        "YAML / learner_id: user_001 / target_roles: / - 大模型应用算法工程师 / - Agent算法工程师 / weekly_time_budget_hours: 25 / preferences: / explanation_style: 直白、带例子、先结论后细节 / output_format: markdown / baseline: / python: 0.70 / algorithms: 0.35 / math_ml: 0.30 / pytorch: 0.30 / transformer: 0.35 / rag: 0.25 / agent: 0.20 / constraints: / - 不做财务项目 / - 研究题不使用学习助手场景"
+      ]
+    },
+    {
+      "heading": "StudyTask",
+      "content": [
+        "YAML / task_id: TASK_W06_003 / learner_id: user_001 / knowledge_unit_id: KU_RAG_HYBRID_001 / task_type: experiment / status: pending / estimated_minutes: 120 / deadline: 2026-08-23 / evidence_required: / - code_commit / - metrics_json / - error_analysis_md / acceptance_criteria: / - 完成BM25、Dense、RRF三组对照 / - 锁定测试集上输出Recall@5与nDCG@10 / - 至少分析5个失败查询"
+      ]
+    },
+    {
+      "heading": "QuizItem",
+      "content": [
+        "YAML / quiz_id: Q_RAG_017 / knowledge_unit_id: KU_RAG_HYBRID_001 / type: short_answer / difficulty: intermediate / question: >- / 为什么RRF在融合不同检索器时通常比直接相加原始分数更稳？ / rubric: / max_score: 10 / criteria: / - description: 不同检索器原始分数不可直接比较 / score: 3 / - description: RRF基于排名而非原始分值 / score: 3 / - description: 能降低单一检索器极端分数影响 / score: 2 / - description: 给出适用场景或局限 / score: 2"
+      ]
+    },
+    {
+      "heading": "AgentTrace",
+      "content": [
+        "YAML / trace_id: TRACE_20260713_001 / session_id: SESSION_001 / workflow: plan / input_summary: 生成第7周RAG学习计划 / state_before: / current_week: 7 / weak_units: [KU_RAG_HYBRID_001] / steps: / - node: load_profile / status: success / latency_ms: 21 / - node: query_knowledge_dag / status: success / latency_ms: 13 / - node: generate_candidate_plan / status: success / latency_ms: 2130 / - node: validate_prerequisites / status: repaired / error_code: MISSING_PREREQUISITE / - node: validate_time_budget / status: success",
+        "YAML（续 2/2） / final_status: success / total_latency_ms: 2470 / token_usage: / input: 1820 / output: 760",
+        "四类对象的边界：KnowledgeUnit 描述“学什么”，LearnerProfile 描述“谁在学”，StudyTask 描述“这次做什么”，QuizItem/AgentTrace 描述“如何产生证据与追溯”。"
+      ]
+    },
+    {
+      "heading": "5.9 知识点 DAG 与计划生成",
+      "content": []
+    },
+    {
+      "heading": "知识图谱边界",
+      "content": [
+        "第一版只覆盖大模型应用算法学习，建议 100–140 个知识点，分为：",
+        "Python 与工程",
+        "数据结构与算法",
+        "数学与机器学习",
+        "PyTorch 与深度学习",
+        "NLP 与 Transformer",
+        "检索与 RAG",
+        "Agent 与评测",
+        "推荐基础",
+        "微调与部署",
+        "论文与面试"
+      ]
+    },
+    {
+      "heading": "计划生成不是纯文本生成",
+      "content": [
+        "结构化树图 / 输入 / └── 目标岗位 / └── 当前掌握度与不确定性 / └── 每周时间预算 / └── 已完成任务和失败记录 / └── 知识DAG与阶段闸门 / 候选生成 / └── 选择目标能力对应知识点 / └── 展开未满足前置依赖 / └── 按优先级、难度和截止时间排序 / └── 生成学习、代码、实验和复盘任务 / 程序校验 / └── DAG合法性 / └── 时间预算 / └── 每周主题数量 / └── 必须存在可验证交付物 / └── 不能同时安排过多高难度任务 / 输出 / └── 周目标 / └── 每日任务 / └── 依赖说明 / └── 验收标准 / └── 风险与替代方案"
+      ]
+    },
+    {
+      "heading": "计划质量指标",
+      "content": [
+        "Prerequisite Violation Rate：违反前置依赖的任务比例。",
+        "Time Budget Error：计划时长与预算的偏差。",
+        "Coverage：目标岗位核心能力覆盖率。",
+        "Overload Rate：单周超负荷率。",
+        "Completion Rate：实际完成率。",
+        "Revision Acceptance：用户接受系统调整的比例。"
+      ]
+    },
+    {
+      "heading": "5.10 RAG 设计",
+      "content": []
+    },
+    {
+      "heading": "入库流程",
+      "content": [
+        "1. 识别文件类型并做大小、页数和编码限制。",
+        "2. 提取标题、章节、页码、代码块和表格说明。",
+        "3. 去除重复页眉、导航和无意义空白。",
+        "4. 以标题层级和语义边界切分，不只按固定字符数。",
+        "5. 保存文档 ID、章节、页码、创建时间和权限。",
+        "6. 同时建立稀疏索引和向量索引。"
+      ]
+    },
+    {
+      "heading": "召回流程",
+      "content": [
+        "结构化流程图 / Query / └── 规范化与意图识别 / ├── 是否需要定义、比较、代码或跨文档证据 / └── 是否需要改写/拆分 / └── 候选召回 / ├── BM25 Top-N / ├── Dense Top-N / └── Metadata Filter / └── 融合 / ├── RRF / └── 去重 / └── 重排 / ├── Cross-Encoder或轻量LLM评分 / └── 多样性与章节覆盖 / └── 上下文构建 / ├── Token预算 / ├── 引用ID / └── 冲突证据保留 / └── 生成与验证 / ├── 逐条引用 / ├── 无证据拒答 / └── 引用支持检查"
+      ]
+    },
+    {
+      "heading": "RAG 测试集",
+      "content": [
+        "子集 | 数量建议 | 目的",
+        "直接事实 | 20 | 检查基本召回与引用",
+        "概念解释 | 20 | 检查语义召回和解释忠实度",
+        "比较/综合 | 20 | 检查多片段组合",
+        "术语/编号/代码 | 15 | 检查 BM25 优势与精确匹配",
+        "跨文档 | 15 | 检查多源证据和冲突处理",
+        "无答案 | 10 | 检查拒答和错误引用",
+        "测试集要覆盖不同失败：事实、比较、跨文档、术语/代码与无答案问题分别暴露召回、融合、精确匹配与拒答问题；开发集用于调参，锁定测试集只用于验收。"
+      ]
+    },
+    {
+      "heading": "5.11 测验生成与评分",
+      "content": []
+    },
+    {
+      "heading": "题型结构",
+      "content": [
+        "事实与定义：检查基本概念。",
+        "对比与取舍：检查边界和适用场景。",
+        "错误诊断：给失败案例，判断根因。",
+        "代码题：实现或修复最小模块。",
+        "实验题：设计基线、指标和消融。",
+        "口述题：三分钟解释给非专业听众。"
+      ]
+    },
+    {
+      "heading": "生成约束",
+      "content": [
+        "每题绑定一个或多个知识点。",
+        "每题有可操作 rubric，不允许只写“回答合理即可”。",
+        "标准答案与引用分离，避免题目直接泄漏答案。",
+        "难度由知识依赖、认知层次和用户历史决定。",
+        "自动生成后做重复、歧义、答案泄漏和覆盖检查。"
+      ]
+    },
+    {
+      "heading": "评分策略",
+      "content": [
+        "1. 规则评分：选择题、数字题、结构化字段。",
+        "2. 单元测试：代码题。",
+        "3. Rubric Judge：简答题，逐条判断标准。",
+        "4. 人工抽样：每周抽查至少 10% 的自动评分。",
+        "5. 一致性测试：同一答案多次评分和多 judge 对比。"
+      ]
+    },
+    {
+      "heading": "评分指标",
+      "content": [
+        "与人工分数的 Spearman 相关。",
+        "分档一致率或加权 Kappa。",
+        "逐条 rubric 的 Precision/Recall。",
+        "多次评分方差。",
+        "错因标签准确率。"
+      ]
+    },
+    {
+      "heading": "5.12 掌握度估计",
+      "content": [
+        "第一版采用可解释的 Beta-Binomial 证据模型，避免使用没有依据的任意加减分公式。",
+        "对每个知识点维护：",
+        "alpha ：支持“已掌握”的有效证据。",
+        "beta ：支持“未掌握”的有效证据。",
+        "掌握度均值： alpha / (alpha + beta) 。",
+        "证据强度： alpha + beta ，用于表示不确定性。"
+      ]
+    },
+    {
+      "heading": "更新示例",
+      "content": [
+        "结构化流程 / 初始先验：alpha=2, beta=2 / 正确完成高质量代码实验：alpha += 2.0 / 正确回答简答题：alpha += 1.0 / 猜对选择题：alpha += 0.3 / 概念性错误：beta += 1.0 / 重复同类错误：beta += 1.5 / 很久未复习：将历史证据向先验衰减，而不是直接把分数清零",
+        "数值示例：先验 α=2、β=2 时均值 0.50；完成高质量代码实验后 α+=2，均值 4/6≈0.67；再正确回答简答题后为 5/7≈0.71。均值上升不等于证据充分，还要看 α+β。"
+      ]
+    },
+    {
+      "heading": "决策规则",
+      "content": [
+        "均值高、证据强：进入间隔复习。",
+        "均值高、证据弱：安排一次验证性任务。",
+        "均值低、证据强：安排补救学习和更基础前置内容。",
+        "均值低、证据弱：先做诊断，不直接判断“不会”。",
+        "BKT 可在 P2 阶段作为对照模型，但必须证明它比简单模型有稳定增益。"
+      ]
+    },
+    {
+      "heading": "5.13 复习调度",
+      "content": [
+        "第一版实现可解释的间隔复习规则：",
+        "最近表现 | 下一次复习",
+        "明显错误或无法解释 | 1 天内",
+        "部分正确但缺关键点 | 3 天内",
+        "正确但证据较弱 | 7 天内",
+        "正确且能迁移到新题 | 14–21 天",
+        "多次稳定掌握 | 30 天后或低频抽查",
+        "调度要受每周时间预算约束；同一知识点不得无限挤占新内容。后续可加入 SM-2/FSRS 风格模型，但不是 MVP 必需项。"
+      ]
+    },
+    {
+      "heading": "5.14 工具清单",
+      "content": [
+        "PYTHON / from typing import Any / def get_learner_profile(learner_id: str) -> dict[str, Any]: ... / def list_knowledge_prerequisites( / knowledge_unit_ids: list[str], / ) -> dict[str, list[str]]: ... / def validate_study_plan( / learner_id: str, / tasks: list[dict[str, Any]], / ) -> dict[str, Any]: ... / def search_knowledge_base( / query: str, / top_k: int = 8, / filters: dict[str, Any] | None = None, / ) -> list[dict[str, Any]]: ... / def create_quiz( / learner_id: str,",
+        "PYTHON（续 2/3） / knowledge_unit_ids: list[str], / difficulty: str, / num_questions: int, / ) -> list[dict[str, Any]]: ... / def grade_answer( / quiz_id: str, / answer: str, / ) -> dict[str, Any]: ... / def update_mastery( / learner_id: str, / knowledge_unit_id: str, / evidence: dict[str, Any], / idempotency_key: str, / ) -> dict[str, Any]: ... / def recommend_resources( / learner_id: str, / knowledge_unit_id: str, / top_k: int = 5, / ) -> list[dict[str, Any]]: ...",
+        "PYTHON（续 3/3） / def schedule_review( / learner_id: str, / knowledge_unit_id: str, / reason: str, / ) -> dict[str, Any]: ... / def summarize_week( / learner_id: str, / week_id: str, / ) -> dict[str, Any]: ...",
+        "每个工具必须有：",
+        "清晰名称和用途边界。",
+        "Pydantic/JSON schema。",
+        "正常、缺参、类型错、越界、重复执行和权限不足测试。",
+        "结构化错误码。",
+        "超时、重试和幂等策略。",
+        "输入输出脱敏和 trace。"
+      ]
+    },
+    {
+      "heading": "5.15 仓库结构",
+      "content": [
+        "代码目录树 / studypilot-agent/ / ├── README.md / ├── pyproject.toml / ├── .env.example / ├── docker-compose.yml / ├── configs/ / │ ├── app.yaml / │ ├── retrieval.yaml / │ └── evaluation.yaml / ├── docs/ / │ ├── product_scope.md / │ ├── system_design.md / │ ├── data_model.md / │ ├── evaluation_plan.md / │ ├── safety_model.md / │ ├── error_taxonomy.md / │ └── demo_script.md / ├── src/studypilot/ / │ ├── api/ / │ ├── workflows/ / │ │ ├── state.py / │ │ ├── router.py",
+        "代码目录树（续 2/4） / │ │ ├── plan.py / │ │ ├── rag_qa.py / │ │ ├── quiz.py / │ │ ├── grading.py / │ │ └── review.py / │ ├── tools/ / │ ├── rag/ / │ │ ├── ingest.py / │ │ ├── chunking.py / │ │ ├── sparse.py / │ │ ├── dense.py / │ │ ├── fusion.py / │ │ ├── rerank.py / │ │ └── citations.py / │ ├── mastery/ / │ ├── recommendation/ / │ ├── storage/ / │ ├── observability/ / │ ├── policies/ / │ └── settings.py / ├── data/ / │ ├── knowledge_units.yaml",
+        "代码目录树（续 3/4） / │ ├── resources.jsonl / │ ├── golden_queries.jsonl / │ ├── agent_tasks.jsonl / │ └── quiz_items.jsonl / ├── eval/ / │ ├── retrieval_eval.py / │ ├── answer_eval.py / │ ├── plan_eval.py / │ ├── grading_eval.py / │ ├── agent_eval.py / │ └── safety_eval.py / ├── tests/ / │ ├── unit/ / │ ├── integration/ / │ └── e2e/ / ├── reports/ / │ ├── rag_report.md / │ ├── agent_report.md / │ ├── grading_report.md / │ ├── safety_report.md / │ └── final_report.md / └── app/",
+        "代码目录树（续 4/4） / └── ui.py"
+      ]
+    },
+    {
+      "heading": "5.16 项目评测方案",
+      "content": []
+    },
+    {
+      "heading": "数据集",
+      "content": [
+        "数据集 | 规模建议 | 用途",
+        "golden_queries | 100–150 | RAG 召回、引用、答案和拒答",
+        "plan_cases | 40–60 | 前置依赖、时间预算和覆盖率",
+        "quiz_cases | 80–120 | 题目覆盖、rubric 与难度",
+        "grading_cases | 100–150 | 人工分数对照与错因分类",
+        "agent_tasks | 80–120 | 工具、参数、轨迹和最终状态",
+        "safety_cases | 40–80 | 越权、提示注入、重复执行和高风险动作",
+        "数据集与指标是一一对应的：先写每个数据集要暴露什么失败，再选指标。若一个指标无法导向具体修复，就只适合作为补充，不适合作为核心门槛。"
+      ]
+    },
+    {
+      "heading": "核心指标",
+      "content": [
+        "结构化分类树 / StudyPilot指标 / └── RAG / ├── Recall@5 / Recall@10 / ├── MRR / nDCG@10 / ├── Citation Precision / Recall / ├── Answer Correctness / ├── Faithfulness / └── No-answer Abstention / └── 计划 / ├── Prerequisite Violation Rate / ├── Coverage / ├── Time Budget Error / ├── Overload Rate / └── Completion Rate / └── 测验与评分 / ├── Knowledge Coverage / ├── Duplicate/Ambiguous Item Rate / ├── Human Agreement / ├── Rubric Criterion F1 / └── Error Label Accuracy / └── Agent / ├── Tool Selection Accuracy / ├── Argument EM/F1 / ├── Goal State Match / ├── Task Success Rate / ├── Clarification Accuracy",
+        "结构化分类树（续 2/2） / ├── Invalid Call Rate / ├── Recovery Rate / └── Loop Rate / └── 工程 / ├── P50/P95 Latency / ├── Cost per Successful Task / ├── API Error Rate / ├── Regression Pass Rate / └── Trace Completeness"
+      ]
+    },
+    {
+      "heading": "建议验收门槛",
+      "content": [
+        "这些是作品集目标，不是对外宣称的统一标准：",
+        "指标 | 建议门槛",
+        "RAG Recall@5 | ≥ 0.80",
+        "Citation Precision | ≥ 0.90",
+        "无答案拒答准确率 | ≥ 0.80",
+        "前置依赖违反率 | ≤ 0.05",
+        "Tool Selection Accuracy | ≥ 0.88",
+        "Argument Field F1 | ≥ 0.85",
+        "Agent Task Success | ≥ 0.75",
+        "Invalid Tool Call Rate | ≤ 0.05",
+        "核心回归测试通过率 | 100%",
+        "门槛是作品集目标，不是行业标准：未达标时公开失败分组和下一步，不通过删难例或换测试集美化结果。",
+        "未达到门槛时不隐藏结果，要在报告中说明任务难度、失败类型和下一步。"
+      ]
+    },
+    {
+      "heading": "5.17 关键实验矩阵",
+      "content": []
+    },
+    {
+      "heading": "RAG 实验",
+      "content": [
+        "实验 | 变量 | 固定项 | 观察指标",
+        "Chunk | 256/512/800 tokens，overlap 0/64/128 | 模型与查询集 | Recall、nDCG、延迟",
+        "召回 | BM25/Dense/RRF | Chunk 与 Top-k | Recall、MRR、错误类型",
+        "Rerank | 无/轻量 reranker/LLM rerank | 候选池 | nDCG、答案正确率、费用",
+        "上下文 | Top-3/5/8 | 召回策略 | 正确率、Faithfulness、Token",
+        "拒答 | 无 gate/证据阈值/二阶段检查 | 无答案集 | 误答率、拒答率"
+      ]
+    },
+    {
+      "heading": "Agent 实验",
+      "content": [
+        "实验 | 对照",
+        "自由 ReAct vs 显式状态图 | 任务成功率、循环率、成本",
+        "仅 schema 校验 vs schema + 状态/规则校验 | 无效调用、修复率",
+        "不询问 vs 缺信息时强制澄清 | 错误执行率、额外轮次",
+        "无 HITL vs 高风险动作审批 | 安全违规、完成率、延迟",
+        "全量上下文 vs 状态摘要 | 成本、准确率、长对话稳定性"
+      ]
+    },
+    {
+      "heading": "掌握度实验",
+      "content": [
+        "方法 | 对照指标",
+        "简单正确率 | 下一题预测、可解释性",
+        "Beta-Binomial | 下一题预测、校准、证据不确定性",
+        "可选 BKT | 是否显著提升预测且值得复杂度"
+      ]
+    },
+    {
+      "heading": "5.18 测试策略",
+      "content": []
+    },
+    {
+      "heading": "单元测试",
+      "content": [
+        "Chunk 边界与 metadata。",
+        "BM25/Dense/RRF 输出格式。",
+        "知识 DAG 环检测和前置依赖。",
+        "工具参数、错误码和幂等更新。",
+        "掌握度更新和复习日期。",
+        "引用 ID 与原文一致性。"
+      ]
+    },
+    {
+      "heading": "集成测试",
+      "content": [
+        "上传资料 → 建索引 → 检索 → 带引用回答。",
+        "生成计划 → 前置校验 → 写入任务。",
+        "创建测验 → 评分 → 更新掌握度 → 安排复习。",
+        "高风险动作 → 暂停 → 用户确认 → 恢复。"
+      ]
+    },
+    {
+      "heading": "回归测试",
+      "content": [
+        "每次修改模型、Prompt、检索参数或工具描述后，自动运行：",
+        "20 条核心 RAG 用例。",
+        "20 条核心 Agent 任务。",
+        "10 条安全用例。",
+        "10 条评分一致性用例。"
+      ]
+    },
+    {
+      "heading": "5.19 Demo 流程",
+      "content": [
+        "结构化流程 / 1. 输入目标：24周转向大模型应用算法岗，每周25小时。 / 2. 展示基线诊断和知识DAG中的缺口。 / 3. 系统生成第一阶段计划，并解释依赖与时间分配。 / 4. 上传一份RAG资料，查看Chunk和索引状态。 / 5. 提问BM25、Dense与RRF差异，展示召回、重排与引用。 / 6. 请求生成测验，展示题目绑定的知识点和rubric。 / 7. 故意提交一个不完整答案，展示逐项评分和错因。 / 8. 展示掌握度概率与复习任务变化。 / 9. 打开Agent trace，查看状态、工具、参数、校验、延迟和费用。 / 10. 切换到评测页面，展示基线与当前策略的真实指标和失败案例。"
+      ]
+    },
+    {
+      "heading": "5.20 项目风险与砍功能顺序",
+      "content": [
+        "风险 | 信号 | 处理",
+        "功能失控 | 两周没有可运行闭环 | 砍多 Agent、AIGC、复杂推荐和多用户",
+        "RAG 指标低 | 生成看似不错但引用错误 | 先修数据、Chunk 和 Golden Set，不换更大模型",
+        "评分不稳定 | 同一答案分数波动大 | 改 rubric、增加规则评分和人工抽样",
+        "Agent 循环 | 工具重复调用无进展 | 显式状态、步数上限、重复动作检测",
+        "成本过高 | 每次任务多次模型调用 | 缓存、减少节点、只在困难样本调用 reviewer",
+        "论文挤压项目 | W16 项目仍不稳定 | 研究线改为较小技术报告，确保项目冻结",
+        "UI 消耗时间 | 页面开发超过一周 | 用 Streamlit/Gradio，放弃复杂前端",
+        "风险表如何落地：每个风险要绑定一个可观察信号和一个立即执行的动作；“继续努力”不是处理方案。"
+      ]
+    },
+    {
+      "heading": "砍功能顺序",
+      "content": [
+        "结构化流程 / 先砍：AIGC、多Agent、语音、多用户 / 再砍：LoRA、复杂推荐、BKT、漂亮Dashboard / 最后保留：RAG、计划、测验、状态更新、Trace、评测、部署"
+      ]
+    },
+    {
+      "heading": "5.21 简历表达模板",
+      "content": [
+        "不得提前填写虚构指标。完成实验后把占位符替换为真实结果。",
+        "结构化流程 / - 设计并实现 StudyPilot 学习助手 Agent，将知识依赖校验、学习计划、RAG问答、测验评分、掌握度更新与复习调度组织为显式状态工作流；为 8+ 个工具定义结构化 Schema、错误码、幂等策略和轨迹日志。 / - 构建 BM25 + Dense Retrieval + RRF + Reranker 的学习资料检索链路，在自建 X 条 Golden Query 上将 Recall@5 从 A 提升至 B，引用精确率达到 C，并基于失败样本区分解析、召回、重排和生成错误。 / - 建立 Agent 离线评测集，覆盖工具选择、参数填充、缺信息澄清、状态依赖和高风险审批；以 Tool Accuracy、Argument F1、Task Success、Loop Rate、P95 延迟和单任务成本评估工作流改动。 / - 采用可解释的 Beta-Binomial 掌握度模型融合测验、代码实验和重复错误证据，驱动复习与资源推荐；通过人工标注集评估评分一致性和错因标签准确率。",
+        "本章收束｜StudyPilot 的价值在可验证闭环。架构、数据、工具、评测与 Demo 都围绕“做对了什么、错在哪里、如何追溯”组织。",
+        "CHAPTER 06 · 研究实验"
+      ]
+    }
+  ],
+  "toolshift_reference": [
+    {
+      "heading": "6.5 首选候选：ToolShift-CN",
+      "content": []
+    },
+    {
+      "heading": "题目",
+      "content": [
+        "中文：",
+        "中文多轮工具调用 Agent 在动态接口扰动下的鲁棒性分解与轻量恢复策略评测",
+        "英文：",
+        "ToolShift-CN: Decomposed Robustness Evaluation and Lightweight Recovery for Chinese Multi-turn Tool-Calling Agents under Dynamic Interface Perturbations"
+      ]
+    },
+    {
+      "heading": "研究定位",
+      "content": [
+        "这不是再做一个通用 Reviewer。研究重点是：当工具接口、返回格式、可用状态或用户信息在运行过程中发生变化时，中文多轮 Agent 的性能如何下降；错误来自工具选择、参数绑定、状态理解、澄清还是恢复；哪些轻量机制在什么扰动下有效。"
+      ]
+    },
+    {
+      "heading": "与现有工作的差异必须建立在以下组合上",
+      "content": [
+        "中文或中英混合用户指令，而不是简单翻译单轮样本。",
+        "多轮、状态依赖和缺信息交互。",
+        "成对的 clean/perturbed 任务，保持用户目标不变。",
+        "将接口扰动、工具故障和澄清需求拆开评价。",
+        "评价恢复行为，而不只看第一次调用是否正确。",
+        "报告准确率、鲁棒性保持率、额外轮次、延迟和费用。",
+        "如果文献检索发现上述组合已被完整覆盖，应立即切换，不得强行包装。"
+      ]
+    },
+    {
+      "heading": "研究问题",
+      "content": [
+        "结构化分类树 / ToolShift-CN / └── RQ1：中文多轮工具调用在不同接口扰动下会下降多少？ / └── RQ2：失败主要来自工具选择、参数绑定、状态跟踪还是恢复策略？ / └── RQ3：Schema规范化、强制澄清、失败分类重试和替代工具重规划分别对哪些错误有效？ / └── RQ4：轻量恢复带来的准确率收益是否值得额外轮次、Token和延迟？ / └── RQ5：模型在干净任务上的高分能否预测其在动态扰动下的稳定性？"
+      ]
+    },
+    {
+      "heading": "数据范围",
+      "content": [
+        "建议只选 3 个任务域，避免自建“大而空”的 benchmark：",
+        "1. 日程与联系人：查询空闲、创建/修改日程、邀请前确认。",
+        "2. 文件与知识库：查找、读取、移动、重命名、摘要、权限限制。",
+        "3. 客服/订单支持：查询状态、更新信息、取消或退款前的规则检查。",
+        "建议规模：",
+        "150–300 个基础任务。",
+        "每个任务 1 个 clean 实例 + 2–4 个受控扰动实例。",
+        "总评测实例 500–1000 个；先用 100–200 个完成 pilot。",
+        "至少 20% 为需要用户澄清的任务。",
+        "至少 20% 含状态依赖或多步骤调用。"
+      ]
+    },
+    {
+      "heading": "样本字段",
+      "content": [
+        "JSON / { / \"task_id\": \"calendar_042\", / \"language\": \"zh-CN\", / \"user_goal\": \"把和Alex的会议改到周五下午，具体时间先看双方空闲；未确认前不要发邀请。\", / \"initial_state\": { / \"current_date\": \"2026-07-13\", / \"existing_event_id\": \"evt_17\", / \"external_invite_confirmed\": false / }, / \"tools_clean\": [], / \"tools_perturbed\": [], / \"perturbation\": { / \"type\": \"schema_rename\", / \"severity\": 2, / \"description\": \"start_time renamed to begins_at and nested under schedule\" / }, / \"policy_rules\": [ / \"External attendees require confirmation before invitation\", / \"A concrete time is required before updating the event\" / ], / \"gold_milestones\": [ / \"query_availability\",",
+        "JSON（续 2/2） / \"present_options\", / \"ask_confirmation\", / \"update_event\" / ], / \"expected_final_state\": { / \"event_updated\": true, / \"invite_sent_after_confirmation\": true / } / }"
+      ]
+    },
+    {
+      "heading": "扰动分类",
+      "content": [
+        "图 9｜ToolShift-CN 动态工具扰动",
+        "读图提示：扰动按 Schema、可用性、状态、用户信息与干扰项分解，便于分组评测和错误归因。"
+      ]
+    },
+    {
+      "heading": "基线",
+      "content": [
+        "编号 | 方法 | 目的",
+        "B0 | 直接 Function Calling | 干净任务基线",
+        "B1 | ReAct + 工具错误原样反馈 | 最常见恢复方式",
+        "B2 | Schema Validator | 只修格式、类型和必填字段",
+        "B3 | Retry with Error Message | 测量简单重试能解决多少问题",
+        "B4 | Clarification Gate | 缺信息时强制询问用户",
+        "B5 | Replan with Tool Refresh | 工具变化后重新读取注册表与状态",
+        "B6 | 组合轻量策略 | Schema + 澄清 + 分类重试 + 重规划",
+        "基线的层次：B0–B5 不是“越后越强”的排行榜，而是逐步回答格式校验、错误反馈、澄清与重规划各自解决什么问题；B6 组合策略必须用消融证明。"
+      ]
+    },
+    {
+      "heading": "轻量恢复组件",
+      "content": [
+        "Schema Canonicalizer：把不同版本工具 schema 映射到统一中间表示。",
+        "Failure Classifier：区分参数错误、权限、超时、空结果、状态冲突和不可恢复错误。",
+        "Clarification Gate：仅在必要字段缺失或歧义高时询问用户。",
+        "Tool Refresh：检测接口错误后重新加载工具定义。",
+        "Bounded Retry：按错误类型限制重试次数，避免死循环。",
+        "State Reconciliation：工具结果与本地状态冲突时重新查询真值。",
+        "这些组件可以是规则、小分类器或 LLM，不应预先假定“更复杂一定更好”。"
+      ]
+    },
+    {
+      "heading": "指标",
+      "content": [
+        "结构化分类树 / ToolShift-CN指标 / └── 基础能力 / ├── Tool Selection Accuracy / ├── Argument Exact Match / Field F1 / ├── Executable Call Rate / └── Clean Task Success / └── 鲁棒性 / ├── Perturbed Task Success / ├── Robustness Retention = Perturbed / Clean / ├── Performance Drop / └── Worst-group Accuracy / └── 恢复 / ├── Recovery Success Rate / ├── Failure Classification Accuracy / ├── Clarification Precision / Recall / ├── State Reconciliation Accuracy / └── Unrecoverable Rate / └── 过程 / ├── Average Extra Turns / ├── Tool Call Overhead / ├── Loop Rate / ├── P95 Latency / └── Cost per Successful Task"
+      ]
+    },
+    {
+      "heading": "实验矩阵",
+      "content": [
+        "维度 | 取值",
+        "模型 | 1–2 个本地模型 + 1–2 个 API 模型，视预算决定",
+        "语言 | 中文、可选中英混合",
+        "任务复杂度 | 单工具、顺序多工具、状态依赖、需要澄清",
+        "扰动 | Schema、工具故障、状态变化、用户缺信息、相似工具",
+        "恢复策略 | 无、简单重试、Validator、Clarification、Replan、组合",
+        "重复运行 | 至少 3 个随机种子或多次采样，视模型确定性决定",
+        "实验矩阵不要一次铺满：先用 100–200 个 pilot 排除不可行组合，再冻结任务、扰动与预算，最后扩到主实验。"
+      ]
+    },
+    {
+      "heading": "误差分类",
+      "content": [
+        "结构化分类树 / ToolShift错误 / └── Selection / ├── wrong_tool / ├── missed_tool / └── unnecessary_tool / └── Arguments / ├── missing_required / ├── stale_value / ├── wrong_type / ├── wrong_enum / ├── hallucinated_value / └── schema_version_mismatch / └── State / ├── ignored_new_state / ├── stale_cache / ├── invalid_transition / └── tool_result_misread / └── Interaction / ├── failed_to_clarify / ├── over_clarification / ├── ignored_user_constraint / └── premature_commit / └── Recovery / ├── repeated_same_action / ├── wrong_failure_diagnosis / ├── failed_tool_refresh",
+        "结构化分类树（续 2/2） / ├── excessive_retry / └── unnecessary_fallback"
+      ]
+    },
+    {
+      "heading": "消融",
+      "content": [
+        "去掉 Schema Canonicalizer。",
+        "去掉错误分类，所有错误统一重试。",
+        "去掉 Clarification Gate。",
+        "去掉状态重新查询。",
+        "固定最大 1/2/3 次重试。",
+        "仅规则 vs 规则 + LLM。",
+        "工具描述原文 vs 精简/对比式描述。"
+      ]
+    },
+    {
+      "heading": "论文结构",
+      "content": [
+        "结构化流程 / 1. Introduction / 2. Related Work / 2.1 Function Calling and Tool-use Benchmarks / 2.2 Robustness under Schema and Environment Shift / 2.3 Tool Failure Recovery and Clarification / 2.4 Multilingual Tool Calling / 3. Task Definition / 3.1 Chinese Multi-turn Tool-use Setting / 3.2 Controlled Perturbation Taxonomy / 3.3 Clean/Perturbed Pair Construction / 4. Dataset and Evaluation Protocol / 5. Lightweight Recovery Baselines / 6. Experiments / 6.1 Main Results / 6.2 Robustness by Perturbation and Complexity / 6.3 Recovery-Cost Trade-off / 6.4 Ablations / 7. Error Analysis / 8. Limitations and Ethics / 9. Conclusion"
+      ]
+    },
+    {
+      "heading": "风险",
+      "content": [
+        "风险 | 处理",
+        "与 2026 新论文重合 | W8 与 W16 两次检索；必要时改为复现与中文诊断报告",
+        "自建数据缺乏可信度 | 使用程序可验证最终状态；公开生成器、规则与样本卡",
+        "中文只是翻译 | 加入真实中文歧义、时间表达、指代和中英混合工具名",
+        "实验成本高 | 先 100–200 个 pilot；只对最终方案扩大规模",
+        "Judge 不可靠 | 最终状态和 schema 尽量程序判断；人工抽查语义标签",
+        "方法没有提升 | 负结果仍可形成“哪些恢复策略无效”的分析，但不包装成算法突破",
+        "负结果也有出口：方法不提升时，仍可报告哪些扰动不可恢复、哪些策略成本过高，以及干净任务分数为何不能预测鲁棒性；但不要包装成算法突破。"
+      ]
+    }
+  ],
+  "interview_questions": [
+    {
+      "category": "Python 与工程",
+      "question": "1. 生成器、迭代器和列表的差异是什么？"
+    },
+    {
+      "category": "Python 与工程",
+      "question": "2. 浅拷贝和深拷贝有什么风险？"
+    },
+    {
+      "category": "Python 与工程",
+      "question": "3. Python 多线程为什么不适合所有 CPU 密集任务？"
+    },
+    {
+      "category": "Python 与工程",
+      "question": "4. 异步 I/O 适合什么场景？"
+    },
+    {
+      "category": "Python 与工程",
+      "question": "5. 如何设计可重试且不重复写入的 API？"
+    },
+    {
+      "category": "Python 与工程",
+      "question": "6. 如何管理配置、随机种子和实验产物？"
+    },
+    {
+      "category": "Python 与工程",
+      "question": "7. 如何用 pytest 测试外部模型或数据库依赖？"
+    },
+    {
+      "category": "数学与机器学习",
+      "question": "1. 余弦相似度与点积有什么关系？"
+    },
+    {
+      "category": "数学与机器学习",
+      "question": "2. 交叉熵、最大似然和 softmax 的关系是什么？"
+    },
+    {
+      "category": "数学与机器学习",
+      "question": "3. Precision 与 Recall 如何根据业务代价选择？"
+    },
+    {
+      "category": "数学与机器学习",
+      "question": "4. 为什么 Macro-F1 更关注小类？"
+    },
+    {
+      "category": "数学与机器学习",
+      "question": "5. 过拟合有哪些信号和处理方法？"
+    },
+    {
+      "category": "数学与机器学习",
+      "question": "6. 如何判断一个 1% 的提升是否可信？"
+    },
+    {
+      "category": "数学与机器学习",
+      "question": "7. 数据泄漏在 RAG/Agent 评测中会如何发生？"
+    },
+    {
+      "category": "PyTorch",
+      "question": "1. model.train() 和 model.eval() 改变什么？"
+    },
+    {
+      "category": "PyTorch",
+      "question": "2. optimizer.zero_grad() 为什么需要？"
+    },
+    {
+      "category": "PyTorch",
+      "question": "3. 梯度爆炸、消失和 NaN 如何排查？"
+    },
+    {
+      "category": "PyTorch",
+      "question": "4. Batch Size 变大时学习率为何可能需要调整？"
+    },
+    {
+      "category": "PyTorch",
+      "question": "5. padding mask 和 causal mask 有什么区别？"
+    },
+    {
+      "category": "PyTorch",
+      "question": "6. 如何保存并恢复完整训练状态？"
+    },
+    {
+      "category": "Transformer/LLM",
+      "question": "1. Q、K、V 各自表示什么？"
+    },
+    {
+      "category": "Transformer/LLM",
+      "question": "2. 为什么除以 sqrt(d_k) ？"
+    },
+    {
+      "category": "Transformer/LLM",
+      "question": "3. 多头 Attention 的价值是什么？"
+    },
+    {
+      "category": "Transformer/LLM",
+      "question": "4. 位置编码解决什么问题？"
+    },
+    {
+      "category": "Transformer/LLM",
+      "question": "5. Decoder-only 如何训练下一 token？"
+    },
+    {
+      "category": "Transformer/LLM",
+      "question": "6. Temperature 与 Top-p 如何影响输出？"
+    },
+    {
+      "category": "Transformer/LLM",
+      "question": "7. 长上下文为什么不等于所有信息都能被有效使用？"
+    },
+    {
+      "category": "Transformer/LLM",
+      "question": "8. 结构化输出为什么仍可能失败？"
+    },
+    {
+      "category": "RAG",
+      "question": "1. BM25 与 Dense Retrieval 的差异是什么？"
+    },
+    {
+      "category": "RAG",
+      "question": "2. RRF 为什么能融合不同检索器？"
+    },
+    {
+      "category": "RAG",
+      "question": "3. Chunk 太大或太小的影响是什么？"
+    },
+    {
+      "category": "RAG",
+      "question": "4. Reranker 与召回模型的职责有何不同？"
+    },
+    {
+      "category": "RAG",
+      "question": "5. 如何构建 Golden Query Set？"
+    },
+    {
+      "category": "RAG",
+      "question": "6. 如何区分检索失败和生成失败？"
+    },
+    {
+      "category": "RAG",
+      "question": "7. Faithfulness 与 Answer Correctness 有何差异？"
+    },
+    {
+      "category": "RAG",
+      "question": "8. 如何处理无答案、冲突证据和旧资料？"
+    },
+    {
+      "category": "RAG",
+      "question": "9. 如何控制上下文长度、延迟和费用？"
+    },
+    {
+      "category": "Agent",
+      "question": "1. Agent 与固定工作流的边界是什么？"
+    },
+    {
+      "category": "Agent",
+      "question": "2. 为什么推荐工作流优先而不是自由 ReAct？"
+    },
+    {
+      "category": "Agent",
+      "question": "3. Tool schema 如何设计才不易混淆？"
+    },
+    {
+      "category": "Agent",
+      "question": "4. 缺少必填信息时应该如何处理？"
+    },
+    {
+      "category": "Agent",
+      "question": "5. 工具执行失败如何分层恢复？"
+    },
+    {
+      "category": "Agent",
+      "question": "6. 如何防止循环和重复副作用？"
+    },
+    {
+      "category": "Agent",
+      "question": "7. 短期状态与长期记忆如何区分？"
+    },
+    {
+      "category": "Agent",
+      "question": "8. 什么时候必须 Human-in-the-loop？"
+    },
+    {
+      "category": "Agent",
+      "question": "9. 如何评价 Agent 的中间轨迹和最终状态？"
+    },
+    {
+      "category": "Agent",
+      "question": "10. 工具返回中存在恶意指令怎么办？"
+    },
+    {
+      "category": "推荐",
+      "question": "1. 召回、粗排、精排和重排的分工是什么？"
+    },
+    {
+      "category": "推荐",
+      "question": "2. Recall@K 与 NDCG@K 的差异是什么？"
+    },
+    {
+      "category": "推荐",
+      "question": "3. 冷启动如何处理？"
+    },
+    {
+      "category": "推荐",
+      "question": "4. 双塔模型为何适合大规模召回？"
+    },
+    {
+      "category": "推荐",
+      "question": "5. 如何兼顾相关性、多样性和长尾？"
+    },
+    {
+      "category": "推荐",
+      "question": "6. LLM 生成标签可能带来哪些偏差？"
+    },
+    {
+      "category": "微调",
+      "question": "1. LoRA 为什么节省显存和参数？"
+    },
+    {
+      "category": "微调",
+      "question": "2. Rank、Alpha 和 target modules 如何理解？"
+    },
+    {
+      "category": "微调",
+      "question": "3. RAG、Prompt 和微调如何选择？"
+    },
+    {
+      "category": "微调",
+      "question": "4. 微调数据如何划分和防止泄漏？"
+    },
+    {
+      "category": "微调",
+      "question": "5. 为什么小任务可能用分类器比微调 LLM 更合适？"
+    },
+    {
+      "category": "微调",
+      "question": "6. 如何判断微调收益值得训练和部署成本？"
+    },
+    {
+      "category": "评测与研究",
+      "question": "1. 研究问题与工程需求有什么区别？"
+    },
+    {
+      "category": "评测与研究",
+      "question": "2. 基线为什么必须强且公平？"
+    },
+    {
+      "category": "评测与研究",
+      "question": "3. 消融实验回答什么问题？"
+    },
+    {
+      "category": "评测与研究",
+      "question": "4. 为什么只报告平均数不够？"
+    },
+    {
+      "category": "评测与研究",
+      "question": "5. LLM-as-a-Judge 有哪些偏差？"
+    },
+    {
+      "category": "评测与研究",
+      "question": "6. 如何验证自建数据集？"
+    },
+    {
+      "category": "评测与研究",
+      "question": "7. 负结果如何写进论文？"
+    },
+    {
+      "category": "评测与研究",
+      "question": "8. 你的方法在什么条件下无效？"
+    }
+  ],
+  "final_acceptance": [
+    {
+      "heading": "11. 最终验收清单",
+      "content": [
+        "验收顺序：先运行，再评测，再解释，最后包装。“能讲但跑不起来”或“能跑但没有锁定测试集”的成果都不算最终交付。",
+        "本章聚焦 | 能力验收 · 项目验收 · 求职就绪"
+      ]
+    },
+    {
+      "heading": "11.1 能力验收",
+      "content": []
+    },
+    {
+      "heading": "编码与基础",
+      "content": [
+        "☐ 完成 120–160 道高质量算法题，并有错题复做记录。",
+        "☐ 能完成常见 SQL JOIN、聚合、窗口函数和索引问题。",
+        "☐ 能解释线性代数、概率、交叉熵、优化、过拟合和评测指标。",
+        "☐ 能独立写出 PyTorch 训练、验证、保存和推理流程。"
+      ]
+    },
+    {
+      "heading": "NLP、RAG 与 Agent",
+      "content": [
+        "☐ 能讲清 Transformer、Embedding 和解码。",
+        "☐ 能实现 BM25、Dense、RRF 和 Rerank 对照。",
+        "☐ 能构建 Golden Set 并区分检索/生成错误。",
+        "☐ 能设计 Tool schema、状态图、重试、HITL 和幂等性。",
+        "☐ 能评价工具、轨迹、最终状态、安全、延迟和成本。"
+      ]
+    },
+    {
+      "heading": "研究",
+      "content": [
+        "☐ 有最近工作新颖性矩阵。",
+        "☐ 有可重复基线和固定测试协议。",
+        "☐ 有主结果、消融、分组、成本与错误分析。",
+        "☐ 有数据卡、运行清单和局限说明。",
+        "☐ 有完整论文或技术报告初稿。"
+      ]
+    },
+    {
+      "heading": "11.2 StudyPilot 验收",
+      "content": [
+        "☐ 四条核心流程端到端可运行。",
+        "☐ 100–140 个知识点 DAG 无环且依赖合理。",
+        "☐ 100 条左右 RAG Golden Query。",
+        "☐ 80 条以上 Agent 离线任务。",
+        "☐ 评分、掌握度和复习变化可追溯。",
+        "☐ 有安全回归、幂等测试和高风险审批。",
+        "☐ 有 RAG、Agent、评分和安全报告。",
+        "☐ 有真实指标、失败案例和局限。",
+        "☐ 一条命令或 Docker 可启动。",
+        "☐ 有 README、架构图、Demo 视频和讲稿。"
+      ]
+    },
+    {
+      "heading": "11.3 研究仓库验收",
+      "content": [
+        "☐ 问题定义清楚，不以“做一个框架”代替研究问题。",
+        "☐ 与最接近工作的差异可用一页表格说明。",
+        "☐ 数据集、扰动或处理流程可复现。",
+        "☐ 评价器尽量程序化，并对 Judge 做人工校准。",
+        "☐ 主实验在同等预算下比较。",
+        "☐ 至少一个消融和一个负结果分析。",
+        "☐ 结果文件包含配置、模型、日期、随机种子和 commit。",
+        "☐ 不夸大结论，不隐瞒未达预期结果。"
+      ]
+    },
+    {
+      "heading": "11.4 求职验收",
+      "content": [
+        "☐ 一页中文或英文算法岗简历。",
+        "☐ 一分钟自我介绍。",
+        "☐ 三分钟和十五分钟项目讲解。",
+        "☐ 十分钟研究讲解。",
+        "☐ 50+ 张高频面试卡片。",
+        "☐ 至少 4 次完整模拟面试。",
+        "☐ 每个目标岗位有匹配表和定制 Bullet。",
+        "☐ GitHub 首页能在 30 秒内看懂方向和核心成果。"
+      ]
+    },
+    {
+      "heading": "11.5 最终交付物",
+      "content": [
+        "代码目录树 / portfolio/ / ├── studypilot-agent/ / │ ├── 可运行代码 / │ ├── 测试与评测 / │ ├── 技术报告 / │ └── Demo / ├── research-project/ / │ ├── 数据与基线 / │ ├── 主实验与消融 / │ ├── 错误分析 / │ └── paper_draft.md / ├── fundamentals/ / │ ├── pytorch-training-template/ / │ ├── retrieval-baselines/ / │ └── algorithm-notes/ / └── career/ / ├── resume_ai_algorithm.md / ├── project_talk.md / ├── research_talk.md / ├── interview_qa.md / └── job_match_tracker.md",
+        "最低可交付与增强项：最低可交付是 StudyPilot 核心闭环、一个研究/复现报告、基础仓库和求职材料；多用户、复杂前端、LoRA 与多 Agent 只属于增强项。"
+      ]
+    },
+    {
+      "heading": "11.6 开始执行的前三天",
+      "content": []
+    },
+    {
+      "heading": "第一天",
+      "content": [
+        "创建 StudyPilot、研究和实验模板三个仓库。",
+        "完成基线诊断。",
+        "写清主投岗位和非目标。"
+      ]
+    },
+    {
+      "heading": "第二天",
+      "content": [
+        "完成 StudyPilot 的范围、四条核心流程和 P0/P1/P2。",
+        "创建 knowledge_units.yaml 的前 30 个知识点。",
+        "配置日志、测试和实验目录。"
+      ]
+    },
+    {
+      "heading": "第三天",
+      "content": [
+        "手写一个最小 PyTorch 文本分类训练流程。",
+        "阅读一篇 RAG、一篇 ReAct/Agent 和一篇 Agent benchmark 论文。",
+        "写第一份周计划，并把每项任务绑定到文件和验收标准。",
+        "本章收束｜最终成果按“能运行—能评测—能解释—能复现—能求职”验收。增强项永远不能遮住最低可交付。",
+        "EPILOGUE · 能力闭环"
+      ]
+    }
+  ]
+}

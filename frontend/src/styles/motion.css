@@ -1,0 +1,457 @@
+/*
+ * StudyPilot low-cost motion contract
+ * -----------------------------------
+ * One route surface and one selection indicator may animate at a time.
+ * Navigation never snapshots the document and never animates layout.
+ */
+
+.page,
+.course-library-hero,
+.course-resume,
+.course-shelf-section,
+.course-volume,
+.course-home-hero,
+.course-module-card,
+.knowledge-notebook,
+.knowledge-page,
+.knowledge-card,
+.canvas-card,
+.node-inspector,
+.trash-list article {
+  animation: none !important;
+}
+
+html[data-motion-intent] :is(.page, .course-library-shell, .global-subpage) {
+  animation: motion-workspace-forward var(--motion-route) var(--ease-enter) both !important;
+}
+
+html[data-motion-intent="back"] :is(.page, .course-library-shell, .global-subpage) {
+  animation-name: motion-workspace-back;
+}
+
+html[data-motion-intent="lateral"] :is(.page, .course-library-shell, .global-subpage) {
+  animation-name: motion-workspace-lateral;
+}
+
+html[data-motion-intent="replace"] :is(.page, .course-library-shell, .global-subpage) {
+  animation-name: motion-workspace-replace;
+}
+
+html[data-motion-intent] .course-library-hero {
+  animation: motion-shelf-in 200ms var(--ease-enter) both !important;
+}
+
+html[data-motion-intent] .course-resume {
+  animation: motion-shelf-in 210ms 35ms var(--ease-enter) both !important;
+}
+
+html[data-motion-intent] .course-shelf-section {
+  animation: motion-shelf-in 220ms 70ms var(--ease-enter) both !important;
+}
+
+.course-volume__progress > span,
+.course-home-progress > span > i {
+  transform-origin: left center;
+  animation: motion-progress-fill 480ms 90ms var(--ease-enter) both;
+}
+
+.course-cover-swatch[aria-checked="true"] i,
+.course-cover-options .cover-dot.is-selected i {
+  animation: motion-choice-confirm 220ms var(--ease-enter) both;
+}
+
+@keyframes motion-workspace-forward {
+  from { opacity: .7; transform: translate3d(14px, 0, 0) scale(.995); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes motion-workspace-back {
+  from { opacity: .7; transform: translate3d(-14px, 0, 0) scale(.995); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes motion-workspace-lateral {
+  from { opacity: .72; transform: translate3d(0, 10px, 0) scale(.996); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes motion-workspace-replace {
+  from { opacity: .4; transform: translate3d(0, var(--motion-distance-sm), 0); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes motion-shelf-in {
+  from { opacity: 0; transform: translate3d(0, var(--motion-distance-md), 0); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes motion-progress-fill {
+  from { opacity: .35; transform: scaleX(0); }
+  to { opacity: 1; transform: scaleX(1); }
+}
+
+@keyframes motion-choice-confirm {
+  0% { transform: scale(.9); }
+  65% { transform: scale(1.05); }
+  100% { transform: none; }
+}
+
+/* Stable chrome; only the active navigation marker moves. */
+.navrail {
+  --nav-item-size: 44px;
+  --nav-item-gap: 2px;
+  --nav-item-stride: calc(var(--nav-item-size) + var(--nav-item-gap));
+  transition: none !important;
+}
+
+.navrail nav {
+  position: relative;
+  isolation: isolate;
+}
+
+.navrail__indicator {
+  position: absolute;
+  z-index: 0;
+  inset: 0 0 auto;
+  height: var(--nav-item-size);
+  border: 0;
+  border-radius: 11px;
+  background: color-mix(in srgb, var(--blue) 13%, var(--surface-2));
+  box-shadow: none;
+  transform: translate3d(0, calc(var(--nav-active-index) * var(--nav-item-stride)), 0);
+  transition: transform 260ms cubic-bezier(.22, 1.18, .48, 1);
+}
+
+.navrail nav button {
+  position: relative;
+  z-index: 1;
+  transition:
+    color var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard);
+}
+
+.navrail nav button.is-active {
+  border-color: transparent;
+  background: transparent;
+}
+
+.navrail nav button.is-active .nav-icon {
+  animation: motion-nav-settle 280ms var(--ease-enter) both;
+}
+
+/* Course journey: shelf arrival, explicit selection, then a layered workspace landing. */
+.course-library-shell .course-library-topbar {
+  animation: motion-course-chrome-arrive 220ms var(--ease-enter) both;
+}
+
+.course-library-shell .course-library-hero {
+  animation: motion-shelf-in 260ms 35ms var(--ease-enter) both !important;
+}
+
+.course-library-shell .course-resume {
+  animation: motion-shelf-in 280ms 70ms var(--ease-enter) both !important;
+}
+
+.course-library-shell .course-shelf-heading {
+  animation: motion-shelf-in 290ms 100ms var(--ease-enter) both;
+}
+
+.course-library-shell .course-volume {
+  animation: motion-course-card-arrive 340ms 125ms var(--ease-enter) both !important;
+}
+
+.course-library-shell .course-volume:nth-child(2) { animation-delay: 165ms !important; }
+.course-library-shell .course-volume:nth-child(3) { animation-delay: 205ms !important; }
+.course-library-shell .course-volume:nth-child(4) { animation-delay: 245ms !important; }
+.course-library-shell .course-volume:nth-child(n + 5) { animation-delay: 270ms !important; }
+
+.course-library-shell[data-course-launching] :is(.course-volume, .course-empty-volume):not(.is-launching) {
+  opacity: .42;
+  filter: saturate(.72);
+  transform: translate3d(0, 4px, 0) scale(.985);
+  transition:
+    opacity var(--motion-standard) var(--ease-exit),
+    filter var(--motion-standard) var(--ease-exit),
+    transform var(--motion-standard) var(--ease-exit);
+}
+
+.course-library-shell[data-course-launching] .course-volume.is-launching,
+.course-library-shell[data-course-launching] .course-resume.is-launching {
+  z-index: 4;
+  animation: motion-course-launch 240ms var(--ease-enter) both !important;
+  pointer-events: none;
+}
+
+.course-library-shell[data-course-launching] .course-volume.is-launching .course-volume__cover::after {
+  display: block;
+  inset: 8px;
+  border: 2px solid color-mix(in srgb, var(--cover-accent) 78%, white);
+  border-radius: 13px;
+  opacity: 0;
+  animation: motion-course-launch-trace 420ms var(--ease-enter) both;
+}
+
+.course-switcher[data-course-switching] .course-switcher__trigger {
+  animation: motion-course-switch-trigger 260ms var(--ease-enter) both;
+}
+
+.course-switcher[data-course-switching] .course-list button:not(.is-switching) {
+  opacity: .5;
+  transform: scale(.985);
+  transition: opacity var(--motion-fast) var(--ease-exit), transform var(--motion-fast) var(--ease-exit);
+}
+
+.course-switcher[data-course-switching] .course-list button.is-switching {
+  animation: motion-course-switch-choice 300ms var(--ease-enter) both;
+}
+
+.course-home .course-home-hero {
+  animation: motion-course-home-shell 320ms var(--ease-enter) both !important;
+}
+
+.course-home .course-home-cover {
+  animation: motion-course-home-cover 430ms 45ms var(--ease-enter) both;
+}
+
+.course-home .course-home-intro {
+  animation: motion-course-home-copy 340ms 85ms var(--ease-enter) both;
+}
+
+.course-home .course-continue {
+  animation: motion-course-home-copy 350ms 125ms var(--ease-enter) both;
+}
+
+.course-home .course-home-section-title {
+  animation: motion-course-home-copy 320ms 150ms var(--ease-enter) both;
+}
+
+.course-home .course-module-card {
+  animation: motion-course-module-arrive 340ms 175ms var(--ease-enter) both !important;
+}
+
+.course-home .course-module-card:nth-child(2) { animation-delay: 205ms !important; }
+.course-home .course-module-card:nth-child(3) { animation-delay: 235ms !important; }
+.course-home .course-module-card:nth-child(4) { animation-delay: 265ms !important; }
+.course-home .course-module-card:nth-child(n + 5) { animation-delay: 290ms !important; }
+
+.course-home .course-home-lower {
+  animation: motion-course-home-copy 340ms 320ms var(--ease-enter) both;
+}
+
+@keyframes motion-course-chrome-arrive {
+  from { opacity: 0; transform: translate3d(0, -6px, 0); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes motion-course-card-arrive {
+  from { opacity: 0; transform: translate3d(0, 16px, 0) scale(.975); }
+  72% { opacity: 1; transform: translate3d(0, -2px, 0) scale(1.005); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes motion-course-launch {
+  0% { transform: none; }
+  38% { transform: translate3d(0, 3px, 0) scale(.985); }
+  100% { transform: translate3d(0, -7px, 0) scale(1.018); }
+}
+
+@keyframes motion-course-launch-trace {
+  0% { opacity: 0; transform: scale(.96); }
+  45% { opacity: .9; }
+  100% { opacity: 0; transform: scale(1.035); }
+}
+
+@keyframes motion-course-switch-trigger {
+  0% { transform: none; }
+  48% { transform: translate3d(0, 2px, 0) scale(.985); }
+  100% { transform: none; }
+}
+
+@keyframes motion-course-switch-choice {
+  0% { transform: scale(.97); }
+  65% { transform: scale(1.015); background: var(--blue-soft); }
+  100% { transform: none; background: var(--blue-soft); }
+}
+
+@keyframes motion-course-home-shell {
+  from { opacity: 0; transform: translate3d(18px, 0, 0) scale(.992); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes motion-course-home-cover {
+  0% { opacity: 0; transform: translate3d(-18px, 6px, 0) rotate(-2deg) scale(.9); }
+  72% { opacity: 1; transform: translate3d(2px, -1px, 0) rotate(.4deg) scale(1.015); }
+  100% { opacity: 1; transform: none; }
+}
+
+@keyframes motion-course-home-copy {
+  from { opacity: 0; transform: translate3d(10px, 0, 0); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes motion-course-module-arrive {
+  from { opacity: 0; transform: translate3d(0, 12px, 0) scale(.985); }
+  to { opacity: 1; transform: none; }
+}
+
+.learning-stats .stats-hero {
+  animation: motion-stats-rise 260ms var(--ease-enter) both;
+}
+
+.learning-stats .stats-metrics {
+  animation: motion-stats-rise 300ms 45ms var(--ease-enter) both;
+}
+
+.learning-stats .stats-dashboard-grid {
+  animation: motion-stats-rise 340ms 90ms var(--ease-enter) both;
+}
+
+.stats-chart__line {
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: motion-chart-draw 680ms 180ms var(--ease-enter) forwards;
+}
+
+.stats-progress-ring .is-value {
+  animation: motion-ring-draw 720ms 160ms var(--ease-enter) both;
+}
+
+.stats-hero__streak > span {
+  animation: motion-milestone-pop 480ms 120ms var(--ease-enter) both;
+}
+
+.stats-hero__streak > span::after {
+  animation: motion-milestone-rays 620ms 220ms var(--ease-enter) both;
+}
+
+.notebook-library-grid {
+  animation: motion-collection-arrive 300ms 70ms var(--ease-enter) both;
+}
+
+@keyframes motion-nav-settle {
+  0% { transform: scale(.76) rotate(-7deg); }
+  70% { transform: scale(1.08) rotate(1deg); }
+  100% { transform: none; }
+}
+
+@keyframes motion-stats-rise {
+  from { opacity: 0; transform: translate3d(0, 12px, 0); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes motion-chart-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes motion-ring-draw {
+  from { stroke-dasharray: 0 100; }
+  to { stroke-dasharray: var(--stats-progress) 100; }
+}
+
+@keyframes motion-milestone-pop {
+  0% { opacity: 0; transform: translate3d(0, 8px, 0) scale(.72) rotate(-8deg); }
+  68% { opacity: 1; transform: translate3d(0, -2px, 0) scale(1.08) rotate(2deg); }
+  100% { opacity: 1; transform: none; }
+}
+
+@keyframes motion-milestone-rays {
+  from { opacity: .9; transform: scale(.45) rotate(-16deg); }
+  to { opacity: 0; transform: scale(1.35) rotate(8deg); }
+}
+
+@keyframes motion-collection-arrive {
+  from { opacity: 0; transform: translate3d(0, 10px, 0); }
+  to { opacity: 1; transform: none; }
+}
+
+.nav-label {
+  transition: opacity var(--motion-fast) var(--ease-exit);
+}
+
+.window-actions button,
+.canvas-toolbar button,
+.canvas-toolbar select {
+  transition:
+    color var(--motion-fast) var(--ease-standard),
+    background-color var(--motion-fast) var(--ease-standard),
+    border-color var(--motion-fast) var(--ease-standard);
+}
+
+.knowledge-workspace {
+  transition: none !important;
+}
+
+/* Presence surfaces retain a short exit frame without blur or spring scaling. */
+:is(.course-wizard-backdrop, .notebook-dialog-backdrop, .safe-confirm-backdrop, .source-backdrop):not([data-presence="exiting"]) {
+  animation: motion-veil-in var(--motion-fast) var(--ease-enter) both !important;
+}
+
+:is(.course-wizard-backdrop, .notebook-dialog-backdrop, .safe-confirm-backdrop, .source-backdrop)[data-presence="exiting"] {
+  animation: motion-veil-out var(--motion-fast) var(--ease-exit) both !important;
+  pointer-events: none;
+}
+
+:is(.course-wizard-backdrop, .notebook-dialog-backdrop, .safe-confirm-backdrop):not([data-presence="exiting"]) > :is(.course-wizard, .notebook-dialog, .safe-confirm-dialog) {
+  animation: motion-dialog-in var(--motion-standard) var(--ease-enter) both !important;
+}
+
+:is(.course-wizard-backdrop, .notebook-dialog-backdrop, .safe-confirm-backdrop)[data-presence="exiting"] > :is(.course-wizard, .notebook-dialog, .safe-confirm-dialog) {
+  animation: motion-dialog-out var(--motion-fast) var(--ease-exit) both !important;
+}
+
+.source-backdrop:not([data-presence="exiting"]) > .source-drawer {
+  animation: motion-drawer-in var(--motion-standard) var(--ease-enter) both !important;
+}
+
+.image-preview-backdrop:not([data-presence="exiting"]) {
+  animation: motion-veil-in var(--motion-fast) var(--ease-enter) both !important;
+}
+
+.image-preview-backdrop:not([data-presence="exiting"]) > .image-preview {
+  animation: motion-image-preview-in var(--motion-standard) var(--ease-enter) both !important;
+}
+
+.image-preview-backdrop[data-presence="exiting"] {
+  animation: motion-veil-out var(--motion-fast) var(--ease-exit) both !important;
+  pointer-events: none;
+}
+
+.image-preview-backdrop[data-presence="exiting"] > .image-preview {
+  animation: motion-image-preview-out var(--motion-fast) var(--ease-exit) both !important;
+}
+
+.source-backdrop[data-presence="exiting"] > .source-drawer {
+  animation: motion-drawer-out var(--motion-fast) var(--ease-exit) both !important;
+}
+
+:is(.safe-action-menu__popover, .course-actions-popover, .canvas-export-menu, .canvas-settings):not([data-presence="exiting"]) {
+  animation: motion-popover-in var(--motion-fast) var(--ease-enter) both !important;
+}
+
+:is(.safe-action-menu__popover, .course-actions-popover, .canvas-export-menu, .canvas-settings)[data-presence="exiting"] {
+  animation: motion-popover-out var(--motion-instant) var(--ease-exit) both !important;
+  pointer-events: none;
+}
+
+@keyframes motion-veil-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes motion-veil-out { from { opacity: 1; } to { opacity: 0; } }
+@keyframes motion-dialog-in { from { opacity: 0; transform: translateY(7px) scale(.985); } to { opacity: 1; transform: none; } }
+@keyframes motion-dialog-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(3px) scale(.992); } }
+@keyframes motion-drawer-in { from { transform: translate3d(100%, 0, 0); } to { transform: none; } }
+@keyframes motion-drawer-out { from { transform: none; } to { transform: translate3d(100%, 0, 0); } }
+@keyframes motion-image-preview-in { from { opacity: 0; transform: translateY(8px) scale(.985); } to { opacity: 1; transform: none; } }
+@keyframes motion-image-preview-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(4px) scale(.992); } }
+@keyframes motion-popover-in { from { opacity: 0; transform: translateY(5px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes motion-popover-out { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateY(3px) scale(.985); } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: .01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    transition-delay: 0ms !important;
+  }
+}

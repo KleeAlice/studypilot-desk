@@ -1,0 +1,2 @@
+"""StudyPilot Desk backend package."""
+

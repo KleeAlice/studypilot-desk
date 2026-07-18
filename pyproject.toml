@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "studypilot-desk"
+version = "0.1.0"
+description = "Local-first learning operations desktop backend"
+requires-python = ">=3.10"
+dependencies = [
+  "fastapi>=0.116,<1",
+  "uvicorn[standard]>=0.35,<1",
+  "pydantic>=2.11,<3",
+  "python-docx>=1.2,<2",
+  "pypdf>=5.8,<6",
+  "python-multipart>=0.0.20,<1",
+  "Pillow>=11.3,<13",
+]
+
+[project.optional-dependencies]
+dev = [
+  "httpx>=0.28,<1",
+  "pytest>=8.4,<9",
+  "pytest-asyncio>=1.0,<2",
+  "reportlab>=4.4,<5",
+]
+
+[tool.setuptools.packages.find]
+include = ["backend*"]
+
+[tool.pytest.ini_options]
+testpaths = ["backend/tests"]
+addopts = "-ra"
