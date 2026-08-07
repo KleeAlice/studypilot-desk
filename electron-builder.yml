@@ -1,0 +1,28 @@
+appId: com.studypilot.desk
+productName: StudyPilot Desk
+directories:
+  output: release/windows
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - package.json
+extraResources:
+  - from: build/backend-runtime/StudyPilotBackend
+    to: backend
+asar: true
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  executableName: StudyPilot Desk
+  signAndEditExecutable: false
+artifactName: StudyPilot-Desk-Setup-${version}-${arch}.${ext}
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+  shortcutName: StudyPilot Desk
+  deleteAppDataOnUninstall: false

@@ -1,0 +1,36 @@
+appId: com.studypilot.desk
+productName: StudyPilot Desk
+directories:
+  output: release/macos
+files:
+  - dist/**/*
+  - dist-electron/**/*
+  - package.json
+extraResources:
+  - from: build/backend-runtime/StudyPilotBackend
+    to: backend
+asar: true
+mac:
+  target:
+    - dmg
+    - zip
+  category: public.app-category.education
+  icon: build/icon.png
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  artifactName: StudyPilot-Desk-${version}-mac-${arch}.${ext}
+dmg:
+  title: StudyPilot Desk ${version}
+  iconSize: 96
+  window:
+    size:
+      width: 540
+      height: 380
+  contents:
+    - x: 130
+      y: 220
+      type: file
+    - x: 410
+      y: 220
+      type: link
+      path: /Applications

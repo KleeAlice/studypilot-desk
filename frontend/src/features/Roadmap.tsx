@@ -10,11 +10,11 @@ export function Roadmap({ api }: { api: ApiClient }) {
   const weeks = data.weeks.filter((item) => item.phase === selected);
   return (
     <section className="page">
-      <div className="page-heading"><div><div className="eyebrow">ROADMAP / 24 WEEKS</div><h1>路线与阶段闸门</h1><p>周计划可以调整，阶段出口必须由证据通过。</p></div></div>
-      <div className="phase-track">{data.phases.map((item) => <button key={item.phase} className={selected === item.phase ? "is-active" : ""} onClick={() => setSelected(item.phase)}><span>{item.gate}</span><strong>{item.title}</strong><small>W{item.start_week}—W{item.end_week}</small></button>)}</div>
-      {!data.phases.length && <div className="empty-state roadmap-empty"><strong>这是一门空白课程</strong><p>先在知识画布建立概念、便签和引用；路线编排可以随后补充。</p></div>}
-      {phase && <div className="gate-detail"><div className="gate-badge gate-badge--large">{phase.gate}</div><div><span className="eyebrow">ACCEPTANCE</span><h2>{phase.acceptance}</h2><p>{phase.remediation}</p></div></div>}
-      <div className="week-table" role="table"><div className="week-row week-row--head" role="row"><span>周</span><span>基础与面试</span><span>项目 / 研究任务</span><span>交付物</span></div>{weeks.map((week) => <div className="week-row" role="row" key={week.week}><strong>W{week.week}</strong><p>{week.foundation}</p><ul>{week.tasks.map((task) => <li key={task}>{task}</li>)}</ul><ul>{week.deliverables.map((item) => <li key={item}>{item}</li>)}</ul></div>)}</div>
+      <div className="page-heading"><div><h1>路线与阶段闸门</h1></div></div>
+      <div className="phase-track">{data.phases.map((item) => <button key={item.phase} className={selected === item.phase ? "is-active" : ""} onClick={() => setSelected(item.phase)}><span>阶段 {item.phase}</span><strong>{item.title}</strong><small>第 {item.start_week}—{item.end_week} 周</small></button>)}</div>
+      {!data.phases.length && <div className="empty-state roadmap-empty"><strong>这是一门空白课程</strong></div>}
+      {phase && <div className="gate-detail"><div className="gate-badge gate-badge--large">阶段 {phase.phase}</div><div><span className="eyebrow">验收标准</span><h2>{phase.acceptance}</h2><p>{phase.remediation}</p></div></div>}
+      <div className="week-table" role="table"><div className="week-row week-row--head" role="row"><span>周</span><span>基础与面试</span><span>项目 / 研究任务</span><span>交付物</span></div>{weeks.map((week) => <div className="week-row" role="row" key={week.week}><strong>第 {week.week} 周</strong><p>{week.foundation}</p><ul>{week.tasks.map((task) => <li key={task}>{task}</li>)}</ul><ul>{week.deliverables.map((item) => <li key={item}>{item}</li>)}</ul></div>)}</div>
     </section>
   );
 }

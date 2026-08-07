@@ -2,7 +2,7 @@ import { spawn, type ChildProcess } from "node:child_process";
 import { randomBytes } from "node:crypto";
 import { existsSync } from "node:fs";
 import net from "node:net";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 
 
 export interface BackendRuntime {
@@ -15,6 +15,7 @@ export interface BackendManagerOptions {
   dataDir: string;
   projectRoot?: string;
   startupTimeoutMs?: number;
+  backendExecutable?: string;
 }
 
 export async function findFreePort(): Promise<number> {
@@ -47,7 +48,12 @@ function waitForExit(child: ChildProcess, timeoutMs: number): Promise<boolean> {
 }
 
 export class BackendManager {
-  private readonly options: Required<BackendManagerOptions>;
+  private readonly options: {
+    dataDir: string;
+    projectRoot: string;
+    startupTimeoutMs: number;
+    backendExecutable?: string;
+  };
   private child?: ChildProcess;
   private runtime?: BackendRuntime;
   private logTail = "";
@@ -57,6 +63,7 @@ export class BackendManager {
       projectRoot: resolve(options.projectRoot ?? process.cwd()),
       startupTimeoutMs: options.startupTimeoutMs ?? 15_000,
       dataDir: resolve(options.dataDir),
+      backendExecutable: options.backendExecutable ? resolve(options.backendExecutable) : undefined,
     };
   }
 
@@ -64,16 +71,26 @@ export class BackendManager {
     if (this.isRunning() && this.runtime) return this.runtime;
     const port = await findFreePort();
     const sessionToken = randomBytes(24).toString("hex");
-    const python = this.pythonExecutable();
+    const executable = this.options.backendExecutable ?? this.pythonExecutable();
+    if (!existsSync(executable)) {
+      throw new Error(`StudyPilot backend runtime was not found: ${executable}`);
+    }
+    const args = this.options.backendExecutable
+      ? []
+      : ["-m", "uvicorn", "backend.app.main:app", "--host", "127.0.0.1", "--port", String(port), "--log-level", "warning"];
+    const cwd = this.options.backendExecutable
+      ? dirname(this.options.backendExecutable)
+      : this.options.projectRoot;
     this.logTail = "";
     const child = spawn(
-      python,
-      ["-m", "uvicorn", "backend.app.main:app", "--host", "127.0.0.1", "--port", String(port), "--log-level", "warning"],
+      executable,
+      args,
       {
-        cwd: this.options.projectRoot,
+        cwd,
         env: {
           ...process.env,
           PYTHONIOENCODING: "utf-8",
+          STUDYPILOT_BACKEND_PORT: String(port),
           STUDYPILOT_DATA_DIR: this.options.dataDir,
           STUDYPILOT_SESSION_TOKEN: sessionToken,
         },

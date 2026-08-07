@@ -1,0 +1,328 @@
+.source-reader-shell {
+  position: relative;
+  z-index: 1;
+  width: min(1120px, calc(100% - 34px));
+  margin: 16px auto 72px;
+}
+
+.source-reader-shell > .reader-mode-bar {
+  margin-inline: 0;
+}
+
+.source-reader-shell > .structured-reader,
+.source-reader-shell > .sheet-reader {
+  width: 100%;
+  padding-inline: 0;
+}
+
+.source-reader-shell--markdown > .markdown-document {
+  width: 100%;
+  margin-top: 10px;
+}
+
+.source-reader-shell .block-edit-trigger {
+  display: none;
+}
+
+.source-editor,
+.spreadsheet-editor {
+  position: relative;
+  z-index: 2;
+  width: min(1480px, calc(100% - 24px));
+  margin: 12px auto 70px;
+  color: var(--text);
+}
+
+.source-editor__ribbon,
+.spreadsheet-editor__ribbon {
+  position: sticky;
+  z-index: 8;
+  top: 8px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--line) 76%, #8596d8);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface) 90%, #f0f3ff);
+  box-shadow: 0 14px 36px rgba(35, 49, 92, .16);
+  backdrop-filter: blur(20px) saturate(125%);
+}
+
+.source-editor__ribbon > header,
+.spreadsheet-editor__ribbon > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  min-height: 56px;
+  padding: 8px 12px 8px 18px;
+}
+
+.source-editor__ribbon > header > div:first-child,
+.spreadsheet-editor__ribbon > header > div:first-child {
+  display: grid;
+  grid-template-columns: auto auto;
+  align-items: baseline;
+  gap: 0 9px;
+}
+
+.source-editor__ribbon > header span,
+.spreadsheet-editor__ribbon > header span {
+  color: #5365d5;
+  font: 750 .625rem/1 var(--font-code);
+  letter-spacing: .12em;
+}
+
+.source-editor__ribbon > header strong,
+.spreadsheet-editor__ribbon > header strong {
+  font-size: .875rem;
+}
+
+.source-editor__ribbon > header small,
+.spreadsheet-editor__ribbon > header small {
+  grid-column: 1 / -1;
+  color: var(--faint);
+  font-size: .625rem;
+}
+
+.source-editor__ribbon > header > div:last-child,
+.spreadsheet-editor__ribbon > header > div:last-child,
+.source-editor__tools,
+.spreadsheet-editor__tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.source-editor button,
+.spreadsheet-editor button {
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.source-editor button:disabled,
+.spreadsheet-editor button:disabled {
+  cursor: not-allowed;
+  opacity: .42;
+}
+
+.source-editor__save,
+.spreadsheet-editor__save {
+  border-color: #4e61d7 !important;
+  background: #5265d7 !important;
+  color: white !important;
+  font-weight: 750;
+}
+
+.source-editor__tools,
+.spreadsheet-editor__tools {
+  min-height: 42px;
+  padding: 6px 12px;
+  border-top: 1px solid color-mix(in srgb, var(--line) 75%, transparent);
+}
+
+.source-editor__tools > span,
+.spreadsheet-editor__tools > span {
+  margin-left: auto;
+  color: var(--faint);
+  font-size: .625rem;
+}
+
+.source-editor__workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+  min-height: calc(100vh - 255px);
+  margin-top: 12px;
+}
+
+.source-editor__workspace[data-with-preview="true"] {
+  grid-template-columns: minmax(360px, .92fr) minmax(420px, 1.08fr);
+}
+
+.source-editor__source-pane,
+.source-editor__preview,
+.spreadsheet-editor__workbook > section {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--surface) 95%, transparent);
+  box-shadow: 0 14px 38px rgba(30, 42, 76, .11);
+  backdrop-filter: blur(16px);
+}
+
+.source-editor textarea.source-editor__canvas {
+  display: block;
+  width: 100%;
+  resize: none;
+  overflow: auto;
+  border: 0;
+  color: var(--text);
+  font: .8125rem/1.78 var(--font-code);
+  white-space: pre;
+  tab-size: 2;
+}
+
+.source-editor__source-pane > header,
+.source-editor__preview > header,
+.spreadsheet-editor__workbook > section > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 40px;
+  padding: 0 14px;
+  border-bottom: 1px solid var(--line);
+  color: var(--faint);
+  font-size: .625rem;
+}
+
+.source-editor__canvas {
+  box-sizing: border-box;
+  min-height: calc(100vh - 310px);
+  padding: 24px 28px 70px;
+  outline: 0;
+  background: color-mix(in srgb, var(--surface) 94%, #111827 6%);
+  caret-color: #5c72ee;
+}
+
+.source-editor__canvas:focus {
+  box-shadow: inset 0 0 0 2px color-mix(in srgb, #5c72ee 28%, transparent);
+}
+
+.source-editor__canvas pre {
+  min-height: 1.75em;
+  margin: 0 0 1.35em;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: .8125rem/1.78 var(--font-code);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.source-editor--text .source-editor__canvas {
+  max-width: 1120px;
+  width: 100%;
+  margin-inline: auto;
+}
+
+.source-editor__preview {
+  overflow: auto;
+}
+
+.source-editor__preview .markdown-document--preview {
+  width: 100%;
+  min-height: calc(100vh - 352px);
+  margin: 0;
+  padding: 34px clamp(28px, 4vw, 62px) 76px;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.source-editor__error,
+.spreadsheet-editor__error {
+  margin: 10px 0 0;
+  color: #ca394a;
+}
+
+.source-editor__exit-prompt {
+  position: sticky;
+  z-index: 10;
+  bottom: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: min(760px, calc(100% - 30px));
+  margin: -2px auto 14px;
+  padding: 12px 14px 12px 17px;
+  border: 1px solid #b8c5ff;
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--surface) 96%, #eef1ff);
+  box-shadow: 0 16px 42px rgba(31, 45, 94, .21);
+}
+
+.source-editor__exit-prompt > div:first-child {
+  display: grid;
+  gap: 2px;
+}
+
+.source-editor__exit-prompt > div:last-child {
+  display: flex;
+  gap: 6px;
+}
+
+.source-editor__exit-prompt span {
+  color: var(--faint);
+  font-size: .6875rem;
+}
+
+.spreadsheet-editor__workbook {
+  display: grid;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.spreadsheet-editor__workbook > section {
+  overflow: auto;
+}
+
+.spreadsheet-editor__grid {
+  display: grid;
+  width: max-content;
+  min-width: 100%;
+  background: var(--surface);
+}
+
+.spreadsheet-editor__grid > [role="columnheader"],
+.spreadsheet-editor__grid > [role="rowheader"],
+.spreadsheet-editor__grid > .sheet-corner {
+  display: grid;
+  place-items: center;
+  position: sticky;
+  z-index: 2;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--surface-2) 91%, #dfe5fb);
+  color: var(--faint);
+  font: .625rem/1 var(--font-code);
+}
+
+.spreadsheet-editor__grid > [role="columnheader"] { top: 0; }
+.spreadsheet-editor__grid > [role="rowheader"] { left: 0; }
+.spreadsheet-editor__grid > .sheet-corner { top: 0; left: 0; }
+
+.spreadsheet-editor__grid > input {
+  box-sizing: border-box;
+  min-width: 0;
+  min-height: 34px;
+  padding: 7px 9px;
+  border: 0;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  outline: 0;
+  background: var(--surface);
+  color: var(--text);
+  font: .75rem/1.4 var(--font-ui);
+}
+
+.spreadsheet-editor__grid > input:focus {
+  position: relative;
+  z-index: 3;
+  box-shadow: inset 0 0 0 2px #5570e6;
+  background: color-mix(in srgb, var(--surface) 92%, #edf1ff);
+}
+
+@media (max-width: 900px) {
+  .source-editor__workspace[data-with-preview="true"] { grid-template-columns: 1fr; }
+  .source-editor__ribbon > header,
+  .spreadsheet-editor__ribbon > header,
+  .source-editor__exit-prompt { align-items: flex-start; flex-direction: column; }
+}

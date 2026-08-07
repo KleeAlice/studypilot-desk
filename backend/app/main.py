@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import logging
+import json
 import os
 import uuid
 from contextlib import asynccontextmanager
@@ -8,17 +9,27 @@ from pathlib import Path
 from typing import Annotated, Literal
 from urllib.parse import quote
 
-from fastapi import Body, FastAPI, File, Query, Request, Response, UploadFile
+from fastapi import Body, FastAPI, File, Form, Query, Request, Response, UploadFile
+from fastapi.concurrency import run_in_threadpool
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 
 from .db import Database
 from .errors import AppError, error_body
 from .repository import Repository
 from .schemas import (
+    AgentMessageCreate,
+    AgentProviderUpdate,
+    AgentThreadCreate,
+    AgentThreadUpdate,
     CourseCreate,
     CourseUpdate,
+    DocumentAnnotationCreate,
+    DocumentAnnotationUpdate,
+    DocumentExportRequest,
+    DocumentRevisionCreate,
+    DocumentUpdate,
     EvidenceCreate,
     GenericCreate,
     GenericUpdate,
@@ -30,20 +41,31 @@ from .schemas import (
     NotebookExportRequest,
     NotebookUpdate,
     MasteryEvidence,
+    RoadmapGenerate,
     PythonRunCreate,
     QuizGrade,
     SettingUpdate,
     TaskCreate,
     TaskUpdate,
+    VocabularyCheckIn,
+    VocabularyCreate,
+    VocabularyReview,
+    LanguagePracticeCreate,
+    LanguageLessonComplete,
 )
 from .python_runner.manager import PythonRunner
 from .services.documents import MAX_DOCUMENT_BYTES, DocumentService
+from .services.agent import AgentService
+from .services.appearance import MAX_WALLPAPER_BYTES, AppearanceService
 from .services.exports import NotebookExportService
 from .services.backups import BackupService
 from .services.knowledge import KnowledgeService
 from .services.learning import LearningService
+from .services.language_learning import LanguageLearningService
 from .services.media import MAX_IMAGE_BYTES, MediaService
 from .services.notebooks import NotebookService
+from .services.speech import SpeechService
+from .services.vocabulary import VocabularyService
 
 
 LOGGER = logging.getLogger("studypilot")
@@ -80,6 +102,7 @@ def create_app(data_dir: Path | str | None = None) -> FastAPI:
         database.initialize()
         app.state.database = database
         app.state.repository = Repository(database)
+        app.state.appearance = AppearanceService(app.state.repository, root)
         app.state.documents = DocumentService(database, root)
         app.state.exports = NotebookExportService(database, root)
         app.state.backups = BackupService(database, root)
@@ -87,6 +110,10 @@ def create_app(data_dir: Path | str | None = None) -> FastAPI:
         app.state.notebooks = NotebookService(database)
         app.state.media = MediaService(database, root)
         app.state.learning = LearningService(database)
+        app.state.language_learning = LanguageLearningService(database)
+        app.state.agent = AgentService(database)
+        app.state.vocabulary = VocabularyService(database)
+        app.state.speech = SpeechService(database, root / "speech")
         app.state.python_runner = PythonRunner(database, root / "python_workspaces")
         try:
             yield
@@ -114,6 +141,9 @@ def create_app(data_dir: Path | str | None = None) -> FastAPI:
     def documents(request: Request) -> DocumentService:
         return request.app.state.documents
 
+    def appearance(request: Request) -> AppearanceService:
+        return request.app.state.appearance
+
     def backups(request: Request) -> BackupService:
         return request.app.state.backups
 
@@ -131,10 +161,22 @@ def create_app(data_dir: Path | str | None = None) -> FastAPI:
 
     def learning(request: Request) -> LearningService:
         return request.app.state.learning
+    def language_learning(request: Request) -> LanguageLearningService:
+        return request.app.state.language_learning
+
 
     def runner(request: Request) -> PythonRunner:
         return request.app.state.python_runner
 
+    def agent(request: Request) -> AgentService:
+        return request.app.state.agent
+
+
+    def vocabulary(request: Request) -> VocabularyService:
+        return request.app.state.vocabulary
+
+    def speech(request: Request) -> SpeechService:
+        return request.app.state.speech
     @app.exception_handler(AppError)
     async def handle_app_error(_: Request, exc: AppError) -> JSONResponse:
         return JSONResponse(error_body(exc.code, exc.message, exc.details), status_code=exc.status_code)
@@ -223,6 +265,20 @@ def create_app(data_dir: Path | str | None = None) -> FastAPI:
     def list_settings(request: Request) -> dict:
         return envelope(repo(request).list_settings())
 
+    @app.post("/api/settings/wallpaper", status_code=201)
+    async def upload_wallpaper(file: UploadFile, request: Request) -> dict:
+        content = await file.read(MAX_WALLPAPER_BYTES + 1)
+        return envelope(appearance(request).save_wallpaper(file.filename or "wallpaper", content))
+
+    @app.get("/api/settings/wallpaper/image")
+    def wallpaper_image(request: Request) -> FileResponse:
+        path, media_type = appearance(request).wallpaper()
+        return FileResponse(path, media_type=media_type, filename=path.name)
+
+    @app.delete("/api/settings/wallpaper")
+    def clear_wallpaper(request: Request) -> dict:
+        return envelope(appearance(request).clear_wallpaper())
+
     @app.put("/api/settings/{key}")
     def update_setting(key: str, payload: SettingUpdate, request: Request) -> dict:
         if len(key) > 80:
@@ -232,6 +288,23 @@ def create_app(data_dir: Path | str | None = None) -> FastAPI:
     @app.get("/api/roadmaps")
     def roadmap(request: Request) -> dict:
         return envelope(repo(request).roadmap())
+
+    @app.get("/api/courses/{course_id}/roadmap")
+    def course_roadmap(course_id: int, request: Request) -> dict:
+        return envelope(repo(request).roadmap(course_id))
+
+    @app.post("/api/courses/{course_id}/roadmap/generate")
+    async def generate_course_roadmap(
+        course_id: int,
+        payload: RoadmapGenerate,
+        request: Request,
+    ) -> dict:
+        result = await run_in_threadpool(
+            agent(request).generate_course_roadmap,
+            course_id,
+            payload.model_dump(),
+        )
+        return envelope(result)
 
     @app.get("/api/today")
     def today(request: Request) -> dict:
@@ -310,15 +383,27 @@ def create_app(data_dir: Path | str | None = None) -> FastAPI:
     def add_task_evidence(task_id: int, payload: EvidenceCreate, request: Request) -> dict:
         return envelope(repo(request).add_evidence(task_id, payload.model_dump()))
 
+    @app.get("/api/courses/{course_id}/documents")
+    def list_course_documents(course_id: int, request: Request, include_deleted: bool = False) -> dict:
+        return envelope(documents(request).list_documents(include_deleted, course_id=course_id))
+
     @app.get("/api/documents")
-    def list_documents(request: Request) -> dict:
-        return envelope(documents(request).list_documents())
+    def list_documents(request: Request, include_deleted: bool = False) -> dict:
+        return envelope(documents(request).list_documents(include_deleted))
 
     @app.post("/api/documents/import")
-    async def import_document(request: Request, file: UploadFile = File(...)) -> JSONResponse:
-        content = await file.read(MAX_DOCUMENT_BYTES + 1)
-        item, deduplicated = documents(request).import_bytes(
-            file.filename or "document", file.content_type or "application/octet-stream", content
+    async def import_document(
+        request: Request,
+        file: UploadFile = File(...),
+        source_created_at: str | None = Form(default=None),
+    ) -> JSONResponse:
+        content = await file.read()
+        item, deduplicated = await run_in_threadpool(
+            documents(request).import_bytes,
+            file.filename or "document",
+            file.content_type or "application/octet-stream",
+            content,
+            source_created_at,
         )
         return JSONResponse(
             envelope(item, {"deduplicated": deduplicated}),
@@ -328,6 +413,97 @@ def create_app(data_dir: Path | str | None = None) -> FastAPI:
     @app.get("/api/documents/{document_id}")
     def get_document(document_id: int, request: Request) -> dict:
         return envelope(documents(request).get_document(document_id))
+
+    @app.get("/api/documents/{document_id}/file")
+    def get_document_file(document_id: int, request: Request) -> FileResponse:
+        path, media_type, filename = documents(request).original_file(document_id)
+        return FileResponse(
+            path=path,
+            media_type=media_type,
+            filename=filename,
+            content_disposition_type="inline",
+        )
+
+    @app.post("/api/documents/{document_id}/export")
+    def export_document(
+        document_id: int, payload: DocumentExportRequest, request: Request
+    ) -> Response:
+        content, filename, media_type = documents(request).export_document(document_id, payload.format)
+        disposition = f"attachment; filename=\"document-export\"; filename*=UTF-8''{quote(filename)}"
+        return Response(
+            content=content,
+            media_type=media_type,
+            headers={"Content-Disposition": disposition, "Cache-Control": "no-store"},
+        )
+
+    @app.patch("/api/documents/{document_id}")
+    def update_document(
+        document_id: int, payload: DocumentUpdate, request: Request
+    ) -> dict:
+        return envelope(documents(request).update_document(document_id, payload.model_dump(exclude_unset=True)))
+
+    @app.delete("/api/documents/{document_id}", status_code=204)
+    def delete_document(document_id: int, request: Request) -> Response:
+        documents(request).trash_document(document_id)
+        return Response(status_code=204)
+
+    @app.post("/api/documents/{document_id}/restore")
+    def restore_document(document_id: int, request: Request) -> dict:
+        return envelope(documents(request).restore_document(document_id))
+
+    @app.get("/api/documents/{document_id}/content")
+    def get_document_content(document_id: int, request: Request) -> dict:
+        return envelope(documents(request).get_content(document_id))
+
+    @app.post("/api/documents/{document_id}/revisions", status_code=201)
+    def create_document_revision(
+        document_id: int, payload: DocumentRevisionCreate, request: Request
+    ) -> dict:
+        return envelope(documents(request).add_revision(document_id, payload.model_dump()))
+
+    @app.get("/api/documents/{document_id}/revisions")
+    def get_document_revision_state(document_id: int, request: Request) -> dict:
+        return envelope(documents(request).revision_state(document_id))
+
+    @app.post("/api/documents/{document_id}/revisions/undo")
+    def undo_document_revision(document_id: int, request: Request) -> dict:
+        return envelope(documents(request).undo_revision(document_id))
+
+    @app.post("/api/documents/{document_id}/revisions/redo")
+    def redo_document_revision(document_id: int, request: Request) -> dict:
+        return envelope(documents(request).redo_revision(document_id))
+
+    @app.get("/api/documents/{document_id}/annotations")
+    def list_document_annotations(document_id: int, request: Request) -> dict:
+        return envelope(documents(request).list_annotations(document_id))
+
+    @app.post("/api/documents/{document_id}/annotations", status_code=201)
+    def create_document_annotation(
+        document_id: int, payload: DocumentAnnotationCreate, request: Request
+    ) -> dict:
+        return envelope(documents(request).add_annotation(document_id, payload.model_dump()))
+
+    @app.patch("/api/documents/{document_id}/annotations/{annotation_id}")
+    def update_document_annotation(
+        document_id: int,
+        annotation_id: int,
+        payload: DocumentAnnotationUpdate,
+        request: Request,
+    ) -> dict:
+        return envelope(
+            documents(request).update_annotation(
+                document_id, annotation_id, payload.model_dump(exclude_unset=True)
+            )
+        )
+
+    @app.delete(
+        "/api/documents/{document_id}/annotations/{annotation_id}", status_code=204
+    )
+    def delete_document_annotation(
+        document_id: int, annotation_id: int, request: Request
+    ) -> Response:
+        documents(request).delete_annotation(document_id, annotation_id)
+        return Response(status_code=204)
 
     @app.post("/api/documents/{document_id}/highlights", status_code=201)
     def create_highlight(
@@ -666,6 +842,238 @@ def create_app(data_dir: Path | str | None = None) -> FastAPI:
     def reviews(request: Request, include_superseded: bool = False) -> dict:
         return envelope(learning(request).list_reviews(include_superseded))
 
+    @app.get("/api/language/packs")
+    def language_packs() -> dict:
+        return envelope(LanguageLearningService.packs())
+
+    @app.get("/api/courses/{course_id}/language/materials")
+    def language_materials(
+        course_id: int, request: Request, q: str = ""
+    ) -> dict:
+        return envelope(
+            language_learning(request).materials(course_id, query=q)
+        )
+
+    @app.get("/api/courses/{course_id}/language/journey")
+    def language_journey(course_id: int, request: Request) -> dict:
+        return envelope(language_learning(request).journey(course_id))
+
+    @app.post("/api/courses/{course_id}/language/start")
+    def start_language_journey(course_id: int, request: Request) -> dict:
+        return envelope(language_learning(request).start(course_id))
+
+    @app.get(
+        "/api/courses/{course_id}/language/lessons/{lesson_id}"
+    )
+    def language_lesson(
+        course_id: int, lesson_id: str, request: Request
+    ) -> dict:
+        return envelope(
+            language_learning(request).lesson(course_id, lesson_id)
+        )
+
+    @app.post(
+        "/api/courses/{course_id}/language/lessons/{lesson_id}/complete"
+    )
+    def complete_language_lesson(
+        course_id: int,
+        lesson_id: str,
+        payload: LanguageLessonComplete,
+        request: Request,
+    ) -> dict:
+        return envelope(
+            language_learning(request).complete_lesson(
+                course_id, lesson_id, payload.model_dump()
+            )
+        )
+
+    @app.get("/api/courses/{course_id}/language/overview")
+    def language_overview(course_id: int, request: Request) -> dict:
+        return envelope(language_learning(request).overview(course_id))
+
+    @app.post("/api/courses/{course_id}/language/practice", status_code=201)
+    def create_language_practice(
+        course_id: int, payload: LanguagePracticeCreate, request: Request
+    ) -> dict:
+        return envelope(
+            language_learning(request).record_session(
+                course_id, payload.model_dump(exclude_none=True)
+            )
+        )
+
+    @app.get("/api/courses/{course_id}/language/sessions")
+    def list_language_sessions(
+        course_id: int,
+        request: Request,
+        limit: int = Query(default=100, ge=1, le=200),
+    ) -> dict:
+        return envelope(
+            language_learning(request).list_sessions(course_id, limit=limit)
+        )
+
+    @app.get("/api/vocabulary")
+    def list_vocabulary(
+        course_id: int,
+        request: Request,
+        due_only: bool = False,
+        limit: int = Query(default=40, ge=1, le=200),
+    ) -> dict:
+        return envelope(
+            vocabulary(request).list_items(
+                course_id, due_only=due_only, limit=limit
+            )
+        )
+
+    @app.post("/api/vocabulary", status_code=201)
+    def create_vocabulary(payload: VocabularyCreate, request: Request) -> dict:
+        values = payload.model_dump()
+        course_id = values.pop("course_id")
+        return envelope(vocabulary(request).create_item(course_id, values))
+
+    @app.post("/api/vocabulary/{item_id}/review")
+    def review_vocabulary(
+        item_id: int, payload: VocabularyReview, request: Request
+    ) -> dict:
+        return envelope(vocabulary(request).review(item_id, payload.rating))
+
+    @app.post("/api/vocabulary/check-in")
+    def check_in_vocabulary(
+        payload: VocabularyCheckIn, request: Request
+    ) -> dict:
+        return envelope(
+            vocabulary(request).check_in(
+                payload.course_id,
+                payload.local_date,
+                reviewed_count=payload.reviewed_count,
+            )
+        )
+
+    @app.get("/api/speech/engine")
+    def resolve_speech_engine(
+        request: Request,
+        language_tag: str = "zh-CN",
+        kind: Literal["tts", "stt"] = "tts",
+    ) -> dict:
+        return envelope(speech(request).resolve_engine(language_tag, kind=kind))
+
+    @app.get("/api/agent/providers")
+    def list_agent_providers(request: Request) -> dict:
+        return envelope(agent(request).list_providers())
+
+    @app.put("/api/agent/providers/{provider_id}")
+    def configure_agent_provider(
+        provider_id: str, payload: AgentProviderUpdate, request: Request
+    ) -> dict:
+        return envelope(
+            agent(request).configure_provider(
+                provider_id, payload.model_dump(exclude_none=True)
+            )
+        )
+
+    @app.delete("/api/agent/providers/{provider_id}", status_code=204)
+    def delete_agent_provider(provider_id: str, request: Request) -> Response:
+        agent(request).delete_provider(provider_id)
+        return Response(status_code=204)
+
+    @app.post("/api/agent/providers/{provider_id}/test")
+    async def test_agent_provider(provider_id: str, request: Request) -> dict:
+        return envelope(
+            await run_in_threadpool(agent(request).test_provider, provider_id)
+        )
+
+    @app.post("/api/agent/providers/{provider_id}/diagnostics")
+    async def diagnose_agent_provider(provider_id: str, request: Request) -> dict:
+        return envelope(
+            await run_in_threadpool(agent(request).diagnose_provider, provider_id)
+        )
+
+    @app.get("/api/agent/threads")
+    def list_agent_threads(course_id: int, request: Request) -> dict:
+        return envelope(agent(request).list_threads(course_id))
+
+    @app.post("/api/agent/threads", status_code=201)
+    def create_agent_thread(payload: AgentThreadCreate, request: Request) -> dict:
+        values = payload.model_dump()
+        return envelope(
+            agent(request).create_thread(values.pop("course_id"), values)
+        )
+
+    @app.get("/api/agent/threads/{thread_id}")
+    def get_agent_thread(thread_id: int, request: Request) -> dict:
+        return envelope(agent(request).get_thread(thread_id))
+
+    @app.patch("/api/agent/threads/{thread_id}")
+    def update_agent_thread(
+        thread_id: int, payload: AgentThreadUpdate, request: Request
+    ) -> dict:
+        return envelope(
+            agent(request).update_thread(
+                thread_id, payload.model_dump(exclude_unset=True, exclude_none=True)
+            )
+        )
+
+    @app.post("/api/agent/threads/{thread_id}/generate-title")
+    async def generate_agent_thread_title(thread_id: int, request: Request) -> dict:
+        return envelope(
+            await run_in_threadpool(
+                agent(request).generate_thread_title, thread_id
+            )
+        )
+
+    @app.delete("/api/agent/threads/{thread_id}", status_code=204)
+    def delete_agent_thread(thread_id: int, request: Request) -> Response:
+        agent(request).delete_thread(thread_id)
+        return Response(status_code=204)
+
+    @app.post("/api/agent/threads/{thread_id}/messages", status_code=201)
+    async def create_agent_message(
+        thread_id: int, payload: AgentMessageCreate, request: Request
+    ) -> dict:
+        return envelope(
+            await run_in_threadpool(
+                agent(request).reply,
+                thread_id,
+                payload.model_dump(exclude_none=True),
+            )
+
+        )
+    @app.post("/api/agent/threads/{thread_id}/messages/stream")
+    def stream_agent_message(
+        thread_id: int, payload: AgentMessageCreate, request: Request
+    ) -> StreamingResponse:
+        values = payload.model_dump(exclude_none=True)
+
+        def events():
+            for event in agent(request).reply_events(thread_id, values):
+                yield json.dumps(event, ensure_ascii=False, separators=(",", ":")) + "\n"
+
+        return StreamingResponse(
+            events(),
+            media_type="application/x-ndjson",
+            headers={
+                "Cache-Control": "no-cache, no-transform",
+                "X-Content-Type-Options": "nosniff",
+            },
+        )
+
+    @app.post("/api/agent/action-plans/{plan_id}/confirm")
+    async def confirm_agent_action_plan(plan_id: int, request: Request) -> dict:
+        return envelope(
+            await run_in_threadpool(agent(request).actions.confirm, plan_id)
+        )
+
+    @app.post("/api/agent/action-plans/{plan_id}/cancel")
+    async def cancel_agent_action_plan(plan_id: int, request: Request) -> dict:
+        return envelope(
+            await run_in_threadpool(agent(request).actions.cancel, plan_id)
+        )
+
+    @app.post("/api/agent/action-plans/{plan_id}/undo")
+    async def undo_agent_action_plan(plan_id: int, request: Request) -> dict:
+        return envelope(
+            await run_in_threadpool(agent(request).actions.undo, plan_id)
+        )
+
     @app.get("/api/{collection}")
     def list_generic(collection: str, request: Request) -> dict:
         if collection not in GENERIC_COLLECTIONS:
@@ -693,6 +1101,12 @@ def create_app(data_dir: Path | str | None = None) -> FastAPI:
         return envelope(
             repo(request).update_generic(collection, item_id, payload.model_dump(exclude_unset=True))
         )
+
+    @app.delete("/api/{collection}/{item_id}")
+    def delete_generic(collection: str, item_id: int, request: Request) -> dict:
+        if collection not in GENERIC_COLLECTIONS:
+            raise AppError("ROUTE_NOT_FOUND", "接口不存在", 404)
+        return envelope(repo(request).delete_generic(collection, item_id))
 
     @app.post("/api/system/shutdown")
     def shutdown(request: Request, token: Annotated[str | None, Body(embed=True)] = None) -> dict:

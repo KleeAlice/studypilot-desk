@@ -45,11 +45,16 @@ def test_creates_supported_node_kinds_with_canvas_and_citation_fields(
             "position_y": -42.25,
         }
         if kind == "citation":
+            block = client.get(
+                f"/api/documents/{document['id']}/content"
+            ).json()["data"]["blocks"][0]
             payload.update(
                 {
                     "source_document_id": document["id"],
                     "source_title": document["title"],
                     "source_quote": "Quoted evidence",
+                    "source_block_key": block["block_key"],
+                    "source_locator": block["locator"],
                 }
             )
         response = client.post("/api/knowledge/nodes", json=payload)

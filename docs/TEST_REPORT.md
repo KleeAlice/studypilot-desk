@@ -1,6 +1,6 @@
 # 测试报告
 
-测试日期：2026-07-16；平台：Windows，Node.js 24.14.1，Electron 37，项目 Python 虚拟环境。
+测试日期：2026-07-16（桌面基线），2026-07-18（移动端增量）；平台：Windows，Node.js 24.14.1，Electron 37，项目 Python 虚拟环境。
 
 | 命令 | 结果 | 覆盖 |
 |---|---:|---|
@@ -14,6 +14,20 @@
 | `npm.cmd run test:e2e` | 1 passed | 首启画像、全局课程书架、两步新建课程、课程主页、创建并直达知识笔记、系统剪贴板 PNG 解码与课程图片地址、画布非等待光标、关系增删、拖动重载、选区引用、字体持久化、真实解释器运行、控制台主题、1366×768/1920×1080 视口边界 |
 
 原生窗口检查覆盖知识画布工具栏/画布，以及 Python 工具栏/编辑器/底部面板/状态栏；两种分辨率下关键区域均在视口内，根节点无横向溢出。Python 实验室的 1366×768 与 1920×1080 截图另经人工检查。
+
+## 2026-07-18 移动端增量验证
+
+| 命令 | 结果 | 覆盖 |
+|---|---:|---|
+| `npx.cmd vitest run --config vitest.config.ts --maxWorkers=1` | 27 files / 121 passed | 原桌面回归，以及移动数据源、四项导航、今日任务、课程、图谱、统计、动效、构建和 Capacitor 契约 |
+| `npm.cmd run typecheck` | 通过 | React Mobile、桌面 React 与 Electron TypeScript |
+| `npm.cmd run build` | 通过 | 桌面 Vite 包与 Electron 主进程/预加载包 |
+| `npm.cmd run mobile:build` | 通过 | 移动生产包；JS 212.16 kB（gzip 67.26 kB），CSS 21.72 kB（gzip 5.15 kB） |
+| `npx.cmd cap sync android` | 通过 | Capacitor 8 Web 资源复制、配置生成和 Android 插件同步 |
+| `python scripts\verify_mobile_ui.py`（由测试服务器托管） | 通过 | 393×852 手机视口；首页、完成反馈、底栏切换、图谱详情、统计页，浏览器控制台零错误 |
+| `powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\bootstrap-mobile-android.ps1 -AcceptAndroidLicenses` | 通过 | 校验并使用便携 JDK 21、Android SDK 36 与 Gradle 8.14.3；Android 单测与 `assembleDebug` 成功，APK 9,568,638 字节 |
+
+移动端截图经人工检查：页面切换为约 240ms 的短距离进入；点击卡片有 2–3px 下沉；任务完成只播放一次局部勾选、进度推进和 620ms 粒子；图谱详情由底部升起；没有空闲循环漂浮、呼吸或大幅缩放。明暗主题与 `prefers-reduced-motion` 均有专门样式。Debug APK 的 SHA-256 为 `705c31d4b5b9be3e61dc178a8bb66c504472831c17acbf5f6708b0d108d3222d`；真机安装与触控验收仍待执行。
 
 ## 本轮测试中发现并修复
 

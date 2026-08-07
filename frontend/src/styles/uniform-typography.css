@@ -1,0 +1,22 @@
+/*
+ * Semantic type hierarchy is the default. The broad literal-size override only
+ * runs when the user explicitly enables the accessibility preference.
+ */
+:root {
+  --ui-uniform-font-size: var(--ui-body-font-size, 14px);
+}
+
+:root[data-force-uniform-font-size="true"] :where(body, body *):not(
+  .document-reader-surface,
+  .document-reader-surface *,
+  .knowledge-canvas,
+  .knowledge-canvas *,
+  .lab-v2-editor-surface,
+  .lab-v2-editor-surface *
+) {
+  font-size: var(--ui-uniform-font-size) !important;
+}
+
+:where(button, input, textarea, select, summary, label) {
+  min-width: 0;
+}

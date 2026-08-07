@@ -14,9 +14,17 @@ beforeEach(() => {
   window.localStorage.removeItem("studypilot.python-workbench.draft.202");
 });
 
-test("selects a real Python environment and supports a light console", async () => {
+test("opens directly into the full-height Python workbench without a descriptive masthead", async () => {
+  const api = { get: vi.fn(async () => []), post: vi.fn(), put: vi.fn() } as any;
+  const { container } = render(<Lab api={api} />);
+
+  await screen.findByRole("button", { name: "运行代码" });
+  expect(screen.queryByRole("heading", { name: "Python 实验室" })).not.toBeInTheDocument();
+  expect(container.querySelector(".lab-page")).toHaveAttribute("data-layout", "full-workbench");
+});
+
+test("selects a real Python environment without exposing a duplicate console theme", async () => {
   window.localStorage.removeItem("studypilot.python-workbench.environment");
-  window.localStorage.removeItem("studypilot.python-workbench.console-theme");
   const posts: any[] = [];
   let runReads = 0;
   const api = {
@@ -43,8 +51,9 @@ test("selects a real Python environment and supports a light console", async () 
   const firstView = render(<Lab api={api} />);
   const environments = await screen.findByLabelText("Python 环境");
   await userEvent.selectOptions(environments, "conda-ml");
-  await userEvent.click(screen.getByRole("button", { name: "浅色控制台" }));
-  expect(screen.getByTestId("output-console")).toHaveClass("terminal-theme--light");
+  expect(screen.queryByLabelText("控制台主题")).not.toBeInTheDocument();
+  expect(screen.getByTestId("output-console")).not.toHaveAttribute("data-theme-preference");
+  expect(screen.getByTestId("output-console").className).not.toMatch(/terminal-theme--/);
 
   await userEvent.clear(screen.getByLabelText("Python 代码"));
   await userEvent.type(screen.getByLabelText("Python 代码"), "print('environment ok')");
@@ -55,7 +64,6 @@ test("selects a real Python environment and supports a light console", async () 
   firstView.unmount();
   render(<Lab api={api} />);
   expect(await screen.findByLabelText("Python 环境")).toHaveValue("conda-ml");
-  expect(screen.getByTestId("output-console")).toHaveClass("terminal-theme--light");
 });
 
 test("renders stderr-only failures as error output", async () => {
@@ -237,32 +245,29 @@ test("offers VS Code style activity, panel tabs, status and font controls", asyn
   expect(editor).toHaveStyle({ fontSize: "13px" });
 });
 
-test("system console theme follows operating system changes", async () => {
-  window.localStorage.removeItem("studypilot.python-workbench.console-theme");
-  let listener: ((event: MediaQueryListEvent) => void) | undefined;
-  let prefersLight = true;
+test("Python workbench delegates appearance entirely to the app theme", async () => {
+  const matchMedia = vi.fn(() => ({
+    matches: false,
+    media: "(prefers-color-scheme: dark)",
+    onchange: null,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+    addListener: vi.fn(),
+    removeListener: vi.fn(),
+    dispatchEvent: vi.fn(),
+  }));
   Object.defineProperty(window, "matchMedia", {
     configurable: true,
-    value: vi.fn(() => ({
-      get matches() { return !prefersLight; },
-      media: "(prefers-color-scheme: dark)",
-      onchange: null,
-      addEventListener: (_name: string, callback: (event: MediaQueryListEvent) => void) => { listener = callback; },
-      removeEventListener: vi.fn(),
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    })),
+    value: matchMedia,
   });
   const api = { get: vi.fn(async () => []), post: vi.fn(async () => ({})) } as any;
 
   render(<Lab api={api} />);
-  await userEvent.click(await screen.findByRole("button", { name: "跟随系统" }));
-  expect(screen.getByTestId("output-console")).toHaveClass("terminal-theme--light");
-  expect(screen.getByTestId("output-console")).toHaveAttribute("data-theme-preference", "system");
-  prefersLight = false;
-  listener?.({ matches: true } as MediaQueryListEvent);
-  await waitFor(() => expect(screen.getByTestId("output-console")).toHaveClass("terminal-theme--dark"));
+  await screen.findByTestId("output-console");
+  expect(screen.queryByRole("button", { name: "跟随系统" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "深色控制台" })).not.toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "浅色控制台" })).not.toBeInTheDocument();
+  expect(matchMedia).not.toHaveBeenCalled();
 });
 
 test("can reconnect run polling after a temporary detail request failure", async () => {
@@ -360,7 +365,7 @@ test("cannot restore history over an active run", async () => {
   const historyButton = await screen.findByRole("button", { name: "查看运行 old-pass" });
   await userEvent.click(screen.getByRole("button", { name: "运行代码" }));
   expect(historyButton).toBeDisabled();
-  expect(screen.getByText("RUNNING")).toBeInTheDocument();
+  expect(screen.getByText("正在运行")).toBeInTheDocument();
   view.unmount();
 });
 

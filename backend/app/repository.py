@@ -8,6 +8,19 @@ from .db import Database
 from .errors import AppError
 
 
+
+def as_course(row: Any) -> dict:
+    result = dict(row)
+    try:
+        result["training_focus"] = json.loads(
+            result.pop("training_focus_json", "[]") or "[]"
+        )
+    except (TypeError, json.JSONDecodeError):
+        result["training_focus"] = []
+    result["romanization_enabled"] = bool(result.get("romanization_enabled", 0))
+    result["auto_play_audio"] = bool(result.get("auto_play_audio", 0))
+    return result
+
 def as_dict(row: Any) -> dict:
     return dict(row)
 
@@ -51,9 +64,15 @@ class Repository:
                 WHERE courses.deleted_at IS NULL
                 ORDER BY is_default DESC, updated_at DESC, id DESC"""
             ).fetchall()
-        return [as_dict(row) for row in rows]
+        return [as_course(row) for row in rows]
 
     def create_course(self, values: dict) -> dict:
+        values = dict(values)
+        training_focus = values.pop("training_focus", None)
+        if training_focus is not None:
+            values["training_focus_json"] = json.dumps(training_focus, ensure_ascii=False)
+        values["romanization_enabled"] = int(bool(values.get("romanization_enabled")))
+        values["auto_play_audio"] = int(bool(values.get("auto_play_audio")))
         columns = list(values)
         placeholders = ",".join("?" for _ in columns)
         with self.database.connect() as connection:
@@ -68,13 +87,29 @@ class Repository:
                 (cursor.lastrowid,),
             )
             row = connection.execute("SELECT * FROM courses WHERE id = ?", (cursor.lastrowid,)).fetchone()
-        return as_dict(row)
+        return as_course(row)
 
     def update_course(self, course_id: int, values: dict) -> dict:
-        allowed = {"title", "cover_style"}
-        changes = {key: value for key, value in values.items() if key in allowed}
+        allowed = {
+            "title", "cover_style", "proficiency_level", "daily_word_goal",
+            "lesson_minutes", "speech_rate", "auto_play_audio",
+            "pronunciation_scheme", "romanization_enabled", "training_focus",
+        }
+        changes = {
+            key: value for key, value in values.items() if key in allowed
+        }
+        training_focus = changes.pop("training_focus", None)
+        if training_focus is not None:
+            changes["training_focus_json"] = json.dumps(
+                training_focus, ensure_ascii=False
+            )
+        for key in ("auto_play_audio", "romanization_enabled"):
+            if key in changes:
+                changes[key] = int(bool(changes[key]))
         if not changes:
-            raise AppError("INVALID_COURSE_UPDATE", "没有可更新的课程信息", 422)
+            raise AppError(
+                "INVALID_COURSE_UPDATE", "没有可更新的课程信息", 422
+            )
         assignments = ", ".join(f"{key} = ?" for key in changes)
         with self.database.connect() as connection:
             cursor = connection.execute(
@@ -85,7 +120,7 @@ class Repository:
             if cursor.rowcount == 0:
                 raise AppError("COURSE_NOT_FOUND", "课程不存在", 404)
             row = connection.execute("SELECT * FROM courses WHERE id = ?", (course_id,)).fetchone()
-        return as_dict(row)
+        return as_course(row)
 
     def activate_course(self, course_id: int) -> dict:
         with self.database.connect() as connection:
@@ -101,7 +136,7 @@ class Repository:
                 "UPDATE courses SET last_opened_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP WHERE id=?",
                 (course_id,),
             )
-        return as_dict(row)
+        return as_course(row)
 
     def delete_course(self, course_id: int) -> dict:
         with self.database.connect() as connection:
@@ -139,7 +174,7 @@ class Repository:
                 ).fetchone()
         return {
             "deleted_id": course_id,
-            "active_course": as_dict(fallback) if fallback else None,
+            "active_course": as_course(fallback) if fallback else None,
         }
 
     def list_trashed_courses(self) -> list[dict]:
@@ -151,7 +186,7 @@ class Repository:
                 FROM courses WHERE deleted_at IS NOT NULL
                 ORDER BY deleted_at DESC, id DESC"""
             ).fetchall()
-        return [as_dict(row) for row in rows]
+        return [as_course(row) for row in rows]
 
     def restore_course(self, course_id: int) -> dict:
         with self.database.connect() as connection:
@@ -169,7 +204,7 @@ class Repository:
             restored = connection.execute(
                 "SELECT * FROM courses WHERE id=?", (course_id,)
             ).fetchone()
-        return as_dict(restored)
+        return as_course(restored)
 
     def purge_course(self, course_id: int) -> dict:
         with self.database.connect() as connection:
@@ -209,7 +244,7 @@ class Repository:
         task_counts = {status: 0 for status in ("todo", "doing", "blocked", "done")}
         task_counts.update({row["status"]: int(row["count"]) for row in task_rows})
         return {
-            "course": as_dict(course),
+            "course": as_course(course),
             "task_counts": task_counts,
             "notebook_count": int(notebook_count),
             "document_count": int(document_count),
@@ -290,22 +325,43 @@ class Repository:
             "daily_activity": daily_activity,
         }
 
-    def roadmap(self) -> dict:
-        course_id = self.active_course_id()
+    def roadmap(self, course_id: int | None = None) -> dict:
+        resolved_course_id = course_id or self.active_course_id()
         with self.database.connect() as connection:
             phases = [as_dict(row) for row in connection.execute(
-                "SELECT * FROM phases WHERE course_id = ? ORDER BY phase", (course_id,)
+                "SELECT * FROM phases WHERE course_id = ? ORDER BY phase",
+                (resolved_course_id,),
             ).fetchall()]
             week_rows = connection.execute(
-                "SELECT * FROM weeks WHERE course_id = ? ORDER BY week", (course_id,)
+                "SELECT * FROM weeks WHERE course_id = ? ORDER BY week",
+                (resolved_course_id,),
             ).fetchall()
+            generation_row = connection.execute(
+                """SELECT id, provider_id, model, status, request_json, error,
+                          created_at, completed_at
+                   FROM roadmap_generations
+                   WHERE course_id = ?
+                   ORDER BY id DESC LIMIT 1""",
+                (resolved_course_id,),
+            ).fetchone()
         weeks = []
         for row in week_rows:
             item = as_dict(row)
             item["tasks"] = json.loads(item.pop("tasks_json"))
             item["deliverables"] = json.loads(item.pop("deliverables_json"))
             weeks.append(item)
-        return {"phases": phases, "weeks": weeks}
+        generation = as_dict(generation_row) if generation_row else None
+        if generation is not None:
+            try:
+                generation["request"] = json.loads(generation.pop("request_json") or "{}")
+            except (TypeError, json.JSONDecodeError):
+                generation["request"] = {}
+        return {
+            "course_id": resolved_course_id,
+            "phases": phases,
+            "weeks": weeks,
+            "generation": generation,
+        }
 
     def create_task(self, values: dict) -> dict:
         course_id = self.active_course_id()
@@ -442,3 +498,13 @@ class Repository:
                 (title, json.dumps(payload, ensure_ascii=False), item_id),
             )
         return self.get_generic(collection, item_id)
+
+    def delete_generic(self, collection: str, item_id: int) -> dict:
+        current = self.get_generic(collection, item_id)
+        with self.database.connect() as connection:
+            connection.execute(
+                """DELETE FROM generic_items
+                WHERE id = ? AND course_id = ? AND collection = ?""",
+                (item_id, self.active_course_id(), collection),
+            )
+        return current

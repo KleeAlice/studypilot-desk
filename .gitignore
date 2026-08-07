@@ -12,10 +12,25 @@ htmlcov/
 node_modules/
 dist/
 dist-electron/
+dist-mobile/
 release/
 out/
 *.log
 npm-debug.log*
+.npm-cache/
+.tooling/
+
+# Generated desktop packaging work
+build/backend-runtime/
+build/pyinstaller-*/
+
+# Android build and signing outputs
+mobile/android/.gradle/
+mobile/android/build/
+mobile/android/app/build/
+mobile/android/local.properties
+mobile/android/*.jks
+mobile/android/*.keystore
 
 # Local StudyPilot data (keep only deterministic seeds)
 data/*
@@ -31,6 +46,24 @@ test-results/
 playwright-report/
 screenshots/
 .playwright/
+artifacts/
+studypilot-linked-workspace.png
+
+# Local merge/debug leftovers
+*.orig
+*.rej
+*.bak
+*.tmp
+*.pid
+
+# Generated archives and installers
+*.zip
+*.7z
+*.rar
+*.exe
+*.msi
+*.dmg
+*.AppImage
 
 # Environment and credentials
 .env
@@ -54,3 +87,15 @@ desktop.ini
 findings.md
 progress.md
 task_plan.md
+
+# Private implementation and acceptance records
+docs/superpowers/
+docs/ROADMAP_IMPORT_REPORT.md
+docs/StudyPilot_Desk_*.md
+docs/本轮*验收清单.md
+scripts/extract_roadmap.py
+scripts/manual_acceptance_*.mjs
+scripts/reproduce_reported_workspace.mjs
+
+# Isolated feature worktrees
+.worktrees/

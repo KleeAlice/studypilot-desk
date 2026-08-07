@@ -11,7 +11,6 @@ import type { PythonEnvironment } from "../types";
 
 type RunStatus = "running" | "passed" | "failed" | "timeout" | "stopped" | "stopping";
 type OutputFilter = "all" | "stdout" | "stderr";
-type ConsoleTheme = "system" | "dark" | "light";
 type ActiveFile = "main.py" | "tests.py";
 type ActivityView = "explorer" | "run" | "history";
 type BottomPanel = "problems" | "console" | "history";
@@ -93,7 +92,6 @@ const OUTPUT_OPTIONS = [
 const terminalStatuses = new Set<RunStatus>(["passed", "failed", "timeout", "stopped"]);
 const DRAFT_KEY = "studypilot.python-workbench.draft";
 const ENVIRONMENT_KEY = "studypilot.python-workbench.environment";
-const CONSOLE_THEME_KEY = "studypilot.python-workbench.console-theme";
 const FONT_SIZE_KEY = "studypilot.python-workbench.font-size";
 
 function courseDraftKey(courseId: number): string {
@@ -212,15 +210,6 @@ function combinedOutput(stdout: string, stderr: string, filter: OutputFilter): s
   return [stdout, stderr].filter(Boolean).join(stdout && stderr ? "\n" : "");
 }
 
-function prefersDarkScheme(): boolean {
-  return typeof window.matchMedia === "function" && window.matchMedia("(prefers-color-scheme: dark)").matches;
-}
-
-function initialConsoleTheme(): ConsoleTheme {
-  const saved = readPreference(CONSOLE_THEME_KEY);
-  return saved === "light" || saved === "dark" || saved === "system" ? saved : "system";
-}
-
 function initialFontSize(): number {
   const saved = Number(readPreference(FONT_SIZE_KEY));
   return Number.isFinite(saved) && saved >= 11 && saved <= 20 ? saved : 12;
@@ -258,8 +247,6 @@ export function Lab({ api, courseId = 1 }: { api: ApiClient; courseId?: number }
   const [timeoutMs, setTimeoutMs] = useState(5000);
   const [maxOutputChars, setMaxOutputChars] = useState(20000);
   const [outputFilter, setOutputFilter] = useState<OutputFilter>("all");
-  const [consoleTheme, setConsoleTheme] = useState<ConsoleTheme>(initialConsoleTheme);
-  const [systemDark, setSystemDark] = useState(prefersDarkScheme);
   const [clearOffsets, setClearOffsets] = useState<ConsoleClearOffsets>({ runId: "", stdout: 0, stderr: 0 });
   const [activityView, setActivityView] = useState<ActivityView>("explorer");
   const [bottomPanel, setBottomPanel] = useState<BottomPanel>("console");
@@ -300,7 +287,6 @@ export function Lab({ api, courseId = 1 }: { api: ApiClient; courseId?: number }
   const visibleOutput = combinedOutput(visibleStdout, visibleStderr, outputFilter);
   const consoleWasCleared = clearApplies && (clearOffsets.stdout > 0 || clearOffsets.stderr > 0);
   const problemOutput = run?.stderr || "";
-  const resolvedConsoleTheme = consoleTheme === "system" ? (systemDark ? "dark" : "light") : consoleTheme;
 
   async function discoverEnvironments(force = false): Promise<EnvironmentDiscoveryResult> {
     const revision = ++environmentRequestRevision.current;
@@ -376,15 +362,6 @@ export function Lab({ api, courseId = 1 }: { api: ApiClient; courseId?: number }
     }, 600);
     return () => window.clearTimeout(timer);
   }, [code, tests, dirty, draftKey]);
-
-  useEffect(() => {
-    if (consoleTheme !== "system" || typeof window.matchMedia !== "function") return undefined;
-    const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const update = (event: MediaQueryListEvent | MediaQueryList) => setSystemDark(event.matches);
-    update(media);
-    media.addEventListener?.("change", update);
-    return () => media.removeEventListener?.("change", update);
-  }, [consoleTheme]);
 
   function persistDraft(nextCode = code, nextTests = tests) {
     const next = { code: nextCode, tests: nextTests };
@@ -661,11 +638,6 @@ export function Lab({ api, courseId = 1 }: { api: ApiClient; courseId?: number }
     window.setTimeout(() => target.setSelectionRange(start + 4, start + 4), 0);
   }
 
-  function chooseConsoleTheme(theme: ConsoleTheme) {
-    setConsoleTheme(theme);
-    savePreference(CONSOLE_THEME_KEY, theme);
-  }
-
   function changeFontSize(delta: number) {
     setFontSize((current) => {
       const next = Math.min(20, Math.max(11, current + delta));
@@ -692,16 +664,7 @@ export function Lab({ api, courseId = 1 }: { api: ApiClient; courseId?: number }
   }
 
   return (
-    <section className="page lab-page lab-v2-page">
-      <div className="page-heading lab-v2-heading">
-        <div>
-          <div className="eyebrow">PYTHON / LEARNING WORKBENCH</div>
-          <h1>Python 实验室</h1>
-          <p>像使用桌面 IDE 一样选择环境、编写测试，并复盘每次运行。</p>
-        </div>
-        <div className={`run-status run-status--${starting ? "starting" : run?.status ?? "idle"}`}>{starting ? "STARTING" : run?.status?.toUpperCase() ?? "IDLE"}</div>
-      </div>
-
+    <section className="page lab-page lab-v2-page" data-layout="full-workbench">
       <div className="lab-v2-toolbar" aria-label="Python 工作台工具栏">
         <div className="lab-v2-environment-control">
           <label>
@@ -884,11 +847,7 @@ export function Lab({ api, courseId = 1 }: { api: ApiClient; courseId?: number }
         </section>
       </div>
 
-      <section
-        data-testid="output-console"
-        data-theme-preference={consoleTheme}
-        className={`terminal-panel lab-v2-panel terminal-theme--${resolvedConsoleTheme}`}
-      >
+      <section data-testid="output-console" className="terminal-panel lab-v2-panel">
         <div className="lab-v2-panel-tabs" role="tablist" aria-label="Python 底部面板">
           {([
             ["problems", "问题", problemOutput ? "1" : "0"],
@@ -907,11 +866,6 @@ export function Lab({ api, courseId = 1 }: { api: ApiClient; courseId?: number }
               {label}{count ? <span>{count}</span> : null}
             </button>
           ))}
-          <div className="lab-v2-theme-switch" aria-label="控制台主题">
-            <button type="button" aria-pressed={consoleTheme === "system"} onClick={() => chooseConsoleTheme("system")}>跟随系统</button>
-            <button type="button" aria-pressed={consoleTheme === "dark"} onClick={() => chooseConsoleTheme("dark")}>深色控制台</button>
-            <button type="button" aria-pressed={consoleTheme === "light"} onClick={() => chooseConsoleTheme("light")}>浅色控制台</button>
-          </div>
         </div>
 
         {bottomPanel === "problems" && (

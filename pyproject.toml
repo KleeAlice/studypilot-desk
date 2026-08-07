@@ -15,6 +15,8 @@ dependencies = [
   "pypdf>=5.8,<6",
   "python-multipart>=0.0.20,<1",
   "Pillow>=11.3,<13",
+  "openpyxl>=3.1,<4",
+  "python-pptx>=1.0,<2",
 ]
 
 [project.optional-dependencies]

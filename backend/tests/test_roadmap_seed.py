@@ -24,8 +24,9 @@ def test_seed_contains_complete_24_week_roadmap() -> None:
 def test_seed_preserves_source_templates_and_workstreams() -> None:
     seed = load_seed()
 
-    assert seed["source"]["filename"].endswith("优化精校版.docx")
-    assert {"StudyPilot", "ToolShift-CN"} <= set(seed["workstreams"])
+    assert seed["source"] == {"kind": "public_demo", "filename": "public-demo-roadmap.json", "license": "CC0-1.0"}
+    assert seed["title"] == "通用学习路线演示"
+    assert {"learning", "practice"} <= set(seed["workstreams"])
     required = {
         "weekly_review",
         "experiment_record",

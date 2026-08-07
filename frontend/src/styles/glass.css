@@ -1,0 +1,1097 @@
+/* Global liquid-glass layer.
+   Opacity is user-controlled through --glass-opacity; blur stays intentionally
+   bounded so the desktop remains responsive on integrated GPUs. */
+:root {
+  --glass-blur: 22px;
+  --glass-highlight: color-mix(in srgb, white 10%, transparent);
+  --glass-content-surface: color-mix(in srgb, var(--glass-surface) 34%, transparent);
+  --glass-card-surface: color-mix(in srgb, var(--glass-surface) 58%, transparent);
+}
+
+:root[data-theme="light"] {
+  --glass-highlight: color-mix(in srgb, white 56%, transparent);
+}
+
+.desktop-shell :is(
+  .page-heading,
+  .dashboard-hero,
+  .dashboard-card,
+  .course-home-hero,
+  .course-module-card,
+  .course-home-lower > article,
+  .course-shelf-section,
+  .trash-list article,
+  .knowledge-studio,
+  .library-controls,
+  .document-card,
+  .notebook-library-toolbar,
+  .notebook-card,
+  .phase-track > button,
+  .gate-detail,
+  .week-table,
+  .empty-state,
+  .stats-hero,
+  .stats-card,
+  .learning-center__roadmap,
+  .agent-dock--workspace,
+  .language-home__metrics > article,
+  .language-due-word,
+  .language-practice-grid > article,
+  .language-exercise-card,
+  .language-stats__metrics > article,
+  .language-settings__summary > article,
+  .language-stats__distribution,
+  .language-stats__history,
+  .language-stats__mastery,
+  .language-settings__panel,
+  .settings-panel,
+  .settings-center__sidebar
+) {
+  border-color: var(--glass-border);
+  background:
+    linear-gradient(145deg, var(--glass-highlight), transparent 54%),
+    linear-gradient(145deg, var(--wallpaper-glass-tint), transparent 62%),
+    var(--glass-surface);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.18);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.18);
+}
+
+.titlebar,
+.nav-rail,
+.course-context-bar,
+.global-course-topbar,
+.language-navrail,
+.language-course-context {
+  background:
+    linear-gradient(145deg, var(--glass-highlight), transparent 58%),
+    var(--glass-surface);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.16);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.16);
+}
+
+/* Learning and Python workbench internals share the same translucent material.
+   These are intentionally separate from the elevated-card list above so a
+   transcript or editor pane does not inherit an oversized floating shadow. */
+.desktop-shell :is(
+  .learning-workbench__topbar,
+  .learning-history-rail,
+  .learning-progress-drawer,
+  .lab-v2-toolbar,
+  .lab-v2-ide,
+  .lab-v2-editor,
+  .lab-v2-panel
+) {
+  border-color: var(--glass-border);
+  background:
+    linear-gradient(145deg, var(--glass-highlight), transparent 58%),
+    linear-gradient(145deg, var(--wallpaper-glass-tint), transparent 68%),
+    var(--glass-surface);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.16);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.16);
+}
+
+.desktop-shell .agent-transcript {
+  border-color: color-mix(in srgb, var(--glass-border) 74%, transparent);
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--glass-highlight) 48%, transparent), transparent 52%),
+    linear-gradient(145deg, color-mix(in srgb, var(--wallpaper-glass-tint) 62%, transparent), transparent 72%),
+    var(--glass-content-surface);
+  box-shadow: inset 0 1px color-mix(in srgb, var(--glass-highlight) 62%, transparent);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * .72)) saturate(1.12);
+  backdrop-filter: blur(calc(var(--glass-blur) * .72)) saturate(1.12);
+}
+
+.desktop-shell :is(.agent-composer, .learning-card) {
+  border-color: var(--glass-border);
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--glass-highlight) 74%, transparent), transparent 56%),
+    linear-gradient(145deg, color-mix(in srgb, var(--wallpaper-glass-tint) 78%, transparent), transparent 70%),
+    var(--glass-card-surface);
+  box-shadow:
+    inset 0 1px color-mix(in srgb, var(--glass-highlight) 82%, transparent),
+    var(--shadow-soft);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.2);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.2);
+}
+
+.desktop-shell .learning-card__question {
+  background:
+    linear-gradient(135deg, color-mix(in srgb, var(--blue) 8%, transparent), transparent 68%),
+    color-mix(in srgb, var(--glass-card-surface) 74%, var(--blue-soft));
+}
+
+.desktop-shell .lab-v2-panel {
+  box-shadow: var(--shadow-soft);
+}
+
+/* Global library and knowledge-canvas pages use the same hierarchy as the
+   learning workbench: one shell layer, lighter content, then card glass. */
+.desktop-shell .course-shelf-section {
+  padding: 18px;
+  border: 1px solid var(--glass-border);
+  border-radius: 22px;
+}
+
+.desktop-shell :is(
+  .course-library-search,
+  .course-resume,
+  .canvas-toolbar
+) {
+  border-color: var(--glass-border);
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--glass-highlight) 74%, transparent), transparent 56%),
+    linear-gradient(145deg, color-mix(in srgb, var(--wallpaper-glass-tint) 72%, transparent), transparent 70%),
+    var(--glass-card-surface);
+  box-shadow:
+    inset 0 1px color-mix(in srgb, var(--glass-highlight) 76%, transparent),
+    var(--shadow-soft);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.18);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.18);
+}
+
+.desktop-shell .knowledge-canvas {
+  background:
+    radial-gradient(circle at 20% 20%, color-mix(in srgb, var(--blue) 7%, transparent), transparent 31%),
+    radial-gradient(circle at 78% 75%, color-mix(in srgb, var(--cyan) 5%, transparent), transparent 35%),
+    var(--glass-content-surface);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur) * .68)) saturate(1.1);
+  backdrop-filter: blur(calc(var(--glass-blur) * .68)) saturate(1.1);
+}
+
+.desktop-shell .canvas-card {
+  border-color: color-mix(in srgb, var(--card-accent) 32%, var(--glass-border));
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.18);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.18);
+}
+
+.desktop-shell .canvas-card:not(.kind--sticky_note):not(.kind--flashcard):not(.kind--image) {
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--card-accent) 7%, var(--glass-highlight)), transparent 58%),
+    var(--glass-card-surface);
+}
+
+.desktop-shell .course-library-actions button {
+  border-color: var(--glass-border);
+  background: var(--glass-card-surface);
+  -webkit-backdrop-filter: blur(var(--glass-blur)) saturate(1.14);
+  backdrop-filter: blur(var(--glass-blur)) saturate(1.14);
+}
+
+.theme-settings-card > .glass-opacity-preference {
+  grid-column: 2;
+  width: 100%;
+  margin-top: -8px;
+}
+
+.glass-opacity-preference {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px 18px;
+  margin-top: 18px;
+  padding: 16px;
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  background:
+    linear-gradient(145deg, var(--glass-highlight), transparent 60%),
+    color-mix(in srgb, var(--glass-surface) 88%, transparent);
+  box-shadow: inset 0 1px var(--glass-highlight);
+}
+
+.glass-opacity-preference__copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.glass-opacity-preference__copy strong {
+  color: var(--text);
+  font-size: var(--ui-body-font-size);
+}
+
+.glass-opacity-preference__copy span {
+  color: var(--muted);
+  font-size: var(--ui-small-font-size);
+  line-height: 1.55;
+}
+
+.glass-opacity-preference output {
+  align-self: start;
+  min-width: 54px;
+  padding: 6px 9px;
+  border: 1px solid color-mix(in srgb, var(--blue) 24%, var(--line));
+  border-radius: 999px;
+  background: var(--selection-surface);
+  color: var(--blue);
+  font: 720 var(--ui-control-font-size)/1 var(--code-font-family);
+  text-align: center;
+}
+
+.glass-opacity-preference input[type="range"] {
+  grid-column: 1 / -1;
+  width: 100%;
+  height: 6px;
+  margin: 2px 0;
+  border: 0;
+  border-radius: 999px;
+  appearance: none;
+  background:
+    linear-gradient(
+      90deg,
+      var(--blue) 0 var(--glass-range-progress),
+      color-mix(in srgb, var(--line-strong) 72%, transparent) var(--glass-range-progress) 100%
+    );
+  cursor: pointer;
+}
+
+.glass-opacity-preference input[type="range"]::-webkit-slider-thumb {
+  width: 20px;
+  height: 20px;
+  border: 3px solid var(--surface);
+  border-radius: 50%;
+  appearance: none;
+  background: var(--blue);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--blue) 35%, transparent);
+}
+
+.glass-opacity-preference__preview {
+  grid-column: 1 / -1;
+  position: relative;
+  min-height: 54px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 11px;
+  background:
+    radial-gradient(circle at 22% 30%, color-mix(in srgb, var(--purple) 68%, transparent), transparent 30%),
+    radial-gradient(circle at 76% 72%, color-mix(in srgb, var(--cyan) 62%, transparent), transparent 34%),
+    var(--surface-3);
+}
+
+.glass-opacity-preference__preview i {
+  position: absolute;
+  inset: 8px 15%;
+  border: 1px solid var(--glass-border);
+  border-radius: 10px;
+  background: var(--glass-surface);
+  box-shadow: var(--glass-shadow);
+  -webkit-backdrop-filter: blur(14px) saturate(1.2);
+  backdrop-filter: blur(14px) saturate(1.2);
+}
+
+.glass-opacity-preference__preview span {
+  position: relative;
+  z-index: 1;
+  color: var(--text);
+  font-size: var(--ui-small-font-size);
+  font-weight: 700;
+}
+
+/* Course roadmap surfaces shared by the standalone route and learning center. */
+.roadmap-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px 22px;
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+}
+
+.roadmap-heading p {
+  margin: 7px 0 0;
+  color: var(--muted);
+}
+
+.roadmap-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin: 14px 0;
+  padding: 14px 17px;
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+  background: var(--glass-surface);
+  box-shadow: var(--shadow-soft);
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  backdrop-filter: blur(var(--glass-blur));
+}
+
+.roadmap-summary > div {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.roadmap-summary strong {
+  color: var(--text);
+  font-size: var(--ui-body-font-size);
+}
+
+.roadmap-summary span {
+  color: var(--muted);
+  font-size: var(--ui-small-font-size);
+}
+
+.roadmap-empty {
+  min-height: 260px;
+  margin-top: 18px;
+  border: 1px dashed var(--glass-border);
+}
+
+.learning-center {
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px;
+}
+
+.learning-center__roadmap {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 10px 13px;
+  border: 1px solid var(--glass-border);
+  border-radius: 14px;
+}
+
+.learning-center__roadmap > div {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center;
+  gap: 6px 12px;
+}
+
+.learning-center__roadmap small {
+  color: var(--blue);
+  font: 720 var(--ui-small-font-size)/1 var(--code-font-family);
+  letter-spacing: .08em;
+}
+
+.learning-center__roadmap strong {
+  color: var(--text);
+  font-size: var(--ui-control-font-size);
+}
+
+.learning-center__roadmap span {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: var(--ui-small-font-size);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.learning-center__roadmap button {
+  flex: 0 0 auto;
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid color-mix(in srgb, var(--blue) 38%, var(--line));
+  border-radius: 9px;
+  background: var(--selection-surface);
+  color: var(--blue);
+  font: 700 var(--ui-control-font-size)/1 var(--ui-font-family);
+  cursor: pointer;
+}
+
+/* Structured roadmap generator. */
+.roadmap-generator-backdrop {
+  position: fixed;
+  inset: var(--titlebar) 0 0;
+  z-index: 90;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  background: color-mix(in srgb, var(--bg) 56%, transparent);
+  -webkit-backdrop-filter: blur(16px) saturate(1.08);
+  backdrop-filter: blur(16px) saturate(1.08);
+  transition: opacity var(--motion-standard) var(--ease-standard);
+}
+
+.roadmap-generator-backdrop[data-presence="exiting"] {
+  opacity: 0;
+}
+
+.roadmap-generator {
+  width: min(760px, 96vw);
+  max-height: min(820px, calc(100vh - var(--titlebar) - 42px));
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  overflow: hidden;
+  border: 1px solid var(--glass-border);
+  border-radius: 22px;
+  background:
+    linear-gradient(145deg, var(--glass-highlight), transparent 52%),
+    linear-gradient(145deg, var(--wallpaper-glass-tint), transparent 66%),
+    var(--glass-surface);
+  box-shadow: 0 32px 100px color-mix(in srgb, black 42%, transparent);
+  -webkit-backdrop-filter: blur(30px) saturate(1.25);
+  backdrop-filter: blur(30px) saturate(1.25);
+}
+
+.roadmap-generator > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 24px 26px 18px;
+}
+
+.roadmap-generator > header small {
+  color: var(--blue);
+  font: 720 var(--ui-small-font-size)/1 var(--code-font-family);
+  letter-spacing: .08em;
+}
+
+.roadmap-generator > header h2 {
+  margin: 7px 0 5px;
+  color: var(--text);
+  font-size: var(--ui-heading-md-font-size);
+}
+
+.roadmap-generator > header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: var(--ui-control-font-size);
+}
+
+.roadmap-generator > header > button {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface-2) 68%, transparent);
+  color: var(--muted);
+  font-size: var(--ui-heading-sm-font-size);
+  cursor: pointer;
+}
+
+.roadmap-generator__steps {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 0 26px 18px;
+  border-bottom: 1px solid color-mix(in srgb, var(--line) 74%, transparent);
+}
+
+.roadmap-generator__steps span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--faint);
+  font-size: var(--ui-small-font-size);
+}
+
+.roadmap-generator__steps span::after {
+  height: 1px;
+  flex: 1;
+  margin-inline: 5px;
+  content: "";
+  background: var(--line);
+}
+
+.roadmap-generator__steps span:last-child::after {
+  display: none;
+}
+
+.roadmap-generator__steps i {
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  font-style: normal;
+}
+
+.roadmap-generator__steps .is-active {
+  color: var(--blue);
+}
+
+.roadmap-generator__steps .is-active i {
+  border-color: var(--blue);
+  background: var(--selection-surface);
+}
+
+.roadmap-generator__body {
+  min-height: 320px;
+  overflow: auto;
+  padding: 22px 26px;
+}
+
+.roadmap-generator__loading,
+.roadmap-generator__empty,
+.roadmap-generator__progress,
+.roadmap-generator__success {
+  min-height: 280px;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.roadmap-generator__loading > i {
+  width: 30px;
+  height: 30px;
+  border: 3px solid var(--line);
+  border-top-color: var(--blue);
+  border-radius: 50%;
+  animation: roadmap-spin .8s linear infinite;
+}
+
+.roadmap-generator__providers {
+  display: grid;
+  gap: 10px;
+}
+
+.roadmap-generator__providers > button,
+.roadmap-generator__sources > article {
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--surface-2) 60%, transparent);
+  color: var(--text);
+  text-align: left;
+}
+
+.roadmap-generator__providers > button {
+  cursor: pointer;
+}
+
+.roadmap-generator__providers > button.is-selected {
+  border-color: color-mix(in srgb, var(--blue) 54%, var(--line));
+  background: var(--selection-surface);
+}
+
+.roadmap-generator__providers > button:disabled {
+  cursor: not-allowed;
+  opacity: .52;
+}
+
+.roadmap-generator__providers > button > span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--surface-3);
+  color: var(--blue);
+}
+
+.roadmap-generator__providers > button > div,
+.roadmap-generator__sources > article > div {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.roadmap-generator__providers strong,
+.roadmap-generator__sources strong {
+  font-size: var(--ui-body-font-size);
+}
+
+.roadmap-generator__providers small,
+.roadmap-generator__sources small,
+.roadmap-generator__providers > button > i,
+.roadmap-generator__sources > article > i {
+  color: var(--muted);
+  font-size: var(--ui-small-font-size);
+  font-style: normal;
+}
+
+.roadmap-generator__time {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.roadmap-generator__time > label {
+  display: grid;
+  gap: 8px;
+  color: var(--muted);
+  font-size: var(--ui-control-font-size);
+}
+
+.roadmap-generator__time > label:first-child,
+.roadmap-generator__time > aside {
+  grid-column: 1 / -1;
+}
+
+.roadmap-generator__time input {
+  min-height: 40px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  outline: none;
+  background: color-mix(in srgb, var(--surface-2) 72%, transparent);
+  color: var(--text);
+  font: inherit;
+}
+
+.roadmap-generator__time input:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px var(--selection-surface);
+}
+
+.roadmap-generator__presets {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+}
+
+.roadmap-generator__presets button {
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--surface-2) 62%, transparent);
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.roadmap-generator__presets button.is-selected {
+  border-color: var(--blue);
+  background: var(--selection-surface);
+  color: var(--blue);
+}
+
+.roadmap-generator__time > aside {
+  display: grid;
+  gap: 4px;
+  padding: 14px;
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--blue-soft) 62%, transparent);
+}
+
+.roadmap-generator__time aside span {
+  color: var(--muted);
+  font-size: var(--ui-small-font-size);
+}
+
+.roadmap-generator__sources {
+  display: grid;
+  gap: 16px;
+}
+
+.roadmap-generator__sources > article > span {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 11px;
+  background: var(--selection-surface);
+  color: var(--blue);
+  font-size: var(--ui-small-font-size);
+  font-weight: 720;
+}
+
+.roadmap-generator__documents {
+  display: grid;
+  gap: 7px;
+}
+
+.roadmap-generator__documents > header {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 2px 7px;
+}
+
+.roadmap-generator__documents > header span,
+.roadmap-generator__documents > p {
+  color: var(--muted);
+  font-size: var(--ui-small-font-size);
+}
+
+.roadmap-generator__documents > label {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 11px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--surface-2) 56%, transparent);
+  cursor: pointer;
+}
+
+.roadmap-generator__documents > label > span {
+  min-width: 0;
+  display: grid;
+  gap: 3px;
+}
+
+.roadmap-generator__documents small {
+  overflow: hidden;
+  color: var(--muted);
+  font-size: var(--ui-small-font-size);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.roadmap-generator__progress ol {
+  display: grid;
+  gap: 7px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.roadmap-generator__progress li {
+  color: var(--faint);
+  font-size: var(--ui-small-font-size);
+}
+
+.roadmap-generator__progress li.is-active {
+  color: var(--blue);
+}
+
+.roadmap-generator__orb {
+  position: relative;
+  width: 70px;
+  height: 70px;
+  display: grid;
+  place-items: center;
+}
+
+.roadmap-generator__orb i {
+  position: absolute;
+  border: 1px solid color-mix(in srgb, var(--blue) 55%, transparent);
+  border-radius: 50%;
+  animation: roadmap-orbit 2.2s ease-in-out infinite;
+}
+
+.roadmap-generator__orb i:nth-child(1) { inset: 5px; }
+.roadmap-generator__orb i:nth-child(2) { inset: 15px; animation-delay: -.5s; }
+.roadmap-generator__orb i:nth-child(3) { inset: 25px; background: var(--blue); animation-delay: -1s; }
+
+.roadmap-generator__success > span {
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--green) 18%, transparent);
+  color: var(--green);
+  font-size: var(--ui-heading-md-font-size);
+}
+
+.roadmap-generator__success details {
+  display: grid;
+  gap: 6px;
+  max-width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  color: var(--muted);
+  text-align: left;
+}
+
+.roadmap-generator__success code,
+.roadmap-generator__success details i {
+  display: block;
+  color: var(--faint);
+  font: var(--ui-small-font-size)/1.5 var(--code-font-family);
+  font-style: normal;
+}
+
+.roadmap-generator > footer {
+  display: flex;
+  gap: 9px;
+  padding: 15px 26px;
+  border-top: 1px solid color-mix(in srgb, var(--line) 74%, transparent);
+  background: color-mix(in srgb, var(--glass-surface) 82%, transparent);
+}
+
+.roadmap-generator > footer > span {
+  flex: 1;
+}
+
+.roadmap-generator > footer button {
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 9px;
+  font: 700 var(--ui-control-font-size)/1 var(--ui-font-family);
+  cursor: pointer;
+}
+
+.roadmap-generator .quiet-action {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+}
+
+.roadmap-generator .primary-action {
+  border: 1px solid var(--blue);
+  background: var(--blue);
+  color: var(--on-blue);
+}
+
+@keyframes roadmap-spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes roadmap-orbit {
+  0%, 100% { transform: scale(.9) rotate(0); opacity: .55; }
+  50% { transform: scale(1.08) rotate(180deg); opacity: 1; }
+}
+
+@media (max-width: 760px) {
+  .theme-settings-card > .glass-opacity-preference {
+    grid-column: auto;
+    margin-top: 0;
+  }
+
+  .roadmap-heading,
+  .roadmap-summary,
+  .learning-center__roadmap {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .learning-center__roadmap > div {
+    grid-template-columns: 1fr;
+  }
+
+  .roadmap-generator-backdrop {
+    padding: 10px;
+  }
+
+  .roadmap-generator {
+    width: 100%;
+    max-height: calc(100vh - var(--titlebar) - 20px);
+  }
+
+  .roadmap-generator__time {
+    grid-template-columns: 1fr;
+  }
+
+  .roadmap-generator__time > label:first-child,
+  .roadmap-generator__time > aside {
+    grid-column: auto;
+  }
+}
+
+/* Roadmap planning controls share one compact glass hierarchy. */
+.roadmap-generator__presets { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.roadmap-generator__time > .roadmap-generator__goal { grid-column: 1 / -1; }
+.roadmap-generator__time textarea {
+  min-height: 88px;
+  padding: 10px 11px;
+  resize: vertical;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  outline: 0;
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  color: var(--text);
+  font: inherit;
+  line-height: 1.55;
+}
+.roadmap-generator__time textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--selection-surface); }
+.roadmap-generator__documents > header > div { display: flex; align-items: center; gap: 9px; }
+.roadmap-generator__documents > header button {
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--blue);
+  cursor: pointer;
+  font-size: var(--ui-small-font-size);
+}
+
+/* Document library: compact controls, bulk actions and unambiguous state. */
+.document-library > .page-heading { min-height: 76px; padding: 8px 2px 14px; }
+.document-library > .page-heading h1 { margin: 0; font-size: clamp(1.75rem, 3.2vw, 2.75rem); }
+.library-import-notice {
+  position: sticky;
+  z-index: 12;
+  top: 8px;
+  width: max-content;
+  max-width: calc(100% - 24px);
+  margin: 8px auto;
+  padding: 9px 13px;
+  border: 1px solid color-mix(in srgb, var(--green) 42%, var(--line));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--surface) 84%, transparent);
+  color: var(--green);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(18px);
+}
+.library-controls { grid-template-columns: minmax(130px, .75fr) minmax(130px, 170px) minmax(155px, 190px) auto auto; align-items: center; }
+.library-controls__bulk { display: flex; align-items: center; gap: 6px; }
+.library-controls__bulk button {
+  min-height: 38px;
+  padding: 0 11px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: var(--surface-2);
+  color: var(--muted);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.library-controls__bulk button:disabled { opacity: .4; cursor: default; }
+.library-controls__bulk button.is-danger { color: var(--danger); }
+.document-book__select {
+  position: absolute;
+  z-index: 8;
+  top: 11px;
+  left: 32px;
+  width: 24px;
+  height: 24px;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  box-shadow: 0 3px 12px rgba(0,0,0,.1);
+  backdrop-filter: blur(12px);
+}
+.document-book__select input { width: 15px; height: 15px; margin: 0; accent-color: var(--blue); }
+.document-book > footer { grid-template-columns: minmax(0, 1fr) auto auto auto; }
+.document-book > footer > button[aria-pressed="true"] { color: var(--blue); background: var(--selection-surface); }
+
+/* Full document reading hides navigation until the pointer reaches the left edge. */
+.document-navigation-hotspot {
+  position: fixed;
+  z-index: 195;
+  inset: var(--titlebar) auto 0 0;
+  width: 14px;
+}
+.document-navigation-flyout {
+  position: fixed;
+  z-index: 196;
+  inset: var(--titlebar) auto 0 0;
+  width: var(--rail);
+  transform: translateX(calc(-100% - 10px));
+  opacity: 0;
+  pointer-events: none;
+  filter: drop-shadow(16px 0 35px rgba(0,0,0,.16));
+  transition: transform .2s var(--ease-out), opacity .16s ease;
+}
+.document-navigation-flyout[data-open="true"] { transform: translateX(0); opacity: 1; pointer-events: auto; }
+.document-navigation-flyout .navrail {
+  width: var(--rail);
+  height: 100%;
+  border-right: 1px solid color-mix(in srgb, var(--line) 78%, transparent);
+  background: color-mix(in srgb, var(--surface) 78%, transparent);
+  backdrop-filter: blur(calc(18px + var(--glass-strength) * 12px)) saturate(1.2);
+}
+
+/* The chapter outline also peeks over the page instead of resizing the reader. */
+.document-workspace__body { position: relative; }
+.document-outline-hotspot {
+  position: absolute;
+  z-index: 45;
+  top: 0;
+  bottom: 0;
+  left: 14px;
+  width: 14px;
+}
+.document-workspace__body.is-outline-peeking { grid-template-columns: 0 minmax(0, 1fr) 270px; }
+.document-workspace__body.is-outline-peeking.is-notes-collapsed,
+.document-workspace__body.is-outline-peeking.is-split { grid-template-columns: 0 minmax(0, 1fr); }
+.document-workspace__body.is-outline-peeking .document-outline {
+  position: absolute;
+  z-index: 46;
+  inset: 0 auto 0 0;
+  width: min(270px, calc(100vw - 48px));
+  height: 100%;
+  max-height: none;
+  opacity: 1;
+  transform: none;
+  box-shadow: 18px 0 45px rgba(0,0,0,.16);
+  backdrop-filter: blur(20px);
+}
+.annotation-list article[data-kind="tag"] { grid-template-columns: 9px minmax(0, 1fr) auto; border-color: color-mix(in srgb, var(--blue) 35%, var(--line)); }
+.annotation-list article > button { min-width: 0; border: 0; background: transparent; color: inherit; text-align: left; cursor: pointer; }
+
+@media (max-width: 980px) {
+  .library-controls { grid-template-columns: 1fr 1fr; }
+  .library-controls__count, .library-controls__bulk { grid-column: 1 / -1; }
+  .roadmap-generator__presets { grid-template-columns: repeat(3, 1fr); }
+}
+
+.font-controls select,
+.font-scale-select select {
+  font-family: "Segoe UI Variable Text", "Microsoft YaHei UI", system-ui, sans-serif;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .roadmap-generator__loading > i,
+  .roadmap-generator__orb i {
+    animation: none;
+  }
+}
+
+/* Deep document outlines and bounded initial rendering for large source files. */
+.document-outline-tree { padding: 7px 5px 18px; }
+.document-outline-item { min-width: 0; }
+.document-outline-row {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: center;
+  gap: 2px;
+  min-width: 0;
+  padding-left: min(52px, calc(var(--outline-depth, 0) * 11px));
+}
+.document-outline-toggle {
+  display: grid;
+  width: 22px;
+  height: 30px;
+  padding: 0;
+  place-items: center;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 1rem;
+  cursor: pointer;
+}
+.document-outline-toggle:hover { background: var(--surface-2); color: var(--text); }
+.document-outline-leaf { width: 22px; }
+.document-outline-link {
+  display: grid;
+  grid-template-columns: 25px minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+  min-height: 34px;
+  padding: 6px 8px;
+  border: 0;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--muted);
+  text-align: left;
+  cursor: pointer;
+}
+.document-outline-link:hover { background: var(--surface-2); color: var(--text); }
+.document-outline-link.is-active { background: color-mix(in srgb, var(--cyan) 11%, var(--surface-2)); color: var(--text); }
+.document-outline-link > span { color: var(--faint); font: 650 .68rem/1 var(--font-code); }
+.document-outline-link > strong { overflow: hidden; font-size: .78rem; font-weight: 620; line-height: 1.35; text-overflow: ellipsis; white-space: nowrap; }
+.document-progressive-load {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  width: min(560px, calc(100% - 24px));
+  margin: 18px auto;
+  padding: 11px 14px;
+  border: 1px solid color-mix(in srgb, var(--cyan) 26%, var(--line));
+  border-radius: 13px;
+  background: color-mix(in srgb, var(--surface) 76%, transparent);
+  color: var(--text);
+  box-shadow: 0 8px 26px rgba(0,0,0,.06);
+  backdrop-filter: blur(15px) saturate(1.2);
+  cursor: pointer;
+}
+.document-progressive-load > span { display: grid; width: 30px; height: 30px; place-items: center; border-radius: 9px; background: color-mix(in srgb, var(--cyan) 12%, var(--surface-2)); color: var(--cyan); }
+.document-progressive-load > strong { text-align: left; font-size: .82rem; }
+.document-progressive-load > small { color: var(--faint); font-size: .72rem; }
+.markdown-section, .structured-reader article, .notebook-cell, .slide-reader article { content-visibility: auto; contain-intrinsic-size: auto 420px; }

@@ -70,7 +70,6 @@ export function NotebookShelf({ courses, activeCourseId, onOpen, onCreate, onDel
     <section className="page notebook-library">
       <div className="page-heading notebook-library__heading">
         <div>
-          <div className="eyebrow">KNOWLEDGE LIBRARY / COURSE NOTEBOOKS</div>
           <h1>知识笔记本</h1>
           <p>每门课程都是一本独立笔记本。打开后再进入导图与自由画布，资料、便签和记忆卡都留在对应课程中。</p>
         </div>

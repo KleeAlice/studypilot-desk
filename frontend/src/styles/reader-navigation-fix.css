@@ -1,0 +1,18 @@
+/* The course menu now sits inside the document toolbar's normal flow. */
+.document-annotation-toolbar .document-course-navigation-button {
+  width: 34px;
+  padding: 0;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.document-annotation-toolbar .document-course-navigation-button:hover,
+.document-annotation-toolbar .document-course-navigation-button:focus-visible,
+.document-annotation-toolbar .document-course-navigation-button[aria-expanded="true"] {
+  background: color-mix(in srgb, var(--blue-soft) 82%, var(--glass-surface));
+  color: var(--blue);
+}
+
+.document-outline-hotspot[data-disabled="true"] {
+  pointer-events: none;
+}

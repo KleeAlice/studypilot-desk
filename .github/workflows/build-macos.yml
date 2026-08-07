@@ -1,0 +1,61 @@
+name: Build macOS installer
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+jobs:
+  build-macos:
+    runs-on: macos-latest
+    timeout-minutes: 45
+    env:
+      CSC_LINK: ${{ secrets.MACOS_CSC_LINK }}
+      CSC_KEY_PASSWORD: ${{ secrets.MACOS_CSC_KEY_PASSWORD }}
+      APPLE_API_KEY: ${{ secrets.APPLE_API_KEY }}
+      APPLE_API_KEY_ID: ${{ secrets.APPLE_API_KEY_ID }}
+      APPLE_API_ISSUER: ${{ secrets.APPLE_API_ISSUER }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Create packaged Python environment
+        run: |
+          python -m venv .venv
+          .venv/bin/python -m pip install --upgrade pip
+          .venv/bin/python -m pip install -e ".[dev]" "pyinstaller>=6.14,<7"
+
+      - name: Verify cross-platform contracts
+        run: |
+          npm run typecheck
+          npm test -- --run tests/unit/runtime-paths.test.ts tests/unit/packaging-contract.test.ts tests/unit/system-fonts.test.ts
+
+      - name: Build DMG and ZIP
+        run: npm run dist:mac
+
+      - name: Upload macOS installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: StudyPilot-Desk-macOS-${{ runner.arch }}
+          path: |
+            release/macos/*.dmg
+            release/macos/*.zip
+            release/macos/*.yml
+            release/macos/*.blockmap
+          if-no-files-found: error

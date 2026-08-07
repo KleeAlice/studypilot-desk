@@ -35,7 +35,7 @@ test("task creation and Python output are real API flows", async () => {
     return json([]);
   }));
   render(<App />);
-  await screen.findByRole("heading", { name: "今日驾驶舱" });
+  await screen.findByRole("heading", { name: "本周执行" });
 
   await userEvent.type(screen.getByLabelText("新任务"), "完成 DAG 测试");
   await userEvent.click(screen.getByRole("button", { name: "添加任务" }));
@@ -60,7 +60,7 @@ test("API failures are shown as friendly Chinese messages", async () => {
     return json([]);
   }));
   render(<App />);
-  await screen.findByRole("heading", { name: "今日驾驶舱" });
+  await screen.findByRole("heading", { name: "本周执行" });
   await userEvent.type(screen.getByLabelText("新任务"), "测试错误");
   await userEvent.click(screen.getByRole("button", { name: "添加任务" }));
   expect(await screen.findByRole("alert")).toHaveTextContent("数据暂时繁忙");

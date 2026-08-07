@@ -1,15 +1,34 @@
-import { app, BrowserWindow, clipboard, dialog, ipcMain, nativeTheme } from "electron";
-import { writeFile } from "node:fs/promises";
+import { app, BrowserWindow, clipboard, dialog, ipcMain, nativeTheme, shell } from "electron";
+import { mkdir, stat, writeFile } from "node:fs/promises";
 import { basename, extname, join, resolve } from "node:path";
 import { BackendManager, type BackendRuntime } from "./backend-manager.js";
 import { WindowStateManager } from "./window-manager.js";
+import { listSystemFonts } from "./system-fonts.js";
+import { ExportArchive } from "./export-archive.js";
+import { resolveRuntimePaths } from "./runtime-paths.js";
 
 
 const projectRoot = resolve(__dirname, "..");
-const dataDir = resolve(process.env.STUDYPILOT_DATA_DIR || join(projectRoot, "data"));
-const backend = new BackendManager({ dataDir, projectRoot });
+const runtimePaths = resolveRuntimePaths({
+  isPackaged: app.isPackaged,
+  projectRoot,
+  resourcesPath: process.resourcesPath,
+  userDataPath: app.getPath("userData"),
+  dataDirOverride: process.env.STUDYPILOT_DATA_DIR,
+  platform: process.platform,
+});
+const { dataDir } = runtimePaths;
+const backend = new BackendManager({
+  dataDir,
+  projectRoot: runtimePaths.projectRoot,
+  backendExecutable: runtimePaths.backendExecutable,
+  startupTimeoutMs: app.isPackaged ? 30_000 : 15_000,
+});
+const exportArchive = new ExportArchive(dataDir);
 const smokeMode = process.env.STUDYPILOT_SMOKE_TEST === "1";
-let runtime: BackendRuntime;
+app.setAppUserModelId("com.studypilot.desk");
+let runtime: BackendRuntime | undefined;
+let runtimeReady: Promise<BackendRuntime> | undefined;
 let mainWindow: BrowserWindow | null = null;
 let quitting = false;
 const MAX_EXPORT_BYTES = 64 * 1024 * 1024;
@@ -22,7 +41,13 @@ const EXPORT_FILTERS: Record<string, { name: string; extensions: string[] }> = {
 
 
 function registerIpc(): void {
-  ipcMain.handle("runtime:get", () => ({ apiBase: runtime.apiBase, dataDir }));
+  ipcMain.handle("runtime:get", async () => {
+    const ready = runtime ?? await runtimeReady;
+    if (!ready) {
+      throw new Error("StudyPilot local service has not started");
+    }
+    return { apiBase: ready.apiBase, dataDir };
+  });
   ipcMain.handle("window:minimize", () => mainWindow?.minimize());
   ipcMain.handle("window:toggle-maximize", () => {
     if (!mainWindow) return false;
@@ -32,9 +57,16 @@ function registerIpc(): void {
   });
   ipcMain.handle("window:close", () => mainWindow?.close());
   ipcMain.handle("window:is-maximized", () => mainWindow?.isMaximized() ?? false);
+  ipcMain.handle("fonts:list-system", () => listSystemFonts());
   ipcMain.handle("clipboard:read-text", () => clipboard.readText());
+  ipcMain.handle("clipboard:write-text", (_event, text: string) => clipboard.writeText(String(text || "")));
   ipcMain.handle("clipboard:read-image", () => {
     const image = clipboard.readImage();
+    return image.isEmpty() ? null : image.toPNG();
+  });
+  ipcMain.handle("capture:window", async () => {
+    if (!mainWindow || mainWindow.isDestroyed()) return null;
+    const image = await mainWindow.webContents.capturePage();
     return image.isEmpty() ? null : image.toPNG();
   });
   ipcMain.handle("files:choose-documents", async () => {
@@ -42,9 +74,18 @@ function registerIpc(): void {
     const result = await dialog.showOpenDialog(mainWindow, {
       title: "导入学习资料",
       properties: ["openFile", "multiSelections"],
-      filters: [{ name: "学习文档", extensions: ["pdf", "docx", "md", "txt"] }],
+      filters: [{ name: "学习文档", extensions: ["pdf", "docx", "md", "txt", "xlsx", "pptx"] }],
     });
     return result.canceled ? [] : result.filePaths;
+  });
+  ipcMain.handle("files:source-created-at", async (_event, filePath: string) => {
+    if (!filePath || typeof filePath !== "string") return null;
+    try {
+      const { birthtime } = await stat(resolve(filePath));
+      return Number.isNaN(birthtime.getTime()) ? null : birthtime.toISOString();
+    } catch {
+      return null;
+    }
   });
   ipcMain.handle("files:save-export", async (_event, request: { suggestedName?: string; bytes?: Uint8Array | number[] }) => {
     if (!mainWindow) return null;
@@ -67,6 +108,31 @@ function registerIpc(): void {
     await writeFile(target, content);
     return target;
   });
+  ipcMain.handle("files:archive-directory", () => exportArchive.getDirectory());
+  ipcMain.handle("files:choose-archive-directory", async () => {
+    if (!mainWindow) return null;
+    const result = await dialog.showOpenDialog(mainWindow, {
+      title: "选择 StudyPilot 导出存档目录",
+      properties: ["openDirectory", "createDirectory"],
+    });
+    if (result.canceled || !result.filePaths[0]) return null;
+    return exportArchive.setDirectory(result.filePaths[0]);
+  });
+  ipcMain.handle("files:reset-archive-directory", () => exportArchive.resetDirectory());
+  ipcMain.handle("files:save-to-archive", async (_event, request: { suggestedName?: string; bytes?: Uint8Array | number[] }) => {
+    const suggestedName = basename(String(request?.suggestedName || ""));
+    const extension = extname(suggestedName).toLowerCase();
+    if (!EXPORT_FILTERS[extension]) throw new Error("不支持的导出文件类型");
+    const content = Buffer.from(request?.bytes || []);
+    if (!content.length || content.length > MAX_EXPORT_BYTES) throw new Error("导出文件为空或超过 64 MB");
+    return exportArchive.saveFile(suggestedName, content);
+  });
+  ipcMain.handle("files:open-archive-directory", async () => {
+    const directory = await exportArchive.getDirectory();
+    await mkdir(directory, { recursive: true });
+    const error = await shell.openPath(directory);
+    if (error) throw new Error(`无法打开存档目录：${error}`);
+  });
 }
 
 async function createWindow(): Promise<void> {
@@ -77,7 +143,6 @@ async function createWindow(): Promise<void> {
     minWidth: 1100,
     minHeight: 700,
     frame: false,
-    titleBarStyle: "hidden",
     backgroundColor: nativeTheme.shouldUseDarkColors ? "#0b1018" : "#f2f4f7",
     show: false,
     webPreferences: {
@@ -86,6 +151,7 @@ async function createWindow(): Promise<void> {
       nodeIntegration: false,
       sandbox: true,
       spellcheck: true,
+      plugins: true,
     },
   });
   state.observe(mainWindow);
@@ -104,14 +170,19 @@ async function createWindow(): Promise<void> {
       while (!document.body.innerText.trim() && Date.now() < deadline) {
         await new Promise((resolve) => setTimeout(resolve, 50));
       }
+      const fonts = typeof window.studypilot?.fonts?.list === 'function'
+        ? await window.studypilot.fonts.list()
+        : [];
       return {
-      title: document.title,
-      bridge: typeof window.studypilot === 'object',
-      content: document.body.innerText.slice(0, 300),
-        overflow: document.documentElement.scrollWidth <= window.innerWidth
+        title: document.title,
+        bridge: typeof window.studypilot === 'object',
+        content: document.body.innerText.slice(0, 300),
+        overflow: document.documentElement.scrollWidth <= window.innerWidth,
+        fontCount: Array.isArray(fonts) ? fonts.length : 0
       };
     })()`);
-    if (!result.bridge || !result.overflow || !String(result.title).includes("StudyPilot") || !String(result.content).trim()) {
+    const fontsMissing = process.platform === "win32" && Number(result.fontCount) < 10;
+    if (!result.bridge || !result.overflow || fontsMissing || !String(result.title).includes("StudyPilot") || !String(result.content).trim()) {
       throw new Error(`Electron smoke failed: ${JSON.stringify(result)}`);
     }
     console.log(`STUDYPILOT_SMOKE_OK ${JSON.stringify(result)}`);
@@ -125,7 +196,21 @@ async function createWindow(): Promise<void> {
 }
 
 async function bootstrap(): Promise<void> {
-  runtime = await backend.start();
+  if (smokeMode) {
+    runtime = await backend.start();
+    runtimeReady = Promise.resolve(runtime);
+    registerIpc();
+    await createWindow();
+    return;
+  }
+
+  runtimeReady = backend.start().then((ready) => {
+    runtime = ready;
+    return ready;
+  });
+  void runtimeReady.catch((error) => {
+    console.error(`StudyPilot backend startup failed: ${String(error)}`);
+  });
   registerIpc();
   await createWindow();
 }
@@ -147,7 +232,7 @@ else {
 }
 
 app.on("activate", () => {
-  if (BrowserWindow.getAllWindows().length === 0 && runtime) void createWindow();
+  if (BrowserWindow.getAllWindows().length === 0 && (runtime || runtimeReady)) void createWindow();
 });
 
 app.on("window-all-closed", () => {

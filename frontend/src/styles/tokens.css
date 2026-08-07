@@ -43,6 +43,37 @@
   --ui-font-family: "Segoe UI Variable Text", "Segoe UI", "Microsoft YaHei UI", "PingFang SC", system-ui, sans-serif;
   --display-font-family: "Segoe UI Variable Display", "Segoe UI", "Microsoft YaHei UI", system-ui, sans-serif;
   --code-font-family: "Cascadia Mono", "Cascadia Code", Consolas, monospace;
+  --ui-font-scale: 1;
+  --ui-root-font-size: 16px;
+  --ui-body-font-size: 14px;
+  --ui-control-font-size: 13px;
+  --ui-small-font-size: 11px;
+  --ui-reading-font-size: 15px;
+  --ui-heading-sm-font-size: 17px;
+  --ui-heading-md-font-size: 20px;
+  --ui-heading-lg-font-size: 28px;
+  --app-wallpaper-image: none;
+  --app-wallpaper-opacity: .82;
+  --app-wallpaper-blur: 0px;
+  --app-wallpaper-overscan: 0px;
+  --accent-hover: #6073df;
+  --focus-ring: rgba(113, 133, 245, .46);
+  --selection-surface: rgba(113, 133, 245, .24);
+  --glass-opacity: 78%;
+  --glass-base: #17191e;
+  --glass-surface: color-mix(in srgb, var(--glass-base) var(--glass-opacity), transparent);
+  --glass-border: rgba(255, 255, 255, .1);
+  --glass-shadow: 0 20px 54px rgba(0, 0, 0, .26);
+  --wallpaper-glass-tint: rgba(113, 133, 245, .08);
+  --lab-chrome-surface: color-mix(in srgb, var(--glass-surface) 94%, var(--surface-2));
+  --lab-chrome-surface-2: color-mix(in srgb, var(--glass-surface) 84%, transparent);
+  --lab-editor-surface: color-mix(in srgb, var(--glass-surface) 76%, transparent);
+  --lab-editor-gutter: color-mix(in srgb, var(--glass-surface) 90%, var(--surface-2));
+  --lab-editor-line: color-mix(in srgb, var(--line-strong) 68%, transparent);
+  --lab-editor-text: var(--text);
+  --lab-editor-muted: var(--muted);
+  --lab-editor-selection: var(--selection-surface);
+  --lab-editor-caret: var(--blue);
   font-family: var(--ui-font-family);
 }
 
@@ -70,4 +101,12 @@
   --ink: #24262b;
   --shadow: 0 18px 46px rgba(25, 28, 38, .12);
   --shadow-soft: 0 4px 16px rgba(25, 28, 38, .07);
+  --glass-base: #ffffff;
+  --glass-border: rgba(255, 255, 255, .72);
+  --glass-shadow: 0 20px 54px rgba(35, 45, 68, .14);
+  --lab-chrome-surface: color-mix(in srgb, var(--glass-surface) 94%, var(--surface-2));
+  --lab-chrome-surface-2: color-mix(in srgb, var(--glass-surface) 84%, transparent);
+  --lab-editor-surface: color-mix(in srgb, var(--glass-surface) 76%, transparent);
+  --lab-editor-gutter: color-mix(in srgb, var(--glass-surface) 90%, var(--surface-2));
+  --lab-editor-line: color-mix(in srgb, var(--line-strong) 68%, transparent);
 }

@@ -1,7 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import type { Course } from "../types";
 import { COURSE_COVER_PRESETS } from "../ui/course-covers";
-import { MotionPresence } from "./MotionPresence";
+import { AnchoredMenu } from "./AnchoredMenu";
+import { ConfirmDialog } from "./ConfirmDialog";
 
 type CourseChanges = Partial<Pick<Course, "title" | "cover_style">>;
 
@@ -22,32 +23,9 @@ export function CourseActionsMenu({
   const [confirming, setConfirming] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const rootRef = useRef<HTMLDivElement>(null);
+  const [trashError, setTrashError] = useState("");
   const triggerRef = useRef<HTMLButtonElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    function closeFromOutside(event: MouseEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
-    }
-    function closeFromKeyboard(event: KeyboardEvent) {
-      if (event.key !== "Escape") return;
-      if (mode === "rename") {
-        setMode("menu");
-        setError("");
-        return;
-      }
-      setOpen(false);
-      triggerRef.current?.focus();
-    }
-    document.addEventListener("mousedown", closeFromOutside);
-    window.addEventListener("keydown", closeFromKeyboard);
-    return () => {
-      document.removeEventListener("mousedown", closeFromOutside);
-      window.removeEventListener("keydown", closeFromKeyboard);
-    };
-  }, [mode, open]);
 
   useEffect(() => {
     if (open && mode === "rename") inputRef.current?.focus();
@@ -78,9 +56,12 @@ export function CourseActionsMenu({
   async function confirmTrash() {
     if (busy) return;
     setBusy(true);
+    setTrashError("");
     try {
       await onTrash();
       setConfirming(false);
+    } catch (reason) {
+      setTrashError(reason instanceof Error ? reason.message : "课程移动失败，请重试");
     } finally {
       setBusy(false);
     }
@@ -89,7 +70,7 @@ export function CourseActionsMenu({
   const cleanName = name.trim();
 
   return <>
-    <div className="safe-action-menu course-actions-menu" ref={rootRef}>
+    <div className="safe-action-menu course-actions-menu">
       <button
         ref={triggerRef}
         type="button"
@@ -100,14 +81,7 @@ export function CourseActionsMenu({
         disabled={disabled || busy}
         onClick={(event) => { event.stopPropagation(); toggle(); }}
       >•••</button>
-      <MotionPresence present={open} exitMs={120}>{(phase) =>
-        <div
-          className="safe-action-menu__popover course-actions-popover"
-          data-presence={phase}
-          role="menu"
-          aria-label={`${course.title}的课程操作`}
-          onClick={(event) => event.stopPropagation()}
-        >
+      <AnchoredMenu open={open} anchorRef={triggerRef} className="course-actions-popover" ariaLabel={`${course.title}的课程操作`} onClose={() => { setOpen(false); setMode("menu"); }}>
           <div className="course-actions-popover__heading"><small>课程操作</small><strong>{course.title}</strong></div>
           {mode === "rename" ? <form className="course-actions-rename" onSubmit={(event) => { event.preventDefault(); void update({ title: cleanName }); }}>
             <label>课程名称<input ref={inputRef} aria-label="课程名称" value={name} maxLength={160} onChange={(event) => setName(event.target.value)} /></label>
@@ -128,21 +102,21 @@ export function CourseActionsMenu({
                 onClick={() => void update({ cover_style: preset.id })}
               ><i /><span>{preset.label}</span></button>)}</div>
             </div>
-            <button type="button" role="menuitem" className="is-danger" onClick={() => { setOpen(false); setConfirming(true); }}>移入回收站</button>
+            <button type="button" role="menuitem" className="is-danger" onClick={() => { setOpen(false); setTrashError(""); setConfirming(true); }}>移入回收站</button>
           </>}
           {error && <p className="course-actions-error" role="alert">{error}</p>}
-        </div>
-      }</MotionPresence>
+      </AnchoredMenu>
     </div>
-    <MotionPresence present={confirming} exitMs={180}>{(phase) => <div className="safe-confirm-backdrop" data-presence={phase} onMouseDown={(event) => { if (event.target === event.currentTarget && !busy) setConfirming(false); }}>
-      <section className="safe-confirm-dialog" role="alertdialog" aria-modal="true" aria-labelledby={`course-trash-${course.id}`}>
-        <div className="safe-confirm-dialog__icon" aria-hidden="true">♲</div>
-        <div><small>MOVE TO TRASH</small><h2 id={`course-trash-${course.id}`}>将课程移入回收站？</h2><p><strong>“{course.title}”</strong> 会从课程书架移除，其中的任务、资料、知识笔记和实验记录可在回收站恢复。</p></div>
-        <footer>
-          <button type="button" className="quiet-action" disabled={busy} onClick={() => setConfirming(false)}>取消</button>
-          <button type="button" className="danger-action" disabled={busy} onClick={() => void confirmTrash()}>{busy ? "正在移动…" : "确认移入回收站"}</button>
-        </footer>
-      </section>
-    </div>}</MotionPresence>
+    <ConfirmDialog
+      open={confirming}
+      title="将课程移入回收站？"
+      description={<p><strong>“{course.title}”</strong> 会从课程书架移除，其中的任务、资料、知识笔记和实验记录可在回收站恢复。</p>}
+      confirmLabel="确认移入回收站"
+      busy={busy}
+      error={trashError}
+      icon="♲"
+      onCancel={() => { if (!busy) { setConfirming(false); setTrashError(""); triggerRef.current?.focus(); } }}
+      onConfirm={() => void confirmTrash()}
+    />
   </>;
 }

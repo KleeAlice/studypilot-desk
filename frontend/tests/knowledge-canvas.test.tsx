@@ -2,6 +2,97 @@ import { fireEvent, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { expect, test, vi } from "vitest";
 import { Knowledge } from "../src/features/Knowledge";
+import { WorkspaceToolbarVisibilityProvider } from "../src/workspace/WorkspaceToolbarVisibility";
+
+test("follows the shared automatic knowledge toolbar visibility state", async () => {
+  const api = {
+    get: vi.fn(async () => ({ nodes: [], edges: [] })),
+    post: vi.fn(), patch: vi.fn(), delete: vi.fn(),
+  } as any;
+  render(
+    <WorkspaceToolbarVisibilityProvider autoHide>
+      <Knowledge api={api} />
+    </WorkspaceToolbarVisibilityProvider>,
+  );
+
+  const toolbar = await screen.findByRole("toolbar", { name: "知识画布工具栏" });
+  expect(toolbar).toHaveAttribute("data-toolbar-visible", "true");
+  fireEvent.pointerLeave(toolbar);
+  await waitFor(() => expect(toolbar).toHaveAttribute("data-toolbar-visible", "false"), { timeout: 1200 });
+  fireEvent.pointerMove(window, { clientY: 45 });
+  expect(toolbar).toHaveAttribute("data-toolbar-visible", "true");
+});
+
+test("opens the document library beside the knowledge canvas", async () => {
+  const onOpenLibrarySplit = vi.fn();
+  const api = {
+    get: vi.fn(async () => ({ nodes: [], edges: [] })),
+    post: vi.fn(), patch: vi.fn(), delete: vi.fn(),
+  } as any;
+
+  render(<Knowledge api={api} onOpenLibrarySplit={onOpenLibrarySplit} />);
+  await userEvent.click(await screen.findByRole("button", { name: "分屏打开资料库" }));
+
+  expect(onOpenLibrarySplit).toHaveBeenCalledTimes(1);
+});
+
+test("uses the canvas toolbar as the only knowledge header and keeps the back action inside it", async () => {
+  const api = {
+    get: vi.fn(async () => ({ nodes: [], edges: [] })),
+    post: vi.fn(), patch: vi.fn(), delete: vi.fn(),
+  } as any;
+  const { container } = render(<Knowledge api={api} onBack={vi.fn()} />);
+
+  await screen.findByText("从第一张卡片开始");
+  expect(screen.queryByRole("heading", { name: "默认知识画布" })).not.toBeInTheDocument();
+  const back = screen.getByRole("button", { name: "返回笔记本书架" });
+  expect(back.closest(".canvas-toolbar")).not.toBeNull();
+  expect(container.querySelector(".knowledge-heading")).toBeNull();
+  expect(container.querySelector(".canvas-toolbar__primary-actions")).not.toBeNull();
+});
+
+test("shows an unclipped canvas font panel with every installed font and live scaling", async () => {
+  const api = {
+    get: vi.fn(async () => ({
+      nodes: [{ id: 1, title: "字体测试", module: "排版", kind: "concept", content: "字号应即时变化", color: "blue", position_x: 120, position_y: 110 }],
+      edges: [],
+    })),
+    post: vi.fn(), patch: vi.fn(), delete: vi.fn(),
+  } as any;
+  const { container } = render(<Knowledge api={api} systemFonts={["Aptos", "霞鹜文楷"]} librarySplitOpen onOpenLibrarySplit={vi.fn()} />);
+  await screen.findByText("字体测试");
+
+  expect(screen.getByRole("button", { name: "关闭资料库分屏" })).toHaveAttribute("aria-pressed", "true");
+  await userEvent.click(screen.getByRole("button", { name: "画布设置" }));
+  const panel = screen.getByRole("dialog", { name: "画布设置面板" });
+  expect(panel.closest(".canvas-toolbar")).toBeNull();
+  await userEvent.selectOptions(screen.getByLabelText("画布字体"), "霞鹜文楷");
+  expect(screen.getByLabelText("画布字体")).toHaveValue("霞鹜文楷");
+  fireEvent.change(screen.getByRole("slider", { name: "卡片字号" }), { target: { value: "150" } });
+
+  const world = container.querySelector(".canvas-world") as HTMLElement;
+  expect(world.style.fontFamily).toContain("霞鹜文楷");
+  expect(world.style.getPropertyValue("--canvas-font-scale")).toBe("1.5");
+});
+
+test("opens a citation at its exact source locator", async () => {
+  const onOpenSource = vi.fn();
+  const api = {
+    get: vi.fn(async (path: string) => path === "/api/knowledge" ? {
+      nodes: [{
+        id: 5, title: "引用", module: "资料摘录", kind: "citation", content: "Feature",
+        color: "sand", position_x: 120, position_y: 110, mastery: .5,
+        source_document_id: 9, source_title: "features.xlsx", source_quote: "Feature",
+        source_block_key: "xlsx:1", source_locator: { sheet: "Sheet1", range: "A1" },
+      }], edges: [],
+    } : []),
+    post: vi.fn(), patch: vi.fn(), delete: vi.fn(),
+  } as any;
+
+  render(<Knowledge api={api} onOpenSource={onOpenSource} />);
+  await userEvent.click(await screen.findByRole("button", { name: "打开来源：features.xlsx" }));
+  expect(onOpenSource).toHaveBeenCalledWith(9, { sheet: "Sheet1", range: "A1" }, "xlsx:1");
+});
 
 test("creates sticky notes, persists dragging, links nodes and cites imported text", async () => {
   const calls: Array<{ method: string; path: string; body?: any }> = [];
@@ -781,8 +872,9 @@ test("lets a concept mastery slider persist a directly selected level", async ()
 
 test("exports the current notebook in visual and structured formats through native save", async () => {
   const originalBridge = (window as any).studypilot;
-  const saveExport = vi.fn().mockResolvedValue("C:/Exports/模型图谱.png");
-  (window as any).studypilot = { files: { saveExport }, clipboard: {} };
+  const saveToArchive = vi.fn().mockResolvedValue("C:/Exports/模型图谱.png");
+  const openExportDirectory = vi.fn().mockResolvedValue(undefined);
+  (window as any).studypilot = { files: { saveToArchive, openExportDirectory }, clipboard: {} };
   const api = {
     baseUrl: "http://127.0.0.1:9000",
     get: vi.fn(async () => ({ nodes: [], edges: [] })),
@@ -795,7 +887,7 @@ test("exports the current notebook in visual and structured formats through nati
   } as any;
 
   try {
-    render(<Knowledge api={api} courseId={41} notebookId={12} notebookTitle="模型图谱" />);
+    render(<Knowledge api={api} courseId={41} notebookId={12} />);
     await screen.findByText("从第一张卡片开始");
     for (const [format, label] of [["png", "导出 PNG 画布"], ["pdf", "导出 PDF 画布"], ["docx", "整理为 Word"], ["md", "整理为 Markdown"]] as const) {
       await userEvent.click(screen.getByRole("button", { name: "导出知识画布" }));
@@ -805,8 +897,10 @@ test("exports the current notebook in visual and structured formats through nati
         expect.objectContaining({ format, canvas_width: 1800, canvas_height: 1100 }),
       ));
     }
-    expect(saveExport).toHaveBeenCalledTimes(4);
+    expect(saveToArchive).toHaveBeenCalledTimes(4);
     expect(await screen.findByRole("status")).toHaveTextContent("已导出");
+    await userEvent.click(screen.getByRole("button", { name: "打开导出文件夹" }));
+    expect(openExportDirectory).toHaveBeenCalled();
   } finally {
     (window as any).studypilot = originalBridge;
   }
@@ -814,8 +908,8 @@ test("exports the current notebook in visual and structured formats through nati
 
 test("exports the legacy knowledge canvas instead of silently disabling the action", async () => {
   const originalBridge = (window as any).studypilot;
-  const saveExport = vi.fn().mockResolvedValue("C:/Exports/默认知识画布.png");
-  (window as any).studypilot = { files: { saveExport }, clipboard: {} };
+  const saveToArchive = vi.fn().mockResolvedValue("C:/Exports/默认知识画布.png");
+  (window as any).studypilot = { files: { saveToArchive }, clipboard: {} };
   const api = {
     get: vi.fn(async () => ({ nodes: [], edges: [] })),
     post: vi.fn(), patch: vi.fn(), delete: vi.fn(),
@@ -834,28 +928,24 @@ test("exports the legacy knowledge canvas instead of silently disabling the acti
       "/api/knowledge/export",
       expect.objectContaining({ format: "png", canvas_width: 1800, canvas_height: 1100 }),
     ));
-    expect(saveExport).toHaveBeenCalledTimes(1);
+    expect(saveToArchive).toHaveBeenCalledTimes(1);
     expect(await screen.findByRole("status")).toHaveTextContent("已导出 默认知识画布.png");
   } finally {
     (window as any).studypilot = originalBridge;
   }
 });
 
-test("enters an app-level focus canvas and exits with Escape while preserving focus", async () => {
+test("does not expose the redundant focus mode in the knowledge canvas", async () => {
   const api = {
     get: vi.fn(async () => ({ nodes: [], edges: [] })),
     post: vi.fn(), patch: vi.fn(), delete: vi.fn(),
   } as any;
-  const { container } = render(<Knowledge api={api} notebookTitle="深度学习图谱" />);
+  const { container } = render(<Knowledge api={api} />);
   await screen.findByText("从第一张卡片开始");
 
-  await userEvent.click(screen.getByRole("button", { name: "进入专注全屏" }));
-  expect(container.querySelector(".knowledge-page")).toHaveClass("is-focus-mode");
-  expect(screen.getByRole("region", { name: "专注模式" })).toHaveTextContent("深度学习图谱");
-
-  fireEvent.keyDown(window, { key: "Escape" });
   expect(container.querySelector(".knowledge-page")).not.toHaveClass("is-focus-mode");
-  expect(screen.getByRole("button", { name: "进入专注全屏" })).toHaveFocus();
+  expect(screen.queryByRole("button", { name: /专注/ })).not.toBeInTheDocument();
+  expect(screen.queryByRole("region", { name: /专注/ })).not.toBeInTheDocument();
 });
 
 test("deletes the selected canvas card with Delete but never hijacks text inputs", async () => {
@@ -937,4 +1027,45 @@ test("keeps Ctrl+Z native while editing card text", async () => {
 
   expect(api.patch).not.toHaveBeenCalled();
   expect(api.delete).not.toHaveBeenCalled();
+});
+
+test("centers and selects an exact knowledge node opened from an assistant source", async () => {
+  const api = {
+    get: vi.fn(async () => ({
+      nodes: [
+        { id: 61, title: "来源节点", module: "来源", kind: "concept", content: "精确定位", color: "blue", position_x: 1320, position_y: 780 },
+        { id: 62, title: "其他节点", module: "来源", kind: "concept", content: "不应选中", color: "teal", position_x: 120, position_y: 110 },
+      ],
+      edges: [],
+    })),
+    post: vi.fn(), patch: vi.fn(), delete: vi.fn(),
+  } as any;
+
+  const { container } = render(<Knowledge api={api} courseId={1} notebookId={5} sourceFocus={{ nodeId: 61, title: "来源节点", requestId: 1 }} />);
+  const focused = await screen.findByTestId("knowledge-node-61");
+  await waitFor(() => expect(focused).toHaveAttribute("data-source-focus", "true"));
+  expect(focused).toHaveClass("is-selected", "is-source-focus");
+  expect(screen.getByTestId("knowledge-node-62")).not.toHaveClass("is-selected", "is-source-focus");
+  await waitFor(() => expect(container.querySelector<HTMLElement>(".canvas-world")?.style.transform).not.toBe("translate(12px, 12px) scale(1)"));
+});
+
+test("centers and selects an exact knowledge relationship opened from an assistant source", async () => {
+  const api = {
+    get: vi.fn(async () => ({
+      nodes: [
+        { id: 71, title: "前置概念", module: "关系", kind: "concept", content: "A", color: "blue", position_x: 900, position_y: 620 },
+        { id: 72, title: "后续概念", module: "关系", kind: "concept", content: "B", color: "teal", position_x: 1260, position_y: 720 },
+      ],
+      edges: [{ id: 79, source_id: 71, target_id: 72, relation: "prerequisite" }],
+    })),
+    post: vi.fn(), patch: vi.fn(), delete: vi.fn(),
+  } as any;
+
+  const { container } = render(<Knowledge api={api} courseId={1} notebookId={5} sourceFocus={{ edgeId: 79, title: "前置概念 → 后续概念", requestId: 2 }} />);
+  const focused = await screen.findByTestId("knowledge-edge-79");
+  await waitFor(() => expect(focused).toHaveAttribute("data-source-focus", "true"));
+  expect(focused).toHaveClass("is-selected", "is-source-focus");
+  expect(screen.getByTestId("knowledge-node-71")).not.toHaveClass("is-selected");
+  expect(screen.getByTestId("knowledge-node-72")).not.toHaveClass("is-selected");
+  await waitFor(() => expect(container.querySelector<HTMLElement>(".canvas-world")?.style.transform).not.toBe("translate(12px, 12px) scale(1)"));
 });

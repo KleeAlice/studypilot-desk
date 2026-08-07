@@ -102,7 +102,7 @@ export function LearningStats({ api, courseId, courseTitle }: { api: ApiClient; 
       </article>
 
       <article className="stats-panel stats-progress">
-        <header><div><small>COURSE PROGRESS</small><h2>任务推进</h2></div></header>
+        <header><div><h2>任务推进</h2></div></header>
         <div className="stats-progress__body">
           <div className="stats-progress-ring" style={{ "--stats-progress": stats.completion_rate } as React.CSSProperties}>
             <svg viewBox="0 0 120 120" aria-hidden="true"><circle cx="60" cy="60" r="50" pathLength="100" /><circle className="is-value" cx="60" cy="60" r="50" pathLength="100" /></svg>
@@ -113,12 +113,12 @@ export function LearningStats({ api, courseId, courseTitle }: { api: ApiClient; 
       </article>
 
       <article className="stats-panel stats-assets">
-        <header><div><small>LEARNING ASSETS</small><h2>学习资产</h2></div></header>
+        <header><div><h2>学习资产</h2></div></header>
         <div><span>知识笔记<strong>{stats.notebooks}</strong></span><span>本地资料<strong>{stats.documents}</strong></span><span>Python 实验<strong>{stats.python_runs}</strong></span></div>
       </article>
 
       <article className="stats-panel stats-coach">
-        <header><div><small>NEXT BEST STEP</small><h2>下一步建议</h2></div></header>
+        <header><div><h2>下一步建议</h2></div></header>
         <p>{recommendation}</p><span>根据当前课程的真实记录生成</span>
       </article>
     </div>

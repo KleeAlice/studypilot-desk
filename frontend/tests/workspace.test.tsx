@@ -35,7 +35,7 @@ test("creates and activates a course then opens its knowledge canvas", async () 
   }));
 
   render(<App />);
-  await screen.findByRole("heading", { name: "今日驾驶舱" });
+  await screen.findByRole("heading", { name: "本周执行" });
   await userEvent.click(screen.getByRole("button", { name: /当前课程/ }));
   expect(screen.getByRole("dialog", { name: "课程空间" })).toBeInTheDocument();
   await userEvent.keyboard("{Escape}");
@@ -79,7 +79,7 @@ test("opens the current course knowledge notebook collection and enters a notebo
   }));
 
   render(<App />);
-  await screen.findByRole("heading", { name: "今日驾驶舱" });
+  await screen.findByRole("heading", { name: "本周执行" });
   await userEvent.click(screen.getByRole("button", { name: "知识网络" }));
 
   expect(await screen.findByRole("heading", { name: "知识笔记" })).toBeInTheDocument();
@@ -87,8 +87,7 @@ test("opens the current course knowledge notebook collection and enters a notebo
   expect(screen.getByText("8 个节点 · 5 条关系")).toBeInTheDocument();
 
   await userEvent.click(screen.getByRole("button", { name: "打开知识笔记：半年路线笔记" }));
-  expect(await screen.findByRole("heading", { name: "半年路线笔记" })).toBeInTheDocument();
-  expect(screen.getByRole("button", { name: "返回笔记本书架" })).toBeInTheDocument();
+  expect(await screen.findByRole("button", { name: "返回笔记本书架" })).toBeInTheDocument();
   expect(requests).toContainEqual(expect.objectContaining({ url: expect.stringMatching(/\/api\/courses\/1\/notebooks\/10\/graph$/), method: "GET" }));
 });
 
@@ -118,7 +117,7 @@ test("commits the active course even when non-critical workspace refreshes fail"
   }));
 
   render(<App />);
-  await screen.findByRole("heading", { name: "今日驾驶舱" });
+  await screen.findByRole("heading", { name: "本周执行" });
   await userEvent.click(screen.getByRole("button", { name: /当前课程/ }));
   await userEvent.click(screen.getByRole("button", { name: "切换到 可靠系统" }));
 
@@ -147,7 +146,7 @@ test("keeps a newly created course available when its first activation fails", a
   }));
 
   render(<App />);
-  await screen.findByRole("heading", { name: "今日驾驶舱" });
+  await screen.findByRole("heading", { name: "本周执行" });
   await userEvent.click(screen.getByRole("button", { name: /当前课程/ }));
   await userEvent.click(screen.getByRole("button", { name: "新建课程" }));
   await userEvent.type(screen.getByLabelText("课程名称"), "RAG 专项");

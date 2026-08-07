@@ -3,6 +3,10 @@ export interface DesktopRuntime {
   dataDir: string;
 }
 
+export type CourseType = "knowledge" | "language";
+export type LanguageProficiency = "beginner" | "elementary" | "intermediate" | "advanced";
+export type LanguageTrainingFocus = "reading" | "listening" | "speaking" | "writing";
+
 export interface Course {
   id: number;
   title: string;
@@ -22,6 +26,17 @@ export interface Course {
   last_opened_at?: string | null;
   deleted_at?: string | null;
   purge_after?: string | null;
+  course_type?: CourseType;
+  target_language_tag?: string;
+  native_language_tag?: string;
+  proficiency_level?: LanguageProficiency;
+  daily_word_goal?: number;
+  pronunciation_scheme?: string;
+  romanization_enabled?: boolean;
+  training_focus?: LanguageTrainingFocus[];
+  lesson_minutes?: number;
+  speech_rate?: number;
+  auto_play_audio?: boolean;
 }
 
 export interface CourseCreateInput {
@@ -33,6 +48,17 @@ export interface CourseCreateInput {
   start_date: string | null;
   target_weeks: number | null;
   weekly_hours: number | null;
+  course_type: CourseType;
+  target_language_tag: string;
+  native_language_tag: string;
+  proficiency_level: LanguageProficiency;
+  daily_word_goal: number;
+  pronunciation_scheme: string;
+  romanization_enabled: boolean;
+  training_focus: LanguageTrainingFocus[];
+  lesson_minutes?: number;
+  speech_rate?: number;
+  auto_play_audio?: boolean;
 }
 
 export interface CanvasSettings {
@@ -78,6 +104,8 @@ export interface KnowledgeNode {
   source_document_id?: number | null;
   source_title?: string;
   source_quote?: string;
+  source_block_key?: string;
+  source_locator?: Record<string, string | number | boolean | null>;
   image_asset_id?: string | null;
   image_alt?: string;
   image_url?: string | null;
@@ -112,9 +140,18 @@ export interface DesktopBridge {
   };
   files: {
     chooseDocuments(): Promise<string[]>;
+    sourceCreatedAt?(file: File): Promise<string | null>;
     saveExport?(request: { suggestedName: string; bytes: Uint8Array }): Promise<string | null>;
+    getExportDirectory?(): Promise<string>;
+    chooseExportDirectory?(): Promise<string | null>;
+    resetExportDirectory?(): Promise<string>;
+    saveToArchive?(request: { suggestedName: string; bytes: Uint8Array }): Promise<string>;
+    openExportDirectory?(): Promise<void>;
   };
-  clipboard: { readText(): Promise<string>; readImage?(): Promise<Uint8Array | null> };
+  fonts?: { list(): Promise<string[]> };
+  appearance?: { setZoomFactor(factor: number): void | Promise<void> };
+  capture?: { window(): Promise<Uint8Array | null> };
+  clipboard: { readText(): Promise<string>; writeText?(text: string): Promise<void>; readImage?(): Promise<Uint8Array | null> };
 }
 
 declare global {
@@ -142,6 +179,55 @@ export interface PhaseData {
   end_week: number;
 }
 
+
+export interface RoadmapGenerationMeta {
+  id: number;
+  provider_id: string;
+  model: string;
+  status: "generating" | "completed" | "failed";
+  request: {
+    start_date?: string | null;
+    target_weeks?: number;
+    weekly_hours?: number;
+    document_ids?: number[];
+    history_message_count?: number;
+  };
+  error: string;
+  created_at: string;
+  completed_at?: string | null;
+}
+
+export interface CourseRoadmap {
+  course_id: number;
+  phases: PhaseData[];
+  weeks: WeekData[];
+  generation?: RoadmapGenerationMeta | null;
+}
+
+export interface RoadmapGenerationRequest {
+  provider_id: string;
+  start_date: string | null;
+  target_weeks: number;
+  weekly_hours: number;
+  planning_goal: string;
+  document_ids: number[];
+}
+
+export interface RoadmapGenerationResult {
+  roadmap: CourseRoadmap;
+  trace: {
+    schema: string;
+    outcome: "valid" | "repaired";
+    provider_id: string;
+    model: string;
+    history_message_count: number;
+    document_ids: number[];
+    fields: Array<{
+      key: string;
+      status: "ready";
+    }>;
+  };
+}
 export interface TodayData {
   week: WeekData;
   phase: PhaseData;

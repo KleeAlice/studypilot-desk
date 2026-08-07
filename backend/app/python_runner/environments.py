@@ -315,17 +315,19 @@ class PythonEnvironmentRegistry:
     @staticmethod
     def _run_command(args: list[str], timeout: float):
         try:
-            return subprocess.run(
-                args,
-                capture_output=True,
-                text=True,
-                encoding="utf-8",
-                errors="replace",
-                timeout=timeout,
-                check=False,
-                shell=False,
-                env=safe_subprocess_environment(),
-            )
+            options = {
+                "capture_output": True,
+                "text": True,
+                "encoding": "utf-8",
+                "errors": "replace",
+                "timeout": timeout,
+                "check": False,
+                "shell": False,
+                "env": safe_subprocess_environment(),
+            }
+            if os.name == "nt":
+                options["creationflags"] = subprocess.CREATE_NO_WINDOW
+            return subprocess.run(args, **options)
         except (OSError, subprocess.TimeoutExpired):
             return None
 

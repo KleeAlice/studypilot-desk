@@ -3,6 +3,8 @@ import type { CSSProperties } from "react";
 import type { ApiClient } from "../services/api";
 import type { KnowledgeEdge, KnowledgeNode, KnowledgeNodeKind, KnowledgeRelation, MediaAsset } from "../types";
 import { MotionPresence } from "../components/MotionPresence";
+import { AnchoredMenu } from "../components/AnchoredMenu";
+import { useWorkspaceToolbarVisibility } from "../workspace/WorkspaceToolbarVisibility";
 
 interface KnowledgeGraph {
   nodes: KnowledgeNode[];
@@ -184,7 +186,15 @@ function isTextEditingTarget(target: EventTarget | null) {
   return target.isContentEditable || ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName);
 }
 
-export function Knowledge({ api, courseId = 1, notebookId, courseTitle, notebookTitle, onBack }: { api: ApiClient; courseId?: number; notebookId?: number; courseTitle?: string; notebookTitle?: string; onBack?: () => void }) {
+export interface KnowledgeSourceFocus {
+  nodeId?: number;
+  edgeId?: number;
+  title: string;
+  requestId: number;
+}
+
+export function Knowledge({ api, courseId = 1, notebookId, courseTitle, onBack, onOpenSource, onOpenLibrarySplit, sourceFocus, systemFonts = [], librarySplitOpen = false }: { api: ApiClient; courseId?: number; notebookId?: number; courseTitle?: string; onBack?: () => void; onOpenSource?: (documentId: number, locator: Record<string, string | number | boolean | null>, blockKey: string) => void; onOpenLibrarySplit?: () => void; sourceFocus?: KnowledgeSourceFocus; systemFonts?: string[]; librarySplitOpen?: boolean }) {
+  const workspaceToolbar = useWorkspaceToolbarVisibility();
   const storageScope = notebookId || courseId;
   const editStorageKey = useMemo(() => pendingEditKey(storageScope), [storageScope]);
   const canvasStorageKey = useMemo(() => canvasPreferenceKey(storageScope), [storageScope]);
@@ -212,7 +222,6 @@ export function Knowledge({ api, courseId = 1, notebookId, courseTitle, notebook
   const [exportNotice, setExportNotice] = useState("");
   const [historyAvailability, setHistoryAvailability] = useState({ canUndo: false, canRedo: false });
   const [imagePreview, setImagePreview] = useState<ImagePreview | null>(null);
-  const [focusMode, setFocusMode] = useState(false);
   const [canvasPreferences, setCanvasPreferences] = useState<CanvasPreferences>(() => readCanvasPreferences(canvasStorageKey));
   const [nodeSaveStatus, setNodeSaveStatus] = useState<Record<number, "dirty" | "saving" | "saved" | "error">>({});
   const [flippedCards, setFlippedCards] = useState<Set<number>>(() => new Set());
@@ -240,11 +249,17 @@ export function Knowledge({ api, courseId = 1, notebookId, courseTitle, notebook
   const canvasRef = useRef<HTMLDivElement>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const exportRootRef = useRef<HTMLDivElement>(null);
-  const focusButtonRef = useRef<HTMLButtonElement>(null);
+  const canvasSettingsButtonRef = useRef<HTMLButtonElement>(null);
   const imagePreviewReturnRef = useRef<HTMLButtonElement | null>(null);
   const undoStackRef = useRef<CanvasHistoryEntry[]>([]);
   const redoStackRef = useRef<CanvasHistoryEntry[]>([]);
   const historyBusyRef = useRef(false);
+  const sourceFocusAppliedRef = useRef("");
+  const canvasFontOptions = useMemo(() => Array.from(new Set([
+    "Microsoft YaHei UI", "KaiTi", "FangSong", "SimSun", "Consolas",
+    ...systemFonts,
+    canvasPreferences.fontFamily,
+  ].filter(Boolean))).sort((left, right) => left.localeCompare(right, "zh-CN")), [canvasPreferences.fontFamily, systemFonts]);
 
   useEffect(() => {
     function handleGlobalKey(event: KeyboardEvent) {
@@ -280,10 +295,6 @@ export function Knowledge({ api, courseId = 1, notebookId, courseTitle, notebook
           return;
         }
         if (sourceOpen) return;
-        if (focusMode) {
-          setFocusMode(false);
-          focusButtonRef.current?.focus();
-        }
         setLinkSource(null);
         setSelectedId(null);
         setSelectedEdgeId(null);
@@ -299,7 +310,7 @@ export function Knowledge({ api, courseId = 1, notebookId, courseTitle, notebook
       window.removeEventListener("keydown", handleGlobalKey);
       document.removeEventListener("mousedown", closeExportMenu);
     };
-  }, [focusMode, imagePreview, selectedId, selectedEdgeId, sourceOpen, historyAvailability.canUndo, historyAvailability.canRedo]);
+  }, [imagePreview, selectedId, selectedEdgeId, sourceOpen, historyAvailability.canUndo, historyAvailability.canRedo]);
 
   useEffect(() => {
     try {
@@ -442,6 +453,56 @@ export function Knowledge({ api, courseId = 1, notebookId, courseTitle, notebook
   const selected = selectedId === null ? null : nodeById.get(selectedId) || null;
   const selectedEdge = selectedEdgeId === null ? null : graph.edges.find((edge) => edge.id === selectedEdgeId) || null;
   const selectedFlashcard = selected?.kind === "flashcard" ? parseFlashcard(selected.content || selected.description || "") : null;
+
+  useEffect(() => {
+    if (!sourceFocus) return;
+    const focusKey = `${notebookId || 0}:${sourceFocus.requestId}:${sourceFocus.nodeId || 0}:${sourceFocus.edgeId || 0}`;
+    if (sourceFocusAppliedRef.current === focusKey) return;
+    const node = sourceFocus.nodeId ? nodeById.get(sourceFocus.nodeId) : null;
+    const edge = sourceFocus.edgeId ? graph.edges.find((item) => item.id === sourceFocus.edgeId) || null : null;
+    if (!node && !edge) return;
+    sourceFocusAppliedRef.current = focusKey;
+    const rect = canvasRef.current?.getBoundingClientRect();
+    const canvasWidth = rect?.width || 900;
+    const canvasHeight = rect?.height || 550;
+    if (node) {
+      setSelectedEdgeId(null);
+      setLinkSource(null);
+      setSelectedId(node.id);
+      setViewport((current) => {
+        const zoom = Math.min(1.25, Math.max(.72, current.zoom || 1));
+        const width = Number(node.width || nodeDefaultSizes[node.kind].width);
+        const height = Number(node.height || nodeDefaultSizes[node.kind].height);
+        return {
+          zoom,
+          x: Math.round(canvasWidth / 2 - (Number(node.position_x || 0) + width / 2) * zoom),
+          y: Math.round(canvasHeight / 2 - (Number(node.position_y || 0) + height / 2) * zoom),
+        };
+      });
+      window.requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-testid="knowledge-node-${node.id}"]`)?.focus({ preventScroll: true }));
+      return;
+    }
+    if (edge) {
+      const sourceNode = nodeById.get(edge.source_id);
+      const targetNode = nodeById.get(edge.target_id);
+      setSelectedId(null);
+      setLinkSource(null);
+      setSelectedEdgeId(edge.id);
+      if (sourceNode && targetNode) {
+        setViewport((current) => {
+          const zoom = Math.min(1.25, Math.max(.72, current.zoom || 1));
+          const sourceWidth = Number(sourceNode.width || nodeDefaultSizes[sourceNode.kind].width);
+          const targetWidth = Number(targetNode.width || nodeDefaultSizes[targetNode.kind].width);
+          const sourceHeight = Number(sourceNode.height || nodeDefaultSizes[sourceNode.kind].height);
+          const targetHeight = Number(targetNode.height || nodeDefaultSizes[targetNode.kind].height);
+          const centerX = (Number(sourceNode.position_x || 0) + sourceWidth / 2 + Number(targetNode.position_x || 0) + targetWidth / 2) / 2;
+          const centerY = (Number(sourceNode.position_y || 0) + sourceHeight / 2 + Number(targetNode.position_y || 0) + targetHeight / 2) / 2;
+          return { zoom, x: Math.round(canvasWidth / 2 - centerX * zoom), y: Math.round(canvasHeight / 2 - centerY * zoom) };
+        });
+      }
+      window.requestAnimationFrame(() => document.querySelector<HTMLElement>(`[data-testid="knowledge-edge-${edge.id}"]`)?.focus({ preventScroll: true }));
+    }
+  }, [graph.edges, graph.nodes, nodeById, notebookId, sourceFocus]);
   const selectedQuote = quoteSelection.end > quoteSelection.start
     ? quote.slice(quoteSelection.start, quoteSelection.end).trim()
     : "";
@@ -1225,7 +1286,7 @@ export function Knowledge({ api, courseId = 1, notebookId, courseTitle, notebook
         notebookId ? `/api/courses/${courseId}/notebooks/${notebookId}/export` : "/api/knowledge/export",
         { format, canvas_width: canvasPreferences.width, canvas_height: canvasPreferences.height },
       );
-      const nativeSave = window.studypilot?.files?.saveExport;
+      const nativeSave = window.studypilot?.files?.saveToArchive || window.studypilot?.files?.saveExport;
       if (nativeSave) {
         const savedPath = await nativeSave({ suggestedName: artifact.filename, bytes: artifact.bytes });
         if (!savedPath) {
@@ -1255,24 +1316,20 @@ export function Knowledge({ api, courseId = 1, notebookId, courseTitle, notebook
   }
 
   return (
-    <section className={`page knowledge-page ${focusMode ? "is-focus-mode" : ""}`}>
-      {focusMode && <div className="focus-mode-bar" role="region" aria-label="专注模式">
-        <div><span>FOCUS CANVAS</span><strong>{notebookTitle || "知识画布"}</strong></div>
-        <p>{graph.nodes.length} 张卡片 · {graph.edges.length} 条关系</p>
-        <button type="button" aria-label="退出专注全屏" onClick={() => { setFocusMode(false); focusButtonRef.current?.focus(); }}>退出专注 <kbd>Esc</kbd></button>
-      </div>}
-      <div className="page-heading knowledge-heading">
-        <div>
-          <div className="eyebrow">KNOWLEDGE STUDIO / FREE CANVAS</div>
-          <h1>{notebookTitle || "知识画布"}</h1>
-          <p>{courseTitle ? `${courseTitle} · ` : ""}把概念、便签、记忆卡和资料摘录放到同一张可持续生长的学习地图。</p>
-        </div>
-        <div className="knowledge-heading__actions">{onBack && <button type="button" className="back-to-shelf" onClick={onBack} aria-label="返回笔记本书架">← 返回书架</button>}<div className="knowledge-heading__meta"><strong>{graph.nodes.length}</strong><span>张知识卡</span><i /><strong>{graph.edges.length}</strong><span>条关系</span></div></div>
-      </div>
-
+    <section className="page knowledge-page">
       <div className="knowledge-studio">
-        <div className="canvas-toolbar" aria-label="知识画布工具栏">
-          <div className="tool-group tool-group--create">
+        <div
+          className="canvas-toolbar workspace-auto-toolbar"
+          role="toolbar"
+          aria-label="知识画布工具栏"
+          data-toolbar-auto-hide={String(workspaceToolbar.autoHide)}
+          data-toolbar-visible={String(workspaceToolbar.visible)}
+          {...workspaceToolbar.toolbarProps}
+          onPointerLeave={(canvasSettingsOpen || exportOpen) ? workspaceToolbar.toolbarProps.onPointerEnter : workspaceToolbar.toolbarProps.onPointerLeave}
+        >
+          {onBack && <div className="tool-group canvas-toolbar__back"><button type="button" className="back-to-shelf" onClick={onBack} aria-label="返回笔记本书架" title="返回知识笔记">←</button></div>}
+          <div className="tool-group tool-group--create canvas-toolbar__scroll-actions">
+            {onOpenLibrarySplit && <button aria-label={librarySplitOpen ? "关闭资料库分屏" : "分屏打开资料库"} aria-pressed={librarySplitOpen} className={`linked-split-trigger ${librarySplitOpen ? "is-active" : ""}`} onClick={onOpenLibrarySplit}><span>◫</span>{librarySplitOpen ? "关闭资料分屏" : "分屏资料库"}</button>}
             <button aria-label="新建概念" onClick={() => void createNode("concept")}><span>◇</span>新建概念</button>
             <button aria-label="新建便签" onClick={() => void createNode("sticky_note")}><span>▤</span>新建便签</button>
             <button aria-label="新建记忆卡" onClick={() => void createNode("flashcard")}><span>▣</span>新建记忆卡</button>
@@ -1281,7 +1338,8 @@ export function Knowledge({ api, courseId = 1, notebookId, courseTitle, notebook
             <button aria-label="导入图片" disabled={imageBusy} onClick={() => imageInputRef.current?.click()}><span>▧</span>{imageBusy ? "导入中…" : "导入图片"}</button>
             <button aria-label="粘贴图片" disabled={imageBusy} onClick={() => void pasteNativeImage()}><span>⌘</span>粘贴图片</button>
           </div>
-          <div className="tool-group">
+          <div className="canvas-toolbar__secondary">
+          <div className="tool-group tool-group--canvas-nav">
             <label>关系<select aria-label="关系类型" value={relation} onChange={(event) => setRelation(event.target.value as KnowledgeRelation)}>{Object.entries(relationLabels).map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select></label>
             <button aria-label="撤销画布操作" title="撤销 · Ctrl+Z" disabled={!historyAvailability.canUndo} onClick={() => void undoCanvas()}>↶</button>
             <button aria-label="重做画布操作" title="重做 · Ctrl+Shift+Z / Ctrl+Y" disabled={!historyAvailability.canRedo} onClick={() => void redoCanvas()}>↷</button>
@@ -1290,32 +1348,34 @@ export function Knowledge({ api, courseId = 1, notebookId, courseTitle, notebook
             <button aria-label="放大画布" onClick={() => setViewport((current) => ({ ...current, zoom: Math.min(1.6, current.zoom + .1) }))}>＋</button>
             <button aria-label="重置画布" onClick={() => setViewport({ x: 12, y: 12, zoom: 1 })}>100%</button>
             <button aria-label="适合全部内容" onClick={fitCanvas}>适合</button>
+          </div>
+          <div className="tool-group canvas-toolbar__primary-actions">
             <div className="canvas-export-anchor" ref={exportRootRef}>
               <button aria-label="导出知识画布" aria-haspopup="menu" aria-expanded={exportOpen} disabled={exportBusy !== null} onClick={() => setExportOpen((value) => !value)}>{exportBusy ? "导出中…" : "⇩ 导出"}</button>
               <MotionPresence present={exportOpen} exitMs={120}>{(phase) => <div className="canvas-export-menu" data-presence={phase} role="menu" aria-label="导出知识笔记">
-                <header><small>EXPORT NOTEBOOK</small><strong>导出与整理</strong><span>完整画布或可继续编辑的文档</span></header>
+                <header><strong>导出与整理</strong><span>完整画布或可继续编辑的文档</span></header>
                 <button role="menuitem" aria-label="导出 PNG 画布" onClick={() => void exportNotebook("png")}><i>PNG</i><span><strong>导出 PNG 画布</strong><small>完整布局与关系连线</small></span></button>
                 <button role="menuitem" aria-label="导出 PDF 画布" onClick={() => void exportNotebook("pdf")}><i>PDF</i><span><strong>导出 PDF 画布</strong><small>适合分享与归档</small></span></button>
                 <button role="menuitem" aria-label="整理为 Word" onClick={() => void exportNotebook("docx")}><i>DOC</i><span><strong>整理为 Word</strong><small>按空间顺序生成章节</small></span></button>
                 <button role="menuitem" aria-label="整理为 Markdown" onClick={() => void exportNotebook("md")}><i>MD</i><span><strong>整理为 Markdown</strong><small>自包含图片与关系清单</small></span></button>
               </div>}</MotionPresence>
             </div>
-            <button ref={focusButtonRef} aria-label={focusMode ? "退出专注全屏" : "进入专注全屏"} className="focus-mode-trigger" onClick={() => setFocusMode((value) => !value)}>{focusMode ? "↙ 退出" : "⛶ 专注"}</button>
             <div className="canvas-settings-anchor">
-              <button aria-label="画布设置" aria-expanded={canvasSettingsOpen} onClick={() => setCanvasSettingsOpen((value) => !value)}>Aa · 设置</button>
-              <MotionPresence present={canvasSettingsOpen} exitMs={140}>{(phase) => <div className="canvas-settings" data-presence={phase} role="dialog" aria-label="画布设置面板">
-                <header><div><small>CANVAS STYLE</small><strong>画布与排版</strong></div><button aria-label="关闭画布设置" onClick={() => setCanvasSettingsOpen(false)}>×</button></header>
+              <button ref={canvasSettingsButtonRef} aria-label="画布设置" aria-expanded={canvasSettingsOpen} onClick={() => setCanvasSettingsOpen((value) => !value)}>Aa · 设置</button>
+              <AnchoredMenu open={canvasSettingsOpen} anchorRef={canvasSettingsButtonRef} ariaLabel="画布设置面板" role="dialog" className="canvas-settings" onClose={() => setCanvasSettingsOpen(false)}>
+                <header><div><strong>画布与排版</strong></div><button aria-label="关闭画布设置" onClick={() => setCanvasSettingsOpen(false)}>×</button></header>
                 <label>画布尺寸<select aria-label="画布尺寸" value={`${canvasPreferences.width}x${canvasPreferences.height}`} onChange={(event) => {
                   const [width, height] = event.target.value.split("x").map(Number);
                   setCanvasPreferences((current) => ({ ...current, width, height }));
                 }}><option value="1400x900">紧凑 · 1400 × 900</option><option value="1800x1100">标准 · 1800 × 1100</option><option value="2400x1400">宽幅 · 2400 × 1400</option><option value="3200x1800">大型 · 3200 × 1800</option></select></label>
                 <div className="canvas-size-fields"><label>宽度<input aria-label="画布宽度" type="number" min={1200} max={4200} value={canvasPreferences.width} onChange={(event) => setCanvasPreferences((current) => ({ ...current, width: Math.min(4200, Math.max(1200, Number(event.target.value) || 1200)) }))} /></label><label>高度<input aria-label="画布高度" type="number" min={800} max={2800} value={canvasPreferences.height} onChange={(event) => setCanvasPreferences((current) => ({ ...current, height: Math.min(2800, Math.max(800, Number(event.target.value) || 800)) }))} /></label></div>
-                <label>画布字体<select aria-label="画布字体" value={canvasPreferences.fontFamily} onChange={(event) => setCanvasPreferences((current) => ({ ...current, fontFamily: event.target.value }))}><option value="Microsoft YaHei UI">微软雅黑</option><option value="KaiTi">楷体</option><option value="FangSong">仿宋</option><option value="SimSun">宋体</option><option value="Consolas">Consolas</option></select></label>
+                <label>画布字体<select aria-label="画布字体" value={canvasPreferences.fontFamily} style={{ fontFamily: canvasPreferences.fontFamily }} onChange={(event) => setCanvasPreferences((current) => ({ ...current, fontFamily: event.target.value }))}>{canvasFontOptions.map((font) => <option key={font} value={font} style={{ fontFamily: font }}>{font}</option>)}</select></label>
                 <div className="canvas-font-scale"><label htmlFor="canvas-font-scale">卡片字号</label><output>{canvasPreferences.fontScale}%</output><input id="canvas-font-scale" aria-label="卡片字号" type="range" min={80} max={150} step={5} value={canvasPreferences.fontScale} onChange={(event) => setCanvasPreferences((current) => ({ ...current, fontScale: Number(event.target.value) }))} /></div>
                 <label>卡片缩放模式<select aria-label="卡片缩放模式" value={canvasPreferences.resizeTextWithCard ? "scale-text" : "reflow"} onChange={(event) => setCanvasPreferences((current) => ({ ...current, resizeTextWithCard: event.target.value === "scale-text" }))}><option value="reflow">仅调整卡片 · 文字自动重排</option><option value="scale-text">左下角联动 · 同步调整字号</option></select></label>
                 <button className="canvas-settings__reset" onClick={() => setCanvasPreferences({ ...defaultCanvasPreferences })}>恢复默认排版</button>
-              </div>}</MotionPresence>
+              </AnchoredMenu>
             </div>
+          </div>
           </div>
         </div>
 
@@ -1334,7 +1394,7 @@ export function Knowledge({ api, courseId = 1, notebookId, courseTitle, notebook
             }}
           >
             <div className="canvas-grid" aria-hidden="true" />
-            <div className="canvas-world" data-resize-mode={canvasPreferences.resizeTextWithCard ? "scale-text" : "reflow"} style={{ transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.zoom})`, width: canvasPreferences.width, height: canvasPreferences.height, fontFamily: canvasPreferences.fontFamily, "--canvas-font-scale": String(canvasPreferences.fontScale / 100) } as CSSProperties}>
+            <div className="canvas-world" data-resize-mode={canvasPreferences.resizeTextWithCard ? "scale-text" : "reflow"} style={{ transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.zoom})`, width: canvasPreferences.width, height: canvasPreferences.height, fontFamily: `"${canvasPreferences.fontFamily.replaceAll('"', '\\"')}"`, "--canvas-font-scale": String(canvasPreferences.fontScale / 100) } as CSSProperties}>
               <svg className="edge-layer" width={canvasPreferences.width} height={canvasPreferences.height} aria-label="知识关系">
                 <defs><marker id="edge-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" /></marker></defs>
                 {graph.edges.map((edge) => {
@@ -1354,10 +1414,12 @@ export function Knowledge({ api, courseId = 1, notebookId, courseTitle, notebook
                   const path = `M ${sx} ${sy} C ${sx + bend} ${sy}, ${tx - bend} ${ty}, ${tx} ${ty}`;
                   return <g
                     key={edge.id}
+                    data-testid={`knowledge-edge-${edge.id}`}
+                    data-source-focus={sourceFocus?.edgeId === edge.id ? "true" : undefined}
                     role="button"
                     tabIndex={0}
                     aria-label={edgeLabel}
-                    className={`knowledge-edge-group ${selectedEdgeId === edge.id ? "is-selected" : ""}`}
+                    className={`knowledge-edge-group ${selectedEdgeId === edge.id ? "is-selected" : ""} ${sourceFocus?.edgeId === edge.id ? "is-source-focus" : ""}`}
                     onClick={(event) => { event.stopPropagation(); setSelectedId(null); setLinkSource(null); setSelectedEdgeId(edge.id); }}
                     onKeyDown={(event) => {
                       if (event.key === "Enter" || event.key === " ") {
@@ -1384,9 +1446,10 @@ export function Knowledge({ api, courseId = 1, notebookId, courseTitle, notebook
                   <article
                     key={node.id}
                     data-testid={`knowledge-node-${node.id}`}
+                    data-source-focus={sourceFocus?.nodeId === node.id ? "true" : undefined}
                     tabIndex={0}
                     aria-label={`知识卡片：${node.title}`}
-                    className={`canvas-card kind--${node.kind} color--${node.color} ${selectedId === node.id ? "is-selected" : ""} ${isSource ? "is-link-source" : ""}`}
+                    className={`canvas-card kind--${node.kind} color--${node.color} ${selectedId === node.id ? "is-selected" : ""} ${isSource ? "is-link-source" : ""} ${sourceFocus?.nodeId === node.id ? "is-source-focus" : ""}`}
                     style={{
                       left: Number(node.position_x || 0),
                       top: Number(node.position_y || 0),
@@ -1420,7 +1483,7 @@ export function Knowledge({ api, courseId = 1, notebookId, courseTitle, notebook
                       </div>
                     ) : node.kind !== "image" ? <p>{node.content || node.description || "双击补充内容"}</p> : !node.image_url ? <p className="image-placeholder">图片正在准备中…</p> : null}
                     {node.kind === "concept" && <footer className="mastery-control" style={{ "--mastery": `${Math.round((node.mastery || 0) * 100)}%` } as CSSProperties}><input type="range" min={0} max={100} step={10} value={Math.round((node.mastery || 0) * 100)} aria-label={`调整“${node.title}”掌握度`} onChange={(event) => changeMastery(node, Number(event.target.value))} onPointerUp={() => void flushScheduledNodePatch(node.id)} onBlur={() => void flushScheduledNodePatch(node.id)} /><small>{Math.round((node.mastery || 0) * 100)}% 掌握</small></footer>}
-                    {node.kind === "citation" && node.source_title && <em>来自 · {node.source_title}</em>}
+                    {node.kind === "citation" && node.source_title && (node.source_document_id && onOpenSource ? <button type="button" className="citation-source-link" aria-label={`打开来源：${node.source_title}`} onClick={(event) => { event.stopPropagation(); onOpenSource(node.source_document_id!, node.source_locator || {}, node.source_block_key || ""); }}>来自 · {node.source_title}</button> : <em>来自 · {node.source_title}</em>)}
                     <button className="node-link-port" aria-label={linkLabel} title={linkLabel} onClick={(event) => { event.stopPropagation(); void chooseLinkTarget(node.id); }}><span /></button>
                     {selectedId === node.id && (Object.keys(resizeHandleLabels) as ResizeDirection[]).map((direction) => {
                       const textCoupled = direction === "sw" && canvasPreferences.resizeTextWithCard;
@@ -1453,7 +1516,7 @@ export function Knowledge({ api, courseId = 1, notebookId, courseTitle, notebook
 
           {selected && (
             <aside className="node-inspector" aria-label="卡片检查器">
-              <header><div><small>CARD INSPECTOR</small><h2>编辑卡片</h2></div><button aria-label="关闭卡片检查器" onClick={() => { void flushScheduledNodePatch(selected.id); setSelectedId(null); }}>×</button></header>
+              <header><div><h2>编辑卡片</h2></div><button aria-label="关闭卡片检查器" onClick={() => { void flushScheduledNodePatch(selected.id); setSelectedId(null); }}>×</button></header>
               <label>标题<input value={selected.title} onChange={(event) => {
                 const title = event.target.value;
                 setGraph((current) => ({ ...current, nodes: current.nodes.map((node) => node.id === selected.id ? { ...node, title } : node) }));
@@ -1495,7 +1558,7 @@ export function Knowledge({ api, courseId = 1, notebookId, courseTitle, notebook
       <MotionPresence present={sourceOpen} exitMs={220}>{(phase) => (
         <div className="source-backdrop" data-presence={phase} role="presentation" onMouseDown={(event) => { if (event.target === event.currentTarget) closeSources(); }}>
           <aside ref={sourceDrawerRef} className="source-drawer" role="dialog" aria-modal="true" aria-label="引用资料">
-            <header><div><small>SOURCE LIBRARY</small><h2>引用资料</h2><p>选择已导入的资料，摘录原文生成可回溯的引用卡片。</p></div><button data-source-close aria-label="关闭引用资料" onClick={closeSources}>×</button></header>
+            <header><div><h2>引用资料</h2><p>选择已导入的资料，摘录原文生成可回溯的引用卡片。</p></div><button data-source-close aria-label="关闭引用资料" onClick={closeSources}>×</button></header>
             <div className="source-drawer__body">
               <nav aria-label="资料列表">
                 {documents.length ? documents.map((document) => <button key={document.id} className={activeDocument?.id === document.id ? "is-active" : ""} aria-label={`${document.title} · ${document.filename}`} onClick={() => void chooseDocument(document)}><span>{document.title}</span><small>{document.filename}</small></button>) : <div className="source-empty"><strong>资料书架还是空的</strong><span>先在“资料书架”导入 PDF、Markdown 或文本文件。</span></div>}
@@ -1520,7 +1583,7 @@ export function Knowledge({ api, courseId = 1, notebookId, courseTitle, notebook
 
       {selectedEdge && <div className="edge-toast" role="status"><span>已选择关系：{nodeById.get(selectedEdge.source_id)?.title} → {nodeById.get(selectedEdge.target_id)?.title} · {relationLabels[selectedEdge.relation || "prerequisite"]}</span><button aria-label="删除关系" onClick={() => void removeEdge(selectedEdge)}>删除关系</button><button aria-label="取消选择关系" onClick={() => setSelectedEdgeId(null)}>取消</button></div>}
       {linkSource !== null && <div className="link-toast" role="status">已选择起点：{nodeById.get(linkSource)?.title} · 点击另一张卡片右侧圆点完成连接 <button onClick={() => setLinkSource(null)}>取消</button></div>}
-      {exportNotice && <div className="export-notice" role="status">{exportNotice}<button aria-label="关闭导出提示" onClick={() => setExportNotice("")}>×</button></div>}
+      {exportNotice && <div className="export-notice" role="status"><span>{exportNotice}</span>{exportNotice.startsWith("已导出") && window.studypilot?.files?.openExportDirectory && <button aria-label="打开导出文件夹" onClick={() => void window.studypilot.files.openExportDirectory?.()}>打开导出文件夹</button>}<button aria-label="关闭导出提示" onClick={() => setExportNotice("")}>×</button></div>}
       {error && <div className="floating-error" role="alert">{error}<button aria-label="关闭错误提示" onClick={() => setError("")}>×</button></div>}
     </section>
   );

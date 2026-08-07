@@ -7,7 +7,7 @@ StudyPilot Desk 使用 Electron、React、FastAPI 与 SQLite 构建，不依赖�
 ## 项目状态
 
 - 桌面端核心学习闭环、课程书架、知识笔记、资料书架、实验室、统计与备份已经可用。
-- Android 伴侣应用正在设计与开发，计划支持加密 `.spack` 数据包、离线只读快照和电脑在线时的安全访问。
+- Android 伴侣应用的首个只读垂直切片已经落地：四项底部导航、课程与今日任务、知识图谱、14 天统计、明暗主题、减弱动态效果和确定性演示数据源均可运行；加密 `.spack`、实时主机访问与真机验收继续开发中。
 - 移动端设计见 [Mobile 与加密数据包规格](docs/superpowers/specs/2026-07-18-mobile-app-data-pack-design.md)。
 - 当前为持续开发版本，升级前建议使用应用内备份功能保存数据。
 
@@ -25,6 +25,28 @@ Windows 双击 `start.bat`，或在 PowerShell 中运行：
 
 ```powershell
 .\dev.bat
+```
+
+移动端浏览器预览与生产构建：
+
+```powershell
+npm.cmd run mobile:dev
+npm.cmd run mobile:build
+```
+
+同步或构建 Android 工程需要 Node.js 22+、JDK 21、Android SDK 36 与可用的 Android Studio/Gradle 工具链：
+
+```powershell
+npm.cmd run mobile:sync
+npm.cmd run mobile:apk
+```
+
+Debug APK 成功后位于 `mobile/android/app/build/outputs/apk/debug/app-debug.apk`。当前移动端使用只读的确定性预览数据，不会修改桌面数据库。
+
+若本机还没有 Android 工具链，可在阅读并接受 Google Android SDK 许可后使用仓库内的便携构建脚本；它把 JDK 21、SDK 36 与 Gradle 缓存放在被 Git 忽略的 `.tooling/`，不会修改系统级 Java 配置：
+
+```powershell
+powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts\bootstrap-mobile-android.ps1 -AcceptAndroidLicenses
 ```
 
 重置演示数据（会先旁路保存原数据）：
@@ -55,6 +77,8 @@ Windows 双击 `start.bat`，或在 PowerShell 中运行：
 npm.cmd test
 npm.cmd run typecheck
 npm.cmd run build
+npm.cmd run mobile:build
+npm.cmd run mobile:sync
 npm.cmd run smoke
 npm.cmd run test:e2e
 .\.venv\Scripts\python.exe scripts\smoke_test.py
@@ -67,12 +91,12 @@ Electron/Playwright 命令需要桌面会话。详见 [测试报告](docs/TEST_R
 ```text
 backend/          FastAPI、SQLite、领域服务、Python 运行器
 electron/         主进程、预加载桥、窗口与后端生命周期
-frontend/         React 工作台与设计系统
+frontend/         React 桌面工作台、移动端页面与设计系统
+mobile/android/   Capacitor 8 Android 原生壳
 data/seeds/       从源 DOCX 生成的结构化路线
 scripts/          路线抽取、开发启动、烟雾测试、演示重置
 tests/            前端、Electron 与 Playwright 测试
 docs/             产品、架构、安全、测试与导入报告
-mobile/           规划中的 Capacitor Android 工程
 ```
 
 ## 数据、安全与隐私
@@ -83,13 +107,7 @@ mobile/           规划中的 Capacitor Android 工程
 
 ## 路线数据
 
-仓库包含结构化演示路线 `data/seeds/roadmap.json`。如需从自己的 DOCX 重新生成：
-
-```powershell
-.\.venv\Scripts\python.exe scripts\extract_roadmap.py "C:\path\to\roadmap.docx"
-```
-
-字段映射与解析规则见 [路线导入报告](docs/ROADMAP_IMPORT_REPORT.md)。
+仓库包含不引用任何用户资料的 CC0 通用演示路线 `data/seeds/roadmap.json`。用户自己的课程、资料和学习计划仅保存在本机数据目录，不进入版本控制。
 
 ## 文档
 

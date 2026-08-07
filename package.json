@@ -1,6 +1,6 @@
 {
   "name": "studypilot-desk",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "type": "module",
   "description": "半年算法转向学习操作系统",
@@ -11,6 +11,14 @@
     "build:frontend": "vite build",
     "build:electron": "tsup electron/main.ts electron/preload.ts --format cjs --platform node --out-dir dist-electron --external electron --clean",
     "build": "npm run build:frontend && npm run build:electron",
+    "build:backend-runtime": "node scripts/build-backend-runtime.mjs",
+    "dist:win": "node scripts/build-installer.mjs",
+    "dist:mac": "node scripts/build-mac-installer.mjs",
+    "mobile:dev": "vite --config vite.mobile.config.ts --host 127.0.0.1",
+    "mobile:build": "vite build --config vite.mobile.config.ts && node scripts/finalize-mobile-build.mjs",
+    "mobile:sync": "npm run mobile:build && cap sync android",
+    "mobile:open": "cap open android",
+    "mobile:apk": "npm run mobile:sync && cd mobile/android && gradlew.bat assembleDebug",
     "typecheck": "tsc --noEmit && tsc -p tsconfig.electron.json --noEmit",
     "test": "vitest run --config vitest.config.ts",
     "test:backend-manager": "vitest run --config vitest.config.ts tests/unit/backend-manager.test.ts",
@@ -19,10 +27,20 @@
     "start:electron": "electron ."
   },
   "dependencies": {
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/core": "^8.0.0",
+    "docx-preview": "^0.4.0",
+    "katex": "^0.18.1",
+    "mermaid": "^11.16.0",
     "react": "^19.1.1",
-    "react-dom": "^19.1.1"
+    "react-dom": "^19.1.1",
+    "react-markdown": "^10.1.0",
+    "rehype-katex": "^7.0.1",
+    "remark-gfm": "^4.0.1",
+    "remark-math": "^6.0.0"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.0.0",
     "@playwright/test": "^1.54.2",
     "@testing-library/jest-dom": "^6.6.4",
     "@testing-library/react": "^16.3.0",
@@ -32,6 +50,7 @@
     "@types/react-dom": "^19.1.7",
     "@vitejs/plugin-react": "^4.7.0",
     "electron": "^37.2.4",
+    "electron-builder": "^26.0.0",
     "jsdom": "^26.1.0",
     "tsup": "^8.5.0",
     "typescript": "^5.8.3",

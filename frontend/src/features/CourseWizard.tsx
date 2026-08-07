@@ -37,6 +37,14 @@ export function CourseWizard({ open, onClose, onCreate }: {
         start_date: startDate || null,
         target_weeks: targetWeeks ? Number(targetWeeks) : null,
         weekly_hours: weeklyHours ? Number(weeklyHours) : null,
+        course_type: "knowledge",
+        target_language_tag: "",
+        native_language_tag: "zh-CN",
+        proficiency_level: "beginner",
+        daily_word_goal: 10,
+        pronunciation_scheme: "",
+        romanization_enabled: false,
+        training_focus: ["reading", "listening", "speaking", "writing"],
       });
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "课程创建失败，请重试");
@@ -54,7 +62,7 @@ export function CourseWizard({ open, onClose, onCreate }: {
           <fieldset><legend>封面色</legend><div className="course-cover-options">{COURSE_COVER_PRESETS.map((preset) => <button type="button" key={preset.id} className={`${preset.id === coverStyle ? "is-selected" : ""} cover-dot course-volume--${preset.id}`} aria-label={`选择${preset.label}封面`} onClick={() => setCoverStyle(preset.id)}><i /><span>{preset.label}</span></button>)}</div></fieldset>
           <fieldset><legend>课程图标</legend><div className="course-icon-options">{[["network", "⌘"], ["matrix", "∑"], ["python", "λ"], ["research", "◈"], ["book", "◇"]].map(([value, glyph]) => <button type="button" key={value} className={value === icon ? "is-selected" : ""} onClick={() => setIcon(value)} aria-label={`选择${value}图标`}>{glyph}</button>)}</div></fieldset>
         </div>
-        <div className={`course-wizard-preview course-volume--${coverStyle}`}><small>PREVIEW</small><i>{{ network: "⌘", matrix: "∑", python: "λ", research: "◈", book: "◇" }[icon]}</i><strong>{title || "你的新课程"}</strong><span>{description || "一段清晰的课程简介"}</span></div>
+        <div className={`course-wizard-preview course-volume--${coverStyle}`}><i>{{ network: "⌘", matrix: "∑", python: "λ", research: "◈", book: "◇" }[icon]}</i><strong>{title || "你的新课程"}</strong><span>{description || "一段清晰的课程简介"}</span></div>
       </div> : <div className="course-wizard-plan">
         <label>学习目标<textarea autoFocus value={goal} onChange={(event) => setGoal(event.target.value)} placeholder="例如：独立完成一个可复现的端到端项目" maxLength={2000} /></label>
         <div className="course-wizard-row"><label>开始日期<input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} /></label><label>预计学习周数<input type="number" min="1" max="260" value={targetWeeks} onChange={(event) => setTargetWeeks(event.target.value)} /></label><label>每周投入小时<input type="number" min="0.5" max="168" step="0.5" value={weeklyHours} onChange={(event) => setWeeklyHours(event.target.value)} /></label></div>

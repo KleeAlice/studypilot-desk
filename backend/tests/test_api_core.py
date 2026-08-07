@@ -1,4 +1,6 @@
 import base64
+from concurrent.futures import ThreadPoolExecutor
+from threading import Event
 
 from fastapi.testclient import TestClient
 
@@ -17,7 +19,64 @@ def test_health_and_default_course_are_available(tmp_path) -> None:
     assert health.status_code == 200
     assert health.json()["data"]["status"] == "ok"
     assert courses.status_code == 200
-    assert courses.json()["data"][0]["title"] == "半年算法转向默认路线"
+    assert courses.json()["data"][0]["title"] == "通用学习示例路线"
+
+
+def test_document_parsing_does_not_block_health_requests(tmp_path, monkeypatch) -> None:
+    parsing_started = Event()
+    release_parsing = Event()
+    with client_for(tmp_path) as client:
+        service = client.app.state.documents
+        original = service.import_bytes
+
+        def slow_import(*args):
+            parsing_started.set()
+            assert release_parsing.wait(3)
+            return original(*args)
+
+        monkeypatch.setattr(service, "import_bytes", slow_import)
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            import_request = executor.submit(
+                client.post,
+                "/api/documents/import",
+                files={"file": ("slow.txt", b"slow parser", "text/plain")},
+            )
+            assert parsing_started.wait(1)
+            health_request = executor.submit(client.get, "/api/health")
+            try:
+                health = health_request.result(timeout=0.5)
+            finally:
+                release_parsing.set()
+            imported = import_request.result(timeout=3)
+
+    assert health.status_code == 200
+    assert imported.status_code == 201
+
+
+def test_course_scoped_document_list_does_not_follow_the_active_course(tmp_path) -> None:
+    with client_for(tmp_path) as client:
+        first_course_id = client.get("/api/settings/active-course").json()["data"]["course_id"]
+        first_import = client.post(
+            "/api/documents/import",
+            files={"file": ("first.md", b"# First course", "text/markdown")},
+        )
+        second_course = client.post(
+            "/api/courses",
+            json={"title": "Second course"},
+        ).json()["data"]
+        client.post(f"/api/courses/{second_course['id']}/activate")
+        second_import = client.post(
+            "/api/documents/import",
+            files={"file": ("second.md", b"# Second course", "text/markdown")},
+        )
+
+        first_list = client.get(f"/api/courses/{first_course_id}/documents")
+        second_list = client.get(f"/api/courses/{second_course['id']}/documents")
+
+    assert first_import.status_code == 201
+    assert second_import.status_code == 201
+    assert [item["filename"] for item in first_list.json()["data"]] == ["first.md"]
+    assert [item["filename"] for item in second_list.json()["data"]] == ["second.md"]
 
 
 def test_course_can_be_created_and_switched(tmp_path) -> None:
@@ -30,6 +89,58 @@ def test_course_can_be_created_and_switched(tmp_path) -> None:
     assert created.status_code == 201
     assert switched.status_code == 200
     assert active.json()["data"]["course_id"] == course_id
+
+def test_course_creation_persists_knowledge_or_language_course_type(tmp_path) -> None:
+    with client_for(tmp_path) as client:
+        knowledge = client.post("/api/courses", json={"title": "普通学习"})
+        language = client.post(
+            "/api/courses",
+            json={
+                "title": "我的英语",
+                "course_type": "language",
+                "target_language_tag": "en-US",
+                "native_language_tag": "zh-CN",
+                "proficiency_level": "elementary",
+                "daily_word_goal": 12,
+                "pronunciation_scheme": "ipa",
+                "romanization_enabled": False,
+                "training_focus": [
+                    "reading",
+                    "listening",
+                    "speaking",
+                    "writing",
+                ],
+            },
+        )
+        invalid = client.post(
+            "/api/courses",
+            json={
+                "title": "缺少目标语言",
+                "course_type": "language",
+                "target_language_tag": "",
+            },
+        )
+        courses = client.get("/api/courses")
+
+    assert knowledge.status_code == 201
+    assert knowledge.json()["data"]["course_type"] == "knowledge"
+    assert language.status_code == 201
+    created = language.json()["data"]
+    assert created["course_type"] == "language"
+    assert created["target_language_tag"] == "en-US"
+    assert created["proficiency_level"] == "elementary"
+    assert created["daily_word_goal"] == 12
+    assert created["pronunciation_scheme"] == "ipa"
+    assert created["romanization_enabled"] is False
+    assert created["training_focus"] == [
+        "reading",
+        "listening",
+        "speaking",
+        "writing",
+    ]
+    persisted = next(item for item in courses.json()["data"] if item["id"] == created["id"])
+    assert persisted["target_language_tag"] == "en-US"
+    assert invalid.status_code == 422
 
 
 def test_course_can_be_renamed_and_recolored(tmp_path) -> None:
@@ -121,6 +232,32 @@ def test_course_trash_keeps_images_and_permanent_delete_removes_them(tmp_path) -
     assert len(retained_files) == 1
     assert purged.status_code == 200
     assert list((tmp_path / "media").iterdir()) == []
+
+
+def test_custom_wallpaper_is_persisted_served_and_cleared(tmp_path) -> None:
+    png = base64.b64decode(
+        "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII="
+    )
+    with client_for(tmp_path) as client:
+        uploaded = client.post(
+            "/api/settings/wallpaper",
+            files={"file": ("study-wallpaper.png", png, "image/png")},
+        )
+        settings = client.get("/api/settings")
+        image = client.get("/api/settings/wallpaper/image")
+        cleared = client.delete("/api/settings/wallpaper")
+        missing = client.get("/api/settings/wallpaper/image")
+
+    assert uploaded.status_code == 201
+    assert uploaded.json()["data"]["mode"] == "custom"
+    assert uploaded.json()["data"]["revision"]
+    assert settings.json()["data"]["wallpaper_mode"] == "custom"
+    assert image.status_code == 200
+    assert image.headers["content-type"] == "image/png"
+    assert image.content == png
+    assert cleared.status_code == 200
+    assert cleared.json()["data"]["mode"] == "none"
+    assert missing.status_code == 404
 
 
 def test_course_profile_can_be_created_trashed_and_restored(tmp_path) -> None:
@@ -292,3 +429,24 @@ def test_validation_and_not_found_use_uniform_error_shape(tmp_path) -> None:
     assert missing.json() == {
         "error": {"code": "TASK_NOT_FOUND", "message": "任务不存在", "details": None}
     }
+
+
+def test_generic_record_can_be_deleted_without_affecting_siblings(tmp_path) -> None:
+    with client_for(tmp_path) as client:
+        first = client.post(
+            "/api/notes", json={"title": "Disposable memo", "payload": {"content": "temporary"}}
+        ).json()["data"]
+        second = client.post(
+            "/api/notes", json={"title": "Keep memo", "payload": {"content": "persistent"}}
+        ).json()["data"]
+
+        deleted = client.delete(f"/api/notes/{first['id']}")
+        remaining = client.get("/api/notes")
+        missing = client.get(f"/api/notes/{first['id']}")
+
+    assert deleted.status_code == 200
+    assert deleted.json()["data"] == first
+    assert remaining.status_code == 200
+    assert [item["id"] for item in remaining.json()["data"]] == [second["id"]]
+    assert missing.status_code == 404
+    assert missing.json()["error"]["code"] == "ITEM_NOT_FOUND"

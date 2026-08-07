@@ -1,4 +1,7 @@
-param([switch]$Dev)
+param(
+    [switch]$Dev,
+    [switch]$Rebuild
+)
 
 $ErrorActionPreference = 'Stop'
 $root = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -32,7 +35,13 @@ if (-not (Test-Path -LiteralPath (Join-Path $root 'node_modules\electron'))) {
 if ($Dev) {
     npm.cmd run dev
 } else {
-    Write-Host '[StudyPilot] Building and starting the desktop application...'
-    npm.cmd run build
+    $needsBuild = $Rebuild -or
+        -not (Test-Path -LiteralPath (Join-Path $root 'dist\index.html')) -or
+        -not (Test-Path -LiteralPath (Join-Path $root 'dist-electron\main.cjs'))
+    if ($needsBuild) {
+        Write-Host '[StudyPilot] Building the desktop application...'
+        npm.cmd run build
+    }
+    Write-Host '[StudyPilot] Starting the desktop application...'
     & (Join-Path $root 'node_modules\.bin\electron.cmd') .
 }

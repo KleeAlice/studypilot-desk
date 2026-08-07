@@ -1,4 +1,4 @@
-import { act, fireEvent, render } from "@testing-library/react";
+import { act, fireEvent, render, screen } from "@testing-library/react";
 import { useState } from "react";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import * as motion from "../src/ui/motion";
@@ -84,7 +84,7 @@ test("sidebar exposes a single moving active indicator", () => {
   const { container } = render(<NavRail active="stats" onChange={vi.fn()} collapsed={false} onToggle={vi.fn()} />);
   const indicator = container.querySelector(".navrail__indicator") as HTMLElement;
   expect(indicator).toBeInTheDocument();
-  expect(indicator.style.getPropertyValue("--nav-active-index")).toBe("8");
+  expect(indicator.style.getPropertyValue("--nav-active-index")).toBe("7");
 });
 
 test("course switcher exposes the selected replacement while activation is pending", () => {
@@ -99,7 +99,11 @@ test("course switcher exposes the selected replacement while activation is pendi
   />);
 
   fireEvent.click(view.container.querySelector(".course-switcher__trigger")!);
-  const target = view.container.querySelectorAll(".course-list button")[1] as HTMLButtonElement;
+  const popover = screen.getByRole("dialog", { name: "课程空间" });
+  expect(popover.parentElement).toBe(document.body);
+  expect(popover.style.position).toBe("fixed");
+  expect(popover).toHaveClass("anchored-menu");
+  const target = screen.getByRole("button", { name: "切换到 第二课程" });
   fireEvent.click(target);
 
   expect(view.container.querySelector(".course-switcher")).toHaveAttribute("data-course-switching", "8");

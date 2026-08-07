@@ -1,10 +1,20 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import "katex/dist/katex.min.css";
 import { App } from "./app/App";
 import "./styles/tokens.css";
 import "./styles/global.css";
 import "./styles/workspace.css";
 import "./styles/refinement.css";
 import "./styles/motion.css";
+import "./styles/agent.css";
+import "./styles/selection-learning.css";
+import "./styles/settings-center.css";
+import "./styles/language.css";
+import "./styles/glass.css";
+import "./styles/assistant-enhancements.css";
+import "./styles/reader-navigation-fix.css";
+import "./styles/uniform-typography.css";
+import "./styles/editable-formats.css";
 
 createRoot(document.getElementById("root")!).render(<StrictMode><App /></StrictMode>);

@@ -1,0 +1,227 @@
+.agent-host.is-agent-open {
+  grid-template-columns: minmax(0, 1fr) var(--agent-dock-width, 420px);
+}
+
+.agent-host__content {
+  grid-column: 1;
+}
+
+.agent-dock {
+  grid-column: 2;
+}
+
+.agent-dock-resizer {
+  -webkit-app-region: no-drag;
+  position: absolute;
+  z-index: 90;
+  top: 0;
+  right: calc(var(--agent-dock-width, 420px) - 6px);
+  bottom: 0;
+  width: 12px;
+  border: 0;
+  outline: 0;
+  cursor: col-resize;
+  touch-action: none;
+}
+
+.agent-dock-resizer::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 4px;
+  width: 4px;
+  height: 54px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--blue) 26%, var(--line));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--surface) 76%, transparent);
+  opacity: .68;
+  transform: translateY(-50%);
+  transition: background 160ms ease, box-shadow 160ms ease, opacity 160ms ease;
+}
+
+.agent-dock-resizer:hover::before,
+.agent-dock-resizer:focus-visible::before {
+  background: var(--blue);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--blue) 13%, transparent);
+  opacity: 1;
+}
+
+.agent-conversation {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.agent-conversation > .agent-transcript {
+  width: 100%;
+  height: 100%;
+}
+
+.agent-conversation.has-question-guide > .agent-transcript {
+  padding-left: 64px;
+  transition: padding-left 180ms var(--ease-enter);
+}
+
+.agent-conversation.has-question-guide:has(.agent-question-guide:hover) > .agent-transcript,
+.agent-conversation.has-question-guide:has(.agent-question-guide:focus-within) > .agent-transcript {
+  /* Keep the transcript readable while the guide opens. At compact dock widths
+     both the rail and this inset shrink together instead of overlapping. */
+  padding-left: min(238px, max(64px, calc(100% - 280px)));
+}
+
+.agent-question-guide {
+  position: absolute;
+  z-index: 9;
+  top: 10px;
+  bottom: 10px;
+  left: 8px;
+  width: 44px;
+  overflow: hidden;
+  padding: 7px 5px;
+  border: 1px solid color-mix(in srgb, var(--blue) 20%, var(--glass-border));
+  border-radius: 14px;
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--glass-highlight) 66%, transparent), transparent 54%),
+    color-mix(in srgb, var(--glass-surface) 93%, transparent);
+  box-shadow: 0 12px 36px color-mix(in srgb, var(--text) 13%, transparent);
+  backdrop-filter: blur(calc(14px + var(--glass-strength) * 8px)) saturate(1.16);
+  transition: width 180ms var(--ease-enter), box-shadow 180ms ease;
+}
+
+.agent-question-guide:hover,
+.agent-question-guide:focus-within {
+  width: min(218px, max(44px, calc(100% - 300px)));
+  box-shadow: 0 18px 46px color-mix(in srgb, var(--text) 18%, transparent);
+}
+
+.agent-question-guide > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  height: 30px;
+  padding: 0 6px 6px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.agent-question-guide > header span {
+  overflow: hidden;
+  opacity: 0;
+  font-size: var(--ui-small-font-size);
+  font-weight: 720;
+  transition: opacity 130ms ease;
+}
+
+.agent-question-guide:hover > header span,
+.agent-question-guide:focus-within > header span {
+  opacity: 1;
+}
+
+.agent-question-guide > header strong {
+  display: grid;
+  place-items: center;
+  min-width: 23px;
+  height: 23px;
+  border-radius: 8px;
+  background: var(--blue-soft);
+  color: var(--blue);
+  font: 750 var(--ui-caption-font-size)/1 var(--code-font-family);
+}
+
+.agent-question-guide > div {
+  display: grid;
+  gap: 5px;
+  max-height: calc(100% - 32px);
+  overflow: auto;
+  scrollbar-width: none;
+}
+
+.agent-question-guide > div::-webkit-scrollbar {
+  display: none;
+}
+
+.agent-question-guide button {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: center;
+  gap: 7px;
+  min-width: 198px;
+  min-height: 34px;
+  padding: 2px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  text-align: left;
+}
+
+.agent-question-guide button:hover,
+.agent-question-guide button.is-active {
+  border-color: color-mix(in srgb, var(--blue) 25%, var(--line));
+  background: color-mix(in srgb, var(--blue-soft) 78%, transparent);
+  color: var(--text);
+}
+
+.agent-question-guide button i {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--surface) 88%, transparent);
+  color: var(--blue);
+  font: 760 var(--ui-caption-font-size)/1 var(--code-font-family);
+  font-style: normal;
+}
+
+.agent-question-guide button span {
+  overflow: hidden;
+  opacity: 0;
+  font-size: var(--ui-small-font-size);
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: opacity 130ms ease;
+}
+
+.agent-question-guide:hover button span,
+.agent-question-guide:focus-within button span {
+  opacity: 1;
+}
+
+.agent-composer {
+  box-shadow:
+    0 -1px 0 color-mix(in srgb, var(--glass-highlight) 74%, transparent),
+    0 20px 54px color-mix(in srgb, var(--text) 16%, transparent),
+    0 6px 18px rgba(18, 22, 32, .13);
+}
+
+.agent-composer:focus-within {
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--blue) 12%, transparent),
+    0 23px 60px color-mix(in srgb, var(--text) 18%, transparent),
+    0 7px 20px rgba(18, 22, 32, .14);
+}
+
+@media (max-width: 760px) {
+  .agent-dock-resizer,
+  .agent-question-guide {
+    display: none;
+  }
+
+  .agent-conversation.has-question-guide > .agent-transcript {
+    padding-left: 15px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .agent-dock-resizer::before,
+  .agent-question-guide,
+  .agent-question-guide button span,
+  .agent-question-guide > header span {
+    transition: none;
+  }
+}

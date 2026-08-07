@@ -82,7 +82,13 @@ def test_registry_discovers_known_sources_safely_deduplicates_and_caches(
         environment_module, "shutil", SimpleNamespace(which=fake_which), raising=False
     )
     monkeypatch.setattr(
-        environment_module, "subprocess", SimpleNamespace(run=fake_run), raising=False
+        environment_module,
+        "subprocess",
+        SimpleNamespace(
+            run=fake_run,
+            CREATE_NO_WINDOW=subprocess.CREATE_NO_WINDOW,
+        ),
+        raising=False,
     )
 
     registry = PythonEnvironmentRegistry(project_root=project)
@@ -101,6 +107,10 @@ def test_registry_discovers_known_sources_safely_deduplicates_and_caches(
     assert len(calls) == calls_after_first
     assert all(isinstance(args, list) for args, _ in calls)
     assert all(kwargs["shell"] is False for _, kwargs in calls)
+    assert all(
+        kwargs.get("creationflags") == subprocess.CREATE_NO_WINDOW
+        for _, kwargs in calls
+    )
     assert all(kwargs["timeout"] <= 2 for _, kwargs in calls)
     assert all(
         kwargs["timeout"] == 2 for args, kwargs in calls if "-I" in args

@@ -39,8 +39,9 @@ class KnowledgeService:
                     course_id, notebook_id, title, description, module, kind, content, color,
                     position_x, position_y, width, height, font_scale,
                     source_document_id, source_title, source_quote,
+                    source_block_key, source_locator_json,
                     image_asset_id, image_alt
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)""",
                 (
                     course_id,
                     notebook_id,
@@ -58,6 +59,8 @@ class KnowledgeService:
                     values.get("source_document_id"),
                     values.get("source_title", ""),
                     values.get("source_quote", ""),
+                    values.get("source_block_key", ""),
+                    json.dumps(values.get("source_locator") or {}, ensure_ascii=False),
                     values.get("image_asset_id"),
                     values.get("image_alt", ""),
                 ),
@@ -92,6 +95,10 @@ class KnowledgeService:
             if "image_asset_id" in values:
                 self._require_media_asset(
                     connection, course_id, values["image_asset_id"]
+                )
+            if "source_locator" in values:
+                values["source_locator_json"] = json.dumps(
+                    values.pop("source_locator") or {}, ensure_ascii=False
                 )
             mastery = values.pop("mastery", None)
             if mastery is not None:
@@ -331,6 +338,7 @@ class KnowledgeService:
     @staticmethod
     def _serialize_node(row) -> dict:
         item = as_dict(row)
+        item["source_locator"] = json.loads(item.pop("source_locator_json", "{}"))
         item["image_url"] = (
             f"/api/courses/{item['course_id']}/media/images/{item['image_asset_id']}"
             if item.get("image_asset_id")

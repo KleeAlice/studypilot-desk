@@ -1,10 +1,13 @@
 import { _electron as electron, expect, test, type Page, type TestInfo } from "@playwright/test";
+import { execFile } from "node:child_process";
 import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { promisify } from "node:util";
 
 
 type ElectronApp = Awaited<ReturnType<typeof electron.launch>>;
+const execFileAsync = promisify(execFile);
 
 async function waitForMotionToSettle(page: Page) {
   await expect(page.locator("html")).not.toHaveAttribute("data-motion-state", "running", { timeout: 5_000 });
@@ -70,6 +73,53 @@ async function setWindowSize(app: ElectronApp, width: number, height: number) {
   }, { width, height });
 }
 
+
+async function dragTitlebar(app: ElectronApp, page: Page, deltaX: number, deltaY: number) {
+  const dragFill = page.locator(".titlebar__drag-fill");
+  await expect(dragFill).toBeVisible();
+  const box = await dragFill.boundingBox();
+  expect(box).not.toBeNull();
+  if (process.platform !== "win32") {
+    const startX = box!.x + box!.width / 2;
+    const startY = box!.y + box!.height / 2;
+    await page.mouse.move(startX, startY);
+    await page.mouse.down();
+    await page.waitForTimeout(30);
+    await page.mouse.move(startX + deltaX, startY + deltaY, { steps: 4 });
+    await page.mouse.up();
+    return;
+  }
+
+  const metrics = await app.evaluate(({ BrowserWindow, screen }) => {
+    const win = BrowserWindow.getAllWindows()[0];
+    win.setAlwaysOnTop(true, "screen-saver");
+    win.show();
+    win.focus();
+    win.moveTop();
+    const bounds = win.getBounds();
+    return {
+      bounds,
+      displayScaleFactor: screen.getDisplayMatching(bounds).scaleFactor,
+    };
+  });
+  await page.waitForTimeout(100);
+  const devicePixelRatio = await page.evaluate(() => window.devicePixelRatio);
+  const startX = Math.round((metrics.bounds.x * metrics.displayScaleFactor) + ((box!.x + box!.width / 2) * devicePixelRatio));
+  const startY = Math.round((metrics.bounds.y * metrics.displayScaleFactor) + ((box!.y + box!.height / 2) * devicePixelRatio));
+  try {
+    await execFileAsync("powershell.exe", [
+      "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass",
+      "-File", resolve("scripts/native-window-drag.ps1"),
+      "-StartX", String(startX),
+      "-StartY", String(startY),
+      "-EndX", String(Math.round(startX + (deltaX * metrics.displayScaleFactor))),
+      "-EndY", String(Math.round(startY + (deltaY * metrics.displayScaleFactor))),
+      "-Steps", "8",
+    ]);
+  } finally {
+    await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].setAlwaysOnTop(false));
+  }
+}
 async function captureResponsiveViewport(
   app: ElectronApp,
   page: Page,
@@ -133,7 +183,15 @@ async function removeTreeWithRetry(path: string) {
   throw failure;
 }
 
+async function revealKnowledgeToolbar(page: Page) {
+  const toolbar = page.getByLabel("知识画布工具栏");
+  await page.mouse.move(640, 120);
+  await expect(toolbar).toHaveAttribute("data-toolbar-visible", "true");
+  await page.waitForTimeout(240);
+}
+
 async function createKnowledgeCard(page: Page, buttonName: string, cardName: string) {
+  await revealKnowledgeToolbar(page);
   await page.getByRole("button", { name: buttonName, exact: true }).click();
   const card = page.getByLabel(`知识卡片：${cardName}`, { exact: true });
   await expect(card).toBeVisible();
@@ -169,14 +227,12 @@ test("frameless ToC workspace persists a course knowledge canvas and runs the se
     });
 
     try {
-      await expect(page.getByRole("heading", { name: "建立学习画像" })).toBeVisible({ timeout: 20_000 });
+      await expect(page.getByRole("heading", { name: "课程书架" })).toBeVisible({ timeout: 20_000 });
     } catch (error) {
       const body = (await page.locator("body").innerText().catch(() => "<body unavailable>")).slice(0, 1_500);
-      throw new Error(`StudyPilot did not reach onboarding. url=${page.url()} body=${JSON.stringify(body)} rendererErrors=${JSON.stringify(rendererErrors)}`, { cause: error });
+      throw new Error(`StudyPilot did not reach the course library. url=${page.url()} body=${JSON.stringify(body)} rendererErrors=${JSON.stringify(rendererErrors)}`, { cause: error });
     }
-    await page.getByLabel("目标岗位").fill("学习型 AI 产品工程师");
-    await page.getByRole("button", { name: "生成第一周计划" }).click();
-    await expect(page.getByRole("dialog").filter({ hasText: "建立学习画像" })).toBeHidden({ timeout: 20_000 });
+    await expect(page.getByRole("heading", { name: "建立学习画像" })).toHaveCount(0);
     await expect(page.getByRole("heading", { name: "课程书架" })).toBeVisible();
     const libraryScreenshot = testInfo.outputPath("course-library.png");
     await waitForMotionToSettle(page);
@@ -190,17 +246,41 @@ test("frameless ToC workspace persists a course knowledge canvas and runs the se
     expect(await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].isMaximized())).toBe(true);
     await page.getByLabel("最大化或还原窗口").click();
 
+    await app.evaluate(({ BrowserWindow }) => {
+      const win = BrowserWindow.getAllWindows()[0];
+      win.setBounds({ ...win.getBounds(), x: 140, y: 100 }, false);
+    });
+    await page.waitForTimeout(500);
+    const boundsBeforeTitlebarDrag = await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].getBounds());
+    await dragTitlebar(app, page, 96, 56);
+    await page.waitForTimeout(150);
+    const boundsAfterTitlebarDrag = await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].getBounds());
+    globalThis.console.log(`[window-drag] normal before=${JSON.stringify(boundsBeforeTitlebarDrag)} after=${JSON.stringify(boundsAfterTitlebarDrag)}`);
+    expect(Math.abs(boundsAfterTitlebarDrag.width - boundsBeforeTitlebarDrag.width)).toBeLessThanOrEqual(1);
+    expect(Math.abs(boundsAfterTitlebarDrag.height - boundsBeforeTitlebarDrag.height)).toBeLessThanOrEqual(1);
+
+    await page.getByLabel("最大化或还原窗口").click();
+    expect(await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].isMaximized())).toBe(true);
+    await page.waitForTimeout(150);
+    await dragTitlebar(app, page, 84, 48);
+    await expect.poll(
+      () => app!.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].isMaximized()),
+      { message: "dragging a maximized titlebar restores the native window", timeout: 3_000 },
+    ).toBe(false);
+    const positionAfterMaximizedDrag = await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].getPosition());
+    globalThis.console.log(`[window-drag] maximized restored=${positionAfterMaximizedDrag.join(",")}`);
     const uniqueStamp = Date.now();
     const courseTitle = `E2E 知识课程 ${uniqueStamp}`;
     const notebookTitle = `E2E 知识笔记 ${uniqueStamp}`;
     const conceptTitle = `E2E 概念 ${uniqueStamp}`;
     await page.getByRole("button", { name: /新建课程/ }).first().click();
+    const typeWizard = page.getByRole("dialog", { name: "选择这门课程的学习方式" });
+    await typeWizard.getByRole("button", { name: "默认学习课程" }).click();
+    await typeWizard.getByRole("button", { name: "下一步" }).click();
     const courseWizard = page.getByRole("dialog", { name: "给课程一个清晰的身份" });
     await courseWizard.getByLabel("课程名称").fill(courseTitle);
     await courseWizard.getByLabel("课程简介").fill("验证卡片、引用、关系和 Python 实验闭环");
-    await courseWizard.getByRole("button", { name: "下一步" }).click();
-    await page.getByRole("dialog", { name: "设定你真正想抵达的地方" }).getByLabel("学习目标").fill("建立一套可复用的知识网络");
-    await page.getByRole("button", { name: "创建并进入课程" }).click();
+    await courseWizard.getByRole("button", { name: "创建并进入课程" }).click();
     await expect(page).toHaveURL(/#\/courses\/\d+\/home$/, { timeout: 20_000 });
     await expect(page.getByRole("heading", { name: "课程书架", level: 1 })).toBeHidden({ timeout: 20_000 });
     await expect(page.getByRole("heading", { name: courseTitle })).toBeVisible({ timeout: 20_000 });
@@ -209,6 +289,25 @@ test("frameless ToC workspace persists a course knowledge canvas and runs the se
     await waitForMotionToSettle(page);
     await page.screenshot({ path: homeScreenshot, animations: "disabled" });
     await testInfo.attach("course-home", { path: homeScreenshot, contentType: "image/png" });
+
+    await page.getByRole("button", { name: "学习中心", exact: true }).click();
+    await expect(page.getByLabel("学习中心工作区")).toBeVisible();
+    await expect(page.getByRole("log", { name: "学习对话" })).toBeVisible();
+    await expect(page.locator(".learning-workbench__sources")).toHaveCount(0);
+    await expect(page.locator(".learning-workbench__trail")).toHaveCount(0);
+    await expect(page.getByRole("region", { name: "学习资料" })).toHaveCount(0);
+    const learningCenterScreenshot = testInfo.outputPath("learning-center-unified.png");
+    await waitForMotionToSettle(page);
+    await page.screenshot({ path: learningCenterScreenshot, animations: "disabled" });
+    await testInfo.attach("learning-center-unified", { path: learningCenterScreenshot, contentType: "image/png" });
+    await page.getByRole("button", { name: "选择学习资料" }).click();
+    await expect(page.getByRole("region", { name: "学习资料" })).toBeVisible();
+    const materialDrawerScreenshot = testInfo.outputPath("learning-center-material-drawer.png");
+    await page.screenshot({ path: materialDrawerScreenshot, animations: "disabled" });
+    await testInfo.attach("learning-center-material-drawer", { path: materialDrawerScreenshot, contentType: "image/png" });
+    await page.getByRole("button", { name: "完成资料选择" }).click();
+    await page.getByRole("button", { name: "课程主页", exact: true }).click();
+    await expect(page.getByRole("heading", { name: courseTitle })).toBeVisible();
 
     await page.getByRole("button", { name: "打开知识网络" }).click();
     await expect(page.getByRole("heading", { name: "知识笔记", exact: true })).toBeVisible();
@@ -222,12 +321,13 @@ test("frameless ToC workspace persists a course knowledge canvas and runs the se
     await notebookDialog.getByLabel("笔记说明").fill("端到端知识画布与引用验证");
     await notebookDialog.getByRole("button", { name: "思维导图", exact: true }).click();
     await notebookDialog.getByRole("button", { name: "创建知识笔记" }).click();
-    await expect(page.getByRole("heading", { name: notebookTitle })).toBeVisible();
+    await expect(page.getByLabel("知识画布工具栏")).toBeVisible();
 
     const clipboardPng = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=";
     await app.evaluate(({ clipboard, nativeImage }, base64) => {
       clipboard.writeImage(nativeImage.createFromDataURL(`data:image/png;base64,${base64}`));
     }, clipboardPng);
+    await revealKnowledgeToolbar(page);
     await page.getByRole("button", { name: "粘贴图片", exact: true }).click();
     const pastedImage = page.locator(".canvas-card__image").first();
     await expect(pastedImage).toBeVisible({ timeout: 20_000 });
@@ -346,17 +446,17 @@ test("frameless ToC workspace persists a course knowledge canvas and runs the se
     expect(Math.abs(movedPosition.y - beforePosition.y)).toBeGreaterThan(25);
 
     await startFrameAudit(page);
-    await page.getByRole("button", { name: "今日驾驶舱" }).click();
-    await expect(page.getByRole("heading", { name: "今日驾驶舱" })).toBeVisible();
-    await expectNavIndicatorAligned(page, "today");
-    await finishFrameAudit(page, "knowledge-to-today");
+    await page.getByRole("button", { name: "课程主页" }).click();
+    await expect(page.getByRole("heading", { name: "本周执行" })).toBeVisible();
+    await expectNavIndicatorAligned(page, "home");
+    await finishFrameAudit(page, "knowledge-to-home");
     await startFrameAudit(page);
-    await page.getByRole("button", { name: "知识网络" }).click();
+    await page.getByRole("button", { name: "知识网络", exact: true }).click();
     await expect(page.getByRole("heading", { name: "知识笔记", exact: true })).toBeVisible();
     await expectNavIndicatorAligned(page, "knowledge");
-    await finishFrameAudit(page, "today-to-notebook-library");
+    await finishFrameAudit(page, "home-to-notebook-library");
     await page.getByRole("button", { name: `打开知识笔记：${notebookTitle}` }).click();
-    await expect(page.getByRole("heading", { name: notebookTitle })).toBeVisible();
+    await expect(page.getByLabel("知识画布工具栏")).toBeVisible();
     const reloadedConcept = page.getByLabel(`知识卡片：${conceptTitle}`, { exact: true });
     const persistedPosition = await reloadedConcept.evaluate((element) => ({
       x: Number.parseFloat((element as HTMLElement).style.left),
@@ -374,10 +474,11 @@ test("frameless ToC workspace persists a course knowledge canvas and runs the se
     await chooser.setFiles(fixturePath);
     await expect(page.getByRole("heading", { name: "e2e-reference" })).toBeVisible();
 
-    await page.getByRole("button", { name: "知识网络" }).click();
+    await page.getByRole("button", { name: "知识网络", exact: true }).click();
     await expect(page.getByRole("heading", { name: "知识笔记", exact: true })).toBeVisible();
     await page.getByRole("button", { name: `打开知识笔记：${notebookTitle}` }).click();
-    await expect(page.getByRole("heading", { name: notebookTitle })).toBeVisible();
+    await expect(page.getByLabel("知识画布工具栏")).toBeVisible();
+    await revealKnowledgeToolbar(page);
     await page.getByRole("button", { name: "引用资料" }).click();
     const sourceDialog = page.getByRole("dialog", { name: "引用资料" });
     await sourceDialog.getByRole("button", { name: `e2e-reference · ${fixtureName}` }).click();
@@ -400,6 +501,8 @@ test("frameless ToC workspace persists a course knowledge canvas and runs the se
     await expect(citation).not.toContainText("这段文字不应进入引用卡的选区");
     await page.getByRole("button", { name: "适合全部内容" }).click();
 
+    await expect(page.getByRole("button", { name: /专注/ })).toHaveCount(0);
+
     for (const [width, height] of [[1366, 768], [1920, 1080]] as const) {
       await captureResponsiveViewport(app, page, testInfo, "knowledge", width, height);
     }
@@ -409,7 +512,7 @@ test("frameless ToC workspace persists a course knowledge canvas and runs the se
       && response.url().includes("/api/python/environments"),
     );
     await page.getByRole("button", { name: "Python 实验室" }).click();
-    await expect(page.getByRole("heading", { name: "Python 实验室" })).toBeVisible();
+    await expect(page.getByLabel("Python 代码", { exact: true })).toBeVisible();
     await expectNavIndicatorAligned(page, "lab");
     const environmentResponse = await environmentResponsePromise;
     expect(environmentResponse.ok(), "Python environment discovery response").toBe(true);
@@ -427,13 +530,11 @@ test("frameless ToC workspace persists a course knowledge canvas and runs the se
     await page.getByRole("button", { name: "运行代码", exact: true }).click();
     const console = page.getByTestId("output-console");
     await expect(console.locator(".lab-v2-output")).toContainText(runMarker, { timeout: 20_000 });
-    await expect(page.locator(".run-status")).toHaveText("PASSED");
+    await expect(page.getByLabel("Python 编辑器状态栏")).toContainText("运行通过");
 
-    await page.getByRole("button", { name: "深色控制台" }).click();
-    await expect(console).toHaveAttribute("data-theme-preference", "dark");
+    await expect(page.getByRole("button", { name: /深色控制台|浅色控制台/ })).toHaveCount(0);
+    await expect(console).toBeVisible();
     await captureResponsiveViewport(app, page, testInfo, "lab", 1366, 768);
-    await page.getByRole("button", { name: "浅色控制台" }).click();
-    await expect(console).toHaveAttribute("data-theme-preference", "light");
     await captureResponsiveViewport(app, page, testInfo, "lab", 1920, 1080);
 
     await startFrameAudit(page);
@@ -449,6 +550,17 @@ test("frameless ToC workspace persists a course knowledge canvas and runs the se
 
     await page.getByRole("button", { name: "设置", exact: true }).click();
     await expect(page.getByRole("heading", { name: "系统设置" })).toBeVisible();
+    await page.getByRole("button", { name: "晨雾壁纸" }).click();
+    await page.getByRole("slider", { name: "壁纸可见度" }).fill("100");
+    await expect(page.locator("html")).not.toHaveAttribute("data-wallpaper-clarity", /.+/);
+    const wallpaperAppearance = await page.evaluate(() => ({
+      mode: document.documentElement.dataset.wallpaper,
+      opacity: getComputedStyle(document.documentElement).getPropertyValue("--app-wallpaper-opacity").trim(),
+      image: getComputedStyle(document.body, "::before").backgroundImage,
+    }));
+    expect(wallpaperAppearance.mode).toBe("dawn");
+    expect(wallpaperAppearance.opacity).toBe("1");
+    expect(wallpaperAppearance.image).not.toBe("none");
     await page.getByLabel("界面字体").selectOption("song");
     await page.getByLabel("代码字体").selectOption("consolas");
     await expect.poll(() => page.evaluate(() => document.documentElement.dataset.uiFont)).toBe("song");
@@ -472,6 +584,9 @@ test("frameless ToC workspace persists a course knowledge canvas and runs the se
     await page.getByRole("button", { name: "设置", exact: true }).click();
     await page.getByRole("button", { name: "浅色", exact: true }).click();
     await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+    await page.getByLabel("界面语言").selectOption("en-US");
+    await expect(page.locator("html")).toHaveAttribute("lang", "en-US");
+    await expect(page.getByRole("button", { name: "Course Home", exact: true })).toBeVisible();
 
     expect(rendererErrors).toEqual([]);
     await app.close();

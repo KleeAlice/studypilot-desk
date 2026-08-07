@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import type { Course } from "../types";
+import { AnchoredMenu } from "./AnchoredMenu";
 
 export function CourseSwitcher({ courses, activeCourseId, fallbackTitle, onActivate, onCreate }: {
   courses: Course[];
@@ -34,22 +35,6 @@ export function CourseSwitcher({ courses, activeCourseId, fallbackTitle, onActiv
     }
   }, [busy, open]);
 
-  useEffect(() => {
-    if (!open) return;
-    function onKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") closeAndRestoreFocus();
-    }
-    function onPointerDown(event: PointerEvent) {
-      if (!rootRef.current?.contains(event.target as Node)) closeAndRestoreFocus();
-    }
-    document.addEventListener("keydown", onKeyDown);
-    document.addEventListener("pointerdown", onPointerDown);
-    return () => {
-      document.removeEventListener("keydown", onKeyDown);
-      document.removeEventListener("pointerdown", onPointerDown);
-    };
-  }, [open]);
-
   async function create(event: React.FormEvent) {
     event.preventDefault();
     if (!title.trim() || busy) return;
@@ -73,10 +58,17 @@ export function CourseSwitcher({ courses, activeCourseId, fallbackTitle, onActiv
   return (
     <div className="course-switcher" ref={rootRef} data-course-switching={switchingId !== null ? String(switchingId) : undefined}>
       <button ref={triggerRef} className={`course-switcher__trigger ${switchingId !== null ? "is-switching" : ""}`} aria-label={`当前课程：${activeTitle}`} aria-expanded={open} aria-busy={busy} disabled={busy} onClick={() => setOpen((value) => !value)}>
-        <span className="course-orbit" /><span><small>COURSE SPACE</small><strong>{activeTitle}</strong></span><b>⌄</b>
+        <span className="course-orbit" /><span><strong>{activeTitle}</strong></span><b>⌄</b>
       </button>
-      {open && <div className="course-popover" role="dialog" aria-label="课程空间">
-        <div className="course-popover__head"><div><small>YOUR SPACES</small><strong>课程空间</strong></div><button aria-label="关闭课程空间" onClick={closeAndRestoreFocus}>×</button></div>
+      <AnchoredMenu
+        open={open}
+        anchorRef={triggerRef}
+        role="dialog"
+        ariaLabel="课程空间"
+        className="course-popover"
+        onClose={closeAndRestoreFocus}
+      >
+        <div className="course-popover__head"><div><strong>课程空间</strong></div><button aria-label="关闭课程空间" onClick={closeAndRestoreFocus}>×</button></div>
         {!creating && <>
           <div className="course-list">{courses.map((course) => <button key={course.id} className={`${course.id === activeCourseId ? "is-active" : ""} ${course.id === switchingId ? "is-switching" : ""}`} onClick={() => void activate(course)} aria-label={`切换到 ${course.title}`} aria-busy={course.id === switchingId} disabled={busy}>
             <span>{course.title.slice(0, 1).toUpperCase()}</span><div><strong>{course.title}</strong><small>{course.description || "独立知识与实验空间"}</small></div>{course.id === activeCourseId && <i>正在使用</i>}
@@ -90,7 +82,7 @@ export function CourseSwitcher({ courses, activeCourseId, fallbackTitle, onActiv
           <button className="primary-action" disabled={!title.trim() || busy}>{busy ? "正在创建…" : "创建并进入知识画布"}</button>
         </form>}
         {error && <p className="error-message" role="alert">{error}</p>}
-      </div>}
+      </AnchoredMenu>
     </div>
   );
 }
