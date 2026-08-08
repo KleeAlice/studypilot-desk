@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "studypilot-desk"
-version = "0.2.1"
+version = "0.3.0"
 description = "Local-first learning operations desktop backend"
 requires-python = ">=3.10"
 dependencies = [
