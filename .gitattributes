@@ -1,0 +1,5 @@
+# Keep Tauri manifests stable across Windows and Unix build hosts.
+src-tauri/Cargo.toml text eol=lf
+src-tauri/Cargo.lock text eol=lf
+src-tauri/tauri.conf.json text eol=lf
+src-tauri/crates/**/Cargo.toml text eol=lf

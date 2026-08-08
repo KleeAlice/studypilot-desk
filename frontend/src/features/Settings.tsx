@@ -6,7 +6,7 @@ import { SettingsIcon } from "../components/SettingsIcon";
 import { GlassOpacityPreference } from "../components/GlassOpacityPreference";
 import { SettingsSectionNav } from "../components/SettingsSectionNav";
 import type { ApiClient } from "../services/api";
-import type { DesktopRuntime } from "../types";
+import type { RuntimeConfig } from "../platform";
 import type { WallpaperMode } from "../ui/appearance";
 import type { UiLanguage } from "../ui/language";
 
@@ -15,7 +15,7 @@ type TypographyKey = "ui_font" | "code_font";
 
 type SettingsProps = {
   api: ApiClient;
-  runtime: DesktopRuntime;
+  runtime: RuntimeConfig;
   initialTheme: string;
   initialUiFont: string;
   initialCodeFont: string;

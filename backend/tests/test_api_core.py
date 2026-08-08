@@ -4,6 +4,7 @@ from threading import Event
 
 from fastapi.testclient import TestClient
 
+from backend.app import __version__
 from backend.app.main import create_app
 
 
@@ -18,8 +19,23 @@ def test_health_and_default_course_are_available(tmp_path) -> None:
 
     assert health.status_code == 200
     assert health.json()["data"]["status"] == "ok"
+    assert health.json()["data"]["version"] == __version__
     assert courses.status_code == 200
     assert courses.json()["data"][0]["title"] == "通用学习示例路线"
+
+
+def test_loopback_session_token_protects_every_api_route_except_health(tmp_path, monkeypatch) -> None:
+    monkeypatch.setenv("STUDYPILOT_SESSION_TOKEN", "test-session-token")
+    with client_for(tmp_path) as client:
+        health = client.get("/api/health")
+        rejected = client.get("/api/courses")
+        accepted = client.get(
+            "/api/courses", headers={"x-studypilot-session": "test-session-token"}
+        )
+
+    assert health.status_code == 200
+    assert rejected.status_code == 401
+    assert accepted.status_code == 200
 
 
 def test_document_parsing_does_not_block_health_requests(tmp_path, monkeypatch) -> None:

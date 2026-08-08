@@ -1,0 +1,25 @@
+[advisories]
+# Tauri's Linux WebKit runtime still uses the gtk-rs GTK3 bindings. These
+# warnings are target-specific transitive dependencies and have no patched
+# release compatible with the current Tauri 2 stack.
+ignore = [
+  "RUSTSEC-2024-0411",
+  "RUSTSEC-2024-0412",
+  "RUSTSEC-2024-0413",
+  "RUSTSEC-2024-0414",
+  "RUSTSEC-2024-0415",
+  "RUSTSEC-2024-0416",
+  "RUSTSEC-2024-0417",
+  "RUSTSEC-2024-0418",
+  "RUSTSEC-2024-0419",
+  "RUSTSEC-2024-0420",
+
+  # Transitive build/runtime dependencies owned by the Tauri ecosystem.
+  "RUSTSEC-2024-0370",
+  "RUSTSEC-2024-0429",
+  "RUSTSEC-2025-0075",
+  "RUSTSEC-2025-0080",
+  "RUSTSEC-2025-0081",
+  "RUSTSEC-2025-0098",
+  "RUSTSEC-2025-0100",
+]

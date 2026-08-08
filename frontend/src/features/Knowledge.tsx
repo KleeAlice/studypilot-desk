@@ -5,6 +5,7 @@ import type { KnowledgeEdge, KnowledgeNode, KnowledgeNodeKind, KnowledgeRelation
 import { MotionPresence } from "../components/MotionPresence";
 import { AnchoredMenu } from "../components/AnchoredMenu";
 import { useWorkspaceToolbarVisibility } from "../workspace/WorkspaceToolbarVisibility";
+import { platform } from "../platform";
 
 interface KnowledgeGraph {
   nodes: KnowledgeNode[];
@@ -193,7 +194,7 @@ export interface KnowledgeSourceFocus {
   requestId: number;
 }
 
-export function Knowledge({ api, courseId = 1, notebookId, courseTitle, onBack, onOpenSource, onOpenLibrarySplit, sourceFocus, systemFonts = [], librarySplitOpen = false }: { api: ApiClient; courseId?: number; notebookId?: number; courseTitle?: string; onBack?: () => void; onOpenSource?: (documentId: number, locator: Record<string, string | number | boolean | null>, blockKey: string) => void; onOpenLibrarySplit?: () => void; sourceFocus?: KnowledgeSourceFocus; systemFonts?: string[]; librarySplitOpen?: boolean }) {
+export function Knowledge({ api, courseId = 1, notebookId, onBack, onOpenSource, onOpenLibrarySplit, sourceFocus, systemFonts = [], librarySplitOpen = false }: { api: ApiClient; courseId?: number; notebookId?: number; courseTitle?: string; onBack?: () => void; onOpenSource?: (documentId: number, locator: Record<string, string | number | boolean | null>, blockKey: string) => void; onOpenLibrarySplit?: () => void; sourceFocus?: KnowledgeSourceFocus; systemFonts?: string[]; librarySplitOpen?: boolean }) {
   const workspaceToolbar = useWorkspaceToolbarVisibility();
   const storageScope = notebookId || courseId;
   const editStorageKey = useMemo(() => pendingEditKey(storageScope), [storageScope]);
@@ -780,7 +781,7 @@ export function Knowledge({ api, courseId = 1, notebookId, courseTitle, onBack, 
   }
 
   async function pasteNativeImage() {
-    const readImage = window.studypilot?.clipboard?.readImage;
+    const readImage = platform().clipboard.readImage;
     if (!readImage) {
       setError("请按 Ctrl + V 粘贴剪贴板图片");
       return;
@@ -1286,14 +1287,13 @@ export function Knowledge({ api, courseId = 1, notebookId, courseTitle, onBack, 
         notebookId ? `/api/courses/${courseId}/notebooks/${notebookId}/export` : "/api/knowledge/export",
         { format, canvas_width: canvasPreferences.width, canvas_height: canvasPreferences.height },
       );
-      const nativeSave = window.studypilot?.files?.saveToArchive || window.studypilot?.files?.saveExport;
-      if (nativeSave) {
-        const savedPath = await nativeSave({ suggestedName: artifact.filename, bytes: artifact.bytes });
-        if (!savedPath) {
+      const savedPath = await platform().files.saveToArchive({ suggestedName: artifact.filename, bytes: artifact.bytes });
+      if (savedPath) {
+      } else {
+        if (platform().kind !== "web") {
           setExportNotice("已取消导出");
           return;
         }
-      } else {
         const blobBytes = artifact.bytes.buffer.slice(
           artifact.bytes.byteOffset,
           artifact.bytes.byteOffset + artifact.bytes.byteLength,
@@ -1403,7 +1403,6 @@ export function Knowledge({ api, courseId = 1, notebookId, courseTitle, onBack, 
                   if (!source || !target) return null;
                   const sourceWidth = Number(source.width || nodeDefaultSizes[source.kind].width);
                   const sourceHeight = Number(source.height || nodeDefaultSizes[source.kind].height);
-                  const targetWidth = Number(target.width || nodeDefaultSizes[target.kind].width);
                   const targetHeight = Number(target.height || nodeDefaultSizes[target.kind].height);
                   const sx = Number(source.position_x || 0) + sourceWidth;
                   const sy = Number(source.position_y || 0) + sourceHeight / 2;
@@ -1583,7 +1582,7 @@ export function Knowledge({ api, courseId = 1, notebookId, courseTitle, onBack, 
 
       {selectedEdge && <div className="edge-toast" role="status"><span>已选择关系：{nodeById.get(selectedEdge.source_id)?.title} → {nodeById.get(selectedEdge.target_id)?.title} · {relationLabels[selectedEdge.relation || "prerequisite"]}</span><button aria-label="删除关系" onClick={() => void removeEdge(selectedEdge)}>删除关系</button><button aria-label="取消选择关系" onClick={() => setSelectedEdgeId(null)}>取消</button></div>}
       {linkSource !== null && <div className="link-toast" role="status">已选择起点：{nodeById.get(linkSource)?.title} · 点击另一张卡片右侧圆点完成连接 <button onClick={() => setLinkSource(null)}>取消</button></div>}
-      {exportNotice && <div className="export-notice" role="status"><span>{exportNotice}</span>{exportNotice.startsWith("已导出") && window.studypilot?.files?.openExportDirectory && <button aria-label="打开导出文件夹" onClick={() => void window.studypilot.files.openExportDirectory?.()}>打开导出文件夹</button>}<button aria-label="关闭导出提示" onClick={() => setExportNotice("")}>×</button></div>}
+      {exportNotice && <div className="export-notice" role="status"><span>{exportNotice}</span>{exportNotice.startsWith("已导出") && platform().files.canOpenExportDirectory && <button aria-label="打开导出文件夹" onClick={() => void platform().files.openExportDirectory()}>打开导出文件夹</button>}<button aria-label="关闭导出提示" onClick={() => setExportNotice("")}>×</button></div>}
       {error && <div className="floating-error" role="alert">{error}<button aria-label="关闭错误提示" onClick={() => setError("")}>×</button></div>}
     </section>
   );

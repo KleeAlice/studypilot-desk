@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState, type MouseEvent as ReactMouseEvent } from "react";
 import type { AgentPageContext } from "../agent/types";
 import type { ApiClient } from "../services/api";
+import { platform } from "../platform";
 
 
 export interface SelectionActionContext {
@@ -57,10 +58,11 @@ function toolbarPosition(rect: Pick<DOMRect, "left" | "right" | "top" | "bottom"
 }
 
 async function writeClipboard(text: string) {
-  const nativeWrite = window.studypilot?.clipboard?.writeText;
-  if (nativeWrite) {
-    await nativeWrite(text);
+  try {
+    await platform().clipboard.writeText(text);
     return;
+  } catch {
+    // The selection fallback below handles restricted browser contexts.
   }
   if (navigator.clipboard?.writeText) {
     await navigator.clipboard.writeText(text);

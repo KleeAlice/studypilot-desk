@@ -33,7 +33,7 @@ def main() -> None:
         browser = playwright.chromium.connect_over_cdp(args.cdp)
         contexts = browser.contexts
         if not contexts:
-            raise AssertionError("Electron did not expose a browser context")
+            raise AssertionError("Desktop shell did not expose a browser context")
         context = contexts[0]
         page = context.pages[0] if context.pages else context.wait_for_event("page")
         page.wait_for_load_state("domcontentloaded")
@@ -60,7 +60,7 @@ def main() -> None:
             request.post(f"/api/courses/{course['id']}/activate"),
             "activate course",
         )
-        notebook = assert_ok(
+        assert_ok(
             request.post(
                 f"/api/courses/{course['id']}/notebooks",
                 data={"title": "学习出处联动画布", "kind": "mindmap"},

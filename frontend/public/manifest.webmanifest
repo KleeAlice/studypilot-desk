@@ -1,0 +1,17 @@
+{
+  "name": "StudyPilot Desk",
+  "short_name": "StudyPilot",
+  "description": "跨端学习工作台",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#0b1018",
+  "theme_color": "#0b1018",
+  "icons": [
+    {
+      "src": "./icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

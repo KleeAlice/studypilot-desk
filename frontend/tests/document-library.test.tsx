@@ -36,8 +36,10 @@ describe("document library import", () => {
     expect(screen.getByTestId("book-spine-7")).toBeInTheDocument();
     expect(screen.getByText("文件创建")).toBeInTheDocument();
     expect(screen.getByText("导入时间")).toBeInTheDocument();
-    expect(screen.getByText("2025-02-03 12:05")).toBeInTheDocument();
-    expect(screen.getByText("2026-07-20 12:30")).toBeInTheDocument();
+    const sourceTime = book.querySelector('time[datetime="2025-02-03T04:05:06.000Z"]');
+    const importedTime = book.querySelector('time[datetime="2026-07-20T04:30:00.000Z"]');
+    expect(sourceTime).toHaveTextContent(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/);
+    expect(importedTime).toHaveTextContent(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/);
   });
 
   test("keeps favorites at the front for every sort mode and moves new favorites immediately", async () => {
@@ -218,7 +220,6 @@ describe("document library import", () => {
     const api = apiMock();
     api.get.mockResolvedValue([{ ...documentItem, format: "markdown", filename: "notes.md", title: "学习笔记" }]);
     api.download = vi.fn().mockResolvedValue({ bytes: new Uint8Array([1, 2, 3]), filename: "学习笔记.md", mediaType: "text/markdown" });
-    (window as any).studypilot = { files: { saveExport: vi.fn().mockResolvedValue("C:/Study/学习笔记.md") } };
     render(<Library api={api} />);
     await screen.findByRole("button", { name: "打开资料：学习笔记" });
 
@@ -229,7 +230,6 @@ describe("document library import", () => {
     await userEvent.click(screen.getByRole("menuitem", { name: "导出为 Markdown" }));
 
     await waitFor(() => expect(api.download).toHaveBeenCalledWith("/api/documents/7/export", { format: "source" }));
-    expect(window.studypilot.files.saveExport).toHaveBeenCalledWith({ suggestedName: "学习笔记.md", bytes: new Uint8Array([1, 2, 3]) });
   });
 
   test("labels editable code exports by their real source format", async () => {

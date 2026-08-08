@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging
 import json
 import os
+import secrets
 import uuid
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -15,6 +16,7 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse, StreamingResponse
 
+from . import __version__
 from .db import Database
 from .errors import AppError, error_body
 from .repository import Repository
@@ -54,7 +56,7 @@ from .schemas import (
     LanguageLessonComplete,
 )
 from .python_runner.manager import PythonRunner
-from .services.documents import MAX_DOCUMENT_BYTES, DocumentService
+from .services.documents import DocumentService
 from .services.agent import AgentService
 from .services.appearance import MAX_WALLPAPER_BYTES, AppearanceService
 from .services.exports import NotebookExportService
@@ -122,18 +124,39 @@ def create_app(data_dir: Path | str | None = None) -> FastAPI:
 
     app = FastAPI(
         title="StudyPilot Desk API",
-        version="0.1.0",
+        version=__version__,
         docs_url="/api/docs" if os.getenv("STUDYPILOT_DEV") == "1" else None,
         redoc_url=None,
         lifespan=lifespan,
     )
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["http://127.0.0.1", "http://localhost"],
-        allow_origin_regex=r"https?://(127\.0\.0\.1|localhost)(:\d+)?",
+        allow_origins=["http://127.0.0.1", "http://localhost", "tauri://localhost"],
+        allow_origin_regex=r"(https?://(127\.0\.0\.1|localhost|tauri\.localhost)(:\d+)?|tauri://localhost)",
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    @app.middleware("http")
+    async def require_local_session(request: Request, call_next):
+        """Protect the random loopback server from other local processes/pages.
+
+        Hosted deployments leave STUDYPILOT_SESSION_TOKEN unset and apply their
+        own user authentication at the deployment edge.
+        """
+        expected = os.getenv("STUDYPILOT_SESSION_TOKEN")
+        if (
+            expected
+            and request.url.path.startswith("/api/")
+            and request.url.path != "/api/health"
+            and not secrets.compare_digest(
+                request.headers.get("x-studypilot-session", ""), expected
+            )
+        ):
+            return JSONResponse(
+                error_body("UNAUTHORIZED", "本地会话令牌无效"), status_code=401
+            )
+        return await call_next(request)
 
     def repo(request: Request) -> Repository:
         return request.app.state.repository

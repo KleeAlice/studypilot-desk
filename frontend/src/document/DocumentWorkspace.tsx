@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties, type UIEvent } from "react";
 import { SplitDivider } from "../components/SplitDivider";
 import type { ApiClient } from "../services/api";
+import { withSession } from "../services/api";
 import { useWorkspaceToolbarVisibility } from "../workspace/WorkspaceToolbarVisibility";
 import type { DocumentAnnotation, DocumentBlock, DocumentContent, DocumentFormat, DocumentItem, DocumentLocator } from "./types";
 import { blockLabel, DocumentReader, type ReaderSelection } from "./readers";
@@ -632,7 +633,7 @@ export function DocumentWorkspace({ api, documentId, onBack, onAgentContextChang
             {primarySourceFocus && <LearningSourceBanner focus={primarySourceFocus} onDismiss={() => setPrimarySourceFocus(null)} />}
             <div className="document-reader-surface">
               <div className="document-reader-zoom" ref={readerSurfaceRef} data-zoom={zoom} style={{ zoom: zoom / 100 }}>
-                <DocumentReader rawUrl={`${api.baseUrl}/api/documents/${source.id}/file`} format={source.format} blocks={blocks} activeBlockKey={activeBlockKey} onActivate={setActiveBlockKey} onRevise={revise} onSelect={setSelection} />
+                <DocumentReader rawUrl={withSession(`${api.baseUrl}/api/documents/${source.id}/file`, api.sessionToken)} format={source.format} blocks={blocks} activeBlockKey={activeBlockKey} onActivate={setActiveBlockKey} onRevise={revise} onSelect={setSelection} />
                 <AnnotationOverlay surfaceRef={readerSurfaceRef} block={activeBlock} annotations={annotations} tool={tool} onCreate={addAnnotation} onErase={eraseAnnotation} />
               </div>
             </div>
@@ -656,7 +657,7 @@ export function DocumentWorkspace({ api, documentId, onBack, onAgentContextChang
             {secondarySourceFocus && <LearningSourceBanner focus={secondarySourceFocus} onDismiss={() => setSecondarySourceFocus(null)} />}
             <div className="document-reader-surface"><div className="document-reader-zoom" data-zoom={secondaryZoom} style={{ zoom: secondaryZoom / 100 }}>
               <div className="document-secondary-title"><strong>{secondaryContent.document.title}</strong><small>{secondaryContent.document.filename}</small></div>
-              <DocumentReader rawUrl={`${api.baseUrl}/api/documents/${secondaryContent.document.id}/file`} format={secondaryContent.document.format} blocks={secondaryContent.blocks} activeBlockKey={secondaryActiveBlockKey} onActivate={setSecondaryActiveBlockKey} onRevise={reviseSecondary} onSelect={() => undefined} />
+              <DocumentReader rawUrl={withSession(`${api.baseUrl}/api/documents/${secondaryContent.document.id}/file`, api.sessionToken)} format={secondaryContent.document.format} blocks={secondaryContent.blocks} activeBlockKey={secondaryActiveBlockKey} onActivate={setSecondaryActiveBlockKey} onRevise={reviseSecondary} onSelect={() => undefined} />
             </div></div>
           </main> : <div className="document-split-empty">选择另一份资料开始并排阅读</div>}
         </section>}

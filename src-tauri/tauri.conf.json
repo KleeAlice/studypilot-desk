@@ -1,0 +1,48 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "StudyPilot Desk",
+  "version": "0.2.1",
+  "identifier": "com.studypilot.desk",
+  "build": {
+    "beforeDevCommand": "node ./node_modules/vite/bin/vite.js --host 127.0.0.1",
+    "devUrl": "http://127.0.0.1:5173",
+    "beforeBuildCommand": "node ./node_modules/vite/bin/vite.js build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "StudyPilot Desk",
+        "width": 1360,
+        "height": 860,
+        "minWidth": 1100,
+        "minHeight": 700,
+        "decorations": false,
+        "transparent": false
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:* https:; img-src 'self' data: blob: http://127.0.0.1:* https:; frame-src 'self' http://127.0.0.1:*; font-src 'self' data:; object-src 'none'; base-uri 'none'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico",
+      "icons/icon.png"
+    ],
+    "resources": {
+      "../build/backend-runtime/StudyPilotPythonWorker": "backend"
+    },
+    "windows": {
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper"
+      }
+    }
+  }
+}

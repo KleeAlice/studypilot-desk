@@ -8,9 +8,11 @@ import tempfile
 import uuid
 import zipfile
 import re
+from contextlib import closing
 from datetime import datetime, timezone
 from pathlib import Path, PurePosixPath
 
+from .. import __version__
 from ..db import CURRENT_SCHEMA_VERSION, Database
 from ..errors import AppError
 
@@ -63,7 +65,7 @@ class BackupService:
         ]
         manifest = {
             "application": "StudyPilot Desk",
-            "application_version": "0.1.0",
+            "application_version": __version__,
             "schema_version": CURRENT_SCHEMA_VERSION,
             "created_at": datetime.now(timezone.utc).isoformat(),
             "files": manifest_files,
@@ -140,8 +142,14 @@ class BackupService:
         ]
 
     def _snapshot_database(self, destination: Path) -> None:
-        with sqlite3.connect(self.database.path) as source, sqlite3.connect(destination) as target:
-            source.backup(target)
+        # sqlite3.Connection's context manager only commits or rolls back; it
+        # does not close the handle. Windows keeps the snapshot locked until
+        # both connections are explicitly closed.
+        with closing(sqlite3.connect(self.database.path)) as source, closing(
+            sqlite3.connect(destination)
+        ) as target:
+            with target:
+                source.backup(target)
 
     @staticmethod
     def _validate_member(name: str) -> None:
@@ -216,7 +224,7 @@ class BackupService:
         if not path.is_file():
             raise AppError("INVALID_BACKUP", "备份中缺少数据库", 422)
         try:
-            with sqlite3.connect(path) as connection:
+            with closing(sqlite3.connect(path)) as connection:
                 result = connection.execute("PRAGMA quick_check").fetchone()[0]
                 version = connection.execute("PRAGMA user_version").fetchone()[0]
         except sqlite3.DatabaseError as exc:

@@ -44,7 +44,7 @@
   background: transparent;
   color: var(--muted);
   cursor: pointer;
-  font-size: 0.625rem;
+  font-size: var(--ui-micro-font-size);
   font-weight: 680;
   white-space: nowrap;
 }
@@ -74,7 +74,7 @@
   background: var(--surface);
   color: var(--muted);
   box-shadow: 0 7px 18px rgba(10, 16, 31, .12);
-  font-size: 0.5625rem;
+  font-size: var(--ui-micro-font-size);
   transform: translateX(-50%);
 }
 
@@ -112,7 +112,7 @@
   padding: 8px 10px;
   color: var(--blue);
   cursor: pointer;
-  font-size: 0.625rem;
+  font-size: var(--ui-micro-font-size);
   font-weight: 700;
 }
 
@@ -146,13 +146,13 @@
 }
 
 .agent-learning-length-setting > header strong {
-  font-size: 0.6875rem;
+  font-size: var(--ui-small-font-size);
 }
 
 .agent-learning-length-setting > header small,
 .agent-learning-length-setting > header > span {
   color: var(--muted);
-  font-size: 0.5625rem;
+  font-size: var(--ui-micro-font-size);
 }
 
 .agent-learning-length-setting > div {
@@ -175,11 +175,11 @@
 
 .agent-learning-length-setting button strong {
   color: var(--text);
-  font-size: 0.6875rem;
+  font-size: var(--ui-small-font-size);
 }
 
 .agent-learning-length-setting button small {
-  font-size: 0.5rem;
+  font-size: var(--ui-micro-font-size);
 }
 
 .agent-learning-length-setting button[aria-pressed="true"] {
@@ -203,14 +203,14 @@
 
 .agent-learning-token-limit > span {
   color: var(--text);
-  font-size: 0.625rem;
+  font-size: var(--ui-micro-font-size);
   font-weight: 700;
 }
 
 .agent-learning-token-limit > small {
   grid-column: 1 / -1;
   color: var(--muted);
-  font-size: 0.5rem;
+  font-size: var(--ui-micro-font-size);
   line-height: 1.45;
 }
 

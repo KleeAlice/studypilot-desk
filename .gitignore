@@ -8,7 +8,7 @@ __pycache__/
 .coverage
 htmlcov/
 
-# Node / Electron
+# Node / Tauri frontend
 node_modules/
 dist/
 dist-electron/
@@ -21,6 +21,10 @@ npm-debug.log*
 # Generated desktop packaging work
 build/backend-runtime/
 build/pyinstaller-*/
+src-tauri/target/
+src-tauri/**/target/
+src-tauri/crates/*/Cargo.lock
+src-tauri/gen/
 
 # Local StudyPilot data (keep only deterministic seeds)
 data/*

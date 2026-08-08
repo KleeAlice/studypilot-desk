@@ -27,21 +27,19 @@ if ($LASTEXITCODE -ne 0) {
     & $python -m pip install --no-build-isolation -e '.[dev]'
 }
 
-if (-not (Test-Path -LiteralPath (Join-Path $root 'node_modules\electron'))) {
+if (-not (Test-Path -LiteralPath (Join-Path $root 'node_modules\@tauri-apps\cli'))) {
     Write-Host '[StudyPilot] Installing desktop dependencies...'
     npm.cmd install
+}
+
+if ($Rebuild) {
+    Write-Host '[StudyPilot] Building the Tauri desktop installer...'
+    npm.cmd run build
 }
 
 if ($Dev) {
     npm.cmd run dev
 } else {
-    $needsBuild = $Rebuild -or
-        -not (Test-Path -LiteralPath (Join-Path $root 'dist\index.html')) -or
-        -not (Test-Path -LiteralPath (Join-Path $root 'dist-electron\main.cjs'))
-    if ($needsBuild) {
-        Write-Host '[StudyPilot] Building the desktop application...'
-        npm.cmd run build
-    }
-    Write-Host '[StudyPilot] Starting the desktop application...'
-    & (Join-Path $root 'node_modules\.bin\electron.cmd') .
+    Write-Host '[StudyPilot] Starting the Tauri desktop application...'
+    npm.cmd run start:tauri
 }

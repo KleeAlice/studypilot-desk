@@ -6,15 +6,17 @@
 <p align="center">把课程、资料、AI 对话、知识沉淀与复习，组织成一个持续推进的本地学习工作台。</p>
 
 <p align="center">
+  <img alt="Version 0.2.1" src="https://img.shields.io/badge/version-0.2.1-5266E5?style=flat-square" />
   <img alt="Windows" src="https://img.shields.io/badge/platform-Windows-2672EC?style=flat-square&amp;logo=windows11&amp;logoColor=white" />
-  <img alt="Electron" src="https://img.shields.io/badge/desktop-Electron-293548?style=flat-square&amp;logo=electron&amp;logoColor=9FEAF9" />
-  <img alt="React and FastAPI" src="https://img.shields.io/badge/stack-React%20%2B%20FastAPI-5266E5?style=flat-square" />
+  <img alt="Tauri" src="https://img.shields.io/badge/desktop-Tauri-293548?style=flat-square&amp;logo=tauri&amp;logoColor=FFC131" />
+  <img alt="React Rust Python" src="https://img.shields.io/badge/stack-React%20%2B%20Rust%20%2B%20Python-5266E5?style=flat-square" />
   <img alt="Local first" src="https://img.shields.io/badge/data-local--first-2E9F86?style=flat-square" />
 </p>
 
 <p align="center">
   <a href="#为什么是-studypilot-desk">产品理念</a> ·
   <a href="#主要功能">主要功能</a> ·
+  <a href="#获取应用">获取应用</a> ·
   <a href="#一分钟启动">一分钟启动</a> ·
   <a href="#系统如何运作">技术架构</a> ·
   <a href="#数据安全与隐私">隐私边界</a>
@@ -44,13 +46,20 @@ StudyPilot Desk 不是一个只负责聊天的 AI 外壳，也不是单纯的资
 
 此外还包括多课程书架、语言学习模式、模型配置、自由知识画布、项目研究工作台、本地备份与恢复、深浅主题、系统字体和可访问性设置。完整边界见 [产品范围](docs/PRODUCT_SCOPE.md) 与 [已知限制](docs/KNOWN_LIMITATIONS.md)。
 
+## 获取应用
+
+当前发布线为 **0.2.x**。Windows 用户可前往 [GitHub Releases](https://github.com/KleeAlice/studypilot-desk/releases) 下载 `StudyPilot Desk_*_x64-setup.exe`；也可以按下方方式直接从源码启动。项目同时保留 Linux、macOS 与移动端适配基础，具体支持范围以每个 Release 的资产和说明为准。
+
+> Windows 未签名安装包可能触发 SmartScreen 提示，请只从本仓库 Release 下载。
+
 ## 一分钟启动
 
 ### 环境要求
 
-- Windows 10 / 11
+- Windows 10 / 11（桌面开发与安装包）
 - Node.js 20+
 - Python 3.10+
+- Rust stable 工具链与 Visual Studio C++ Build Tools（仅源码构建桌面端时需要）
 - 首次安装依赖时可访问 npm 与 PyPI
 
 ### 直接启动
@@ -61,48 +70,50 @@ StudyPilot Desk 不是一个只负责聊天的 AI 外壳，也不是单纯的资
 .\start.ps1
 ```
 
-首次启动会创建 `.venv`、安装 Python / Node 依赖并构建桌面端。之后可直接启动现有环境；运行数据默认保存在 `data/`，该目录不会进入 Git。
+首次启动会创建 `.venv`、安装 Python / Node 依赖并启动 Tauri 桌面端。之后可直接复用现有环境；运行数据默认保存在 `data/`，该目录不会进入 Git。
 
-开发模式：
+仅启动浏览器版：
 
 ```powershell
-.\dev.bat
+npm.cmd run dev:web
 ```
 
-重置演示数据（会先旁路保存原数据）：
+Tauri 桌面开发模式：
 
 ```powershell
-.\reset_demo.bat
+npm.cmd run dev
 ```
 
 ## 系统如何运作
 
 ```mermaid
 flowchart LR
-    A[Electron 桌面外壳] --> B[React 学习工作台]
-    B <--> C[FastAPI 本地服务]
+    A[Tauri / Rust 原生外壳] --> B[React 学习工作台]
+    A --> C[Actix-Web 本地网关]
+    B <--> C
     C <--> D[(SQLite)]
     C <--> E[本地资料与媒体]
-    C --> F[Python 本机进程]
+    C <--> F[私有 Python Worker]
     B -. 用户主动选择上下文 .-> G[已配置的模型服务]
 ```
 
-- **Electron** 管理无边框单实例窗口、窗口状态和 FastAPI 子进程生命周期。
+- **Tauri / Rust** 管理无边框原生窗口、窗口状态、权限与本地服务生命周期。
 - **React** 提供课程书架、学习中心、资料阅读、知识画布、实验室和设置界面。
-- **FastAPI + SQLite** 承担领域服务、数据迁移、全文检索、掌握度与备份恢复。
-- **受限 preload API** 隔离渲染进程与 Node.js；后端只监听 `127.0.0.1` 并使用启动会话令牌。
+- **Actix-Web + SQLite** 提供唯一的本地 API、数据迁移、全文检索与备份恢复。
+- **私有 Python Worker** 承担文档解析和 Python 领域能力，不监听 TCP 端口。
+- 渲染进程不开放 Node.js；后端只监听 `127.0.0.1`，并使用每次启动生成的会话令牌。
 
 ```text
-backend/          FastAPI、SQLite、领域服务、Python 运行器
-electron/         主进程、预加载桥、窗口与后端生命周期
+backend/          Python 领域服务、SQLite 迁移、文档解析与 Python 运行器
+src-tauri/        Rust 原生壳、Actix-Web 网关、权限与 native-core
 frontend/         React 桌面工作台与设计系统
 data/seeds/       不包含用户资料的通用演示路线
-scripts/          启动、烟雾测试与演示重置
-tests/            前端、Electron 与 Playwright 测试
+scripts/          启动、版本同步、Worker 打包与验证脚本
+tests/            前端、后端、Tauri 契约与 Playwright 测试
 docs/             产品、架构、安全、测试与设计说明
 ```
 
-进一步阅读：[系统架构](docs/ARCHITECTURE.md) · [数据模型](docs/DATA_MODEL.md) · [设计系统](docs/DESIGN_SYSTEM.md)
+进一步阅读：[系统架构](docs/ARCHITECTURE.md) · [Tauri 跨端计划](docs/TAURI_CROSS_PLATFORM_PLAN.md) · [数据模型](docs/DATA_MODEL.md) · [设计系统](docs/DESIGN_SYSTEM.md)
 
 ## 数据、安全与隐私
 
@@ -117,16 +128,18 @@ docs/             产品、架构、安全、测试与设计说明
 ## 验证与测试
 
 ```powershell
+.\.venv\Scripts\python.exe -m ruff check backend scripts
 .\.venv\Scripts\python.exe -m pytest backend/tests -q
+npm.cmd run check:versions
 npm.cmd test
 npm.cmd run typecheck
-npm.cmd run build
-npm.cmd run smoke
 npm.cmd run test:e2e
-.\.venv\Scripts\python.exe scripts\smoke_test.py
+cargo clippy --manifest-path src-tauri\Cargo.toml --workspace --all-targets --locked -- -D warnings
+cargo test --manifest-path src-tauri\Cargo.toml --workspace --all-targets --locked
+npm.cmd run build:tauri
 ```
 
-Electron / Playwright 命令需要桌面会话。当前测试策略与验收范围见 [测试计划](docs/TEST_PLAN.md) 和 [测试报告](docs/TEST_REPORT.md)。
+Tauri / Playwright 命令需要桌面会话。当前测试策略与验收范围见 [测试计划](docs/TEST_PLAN.md) 和 [测试报告](docs/TEST_REPORT.md)。
 
 ## 项目状态
 
@@ -134,16 +147,22 @@ Electron / Playwright 命令需要桌面会话。当前测试策略与验收范�
 
 仓库只包含不引用用户资料的 CC0 通用演示路线 `data/seeds/roadmap.json`。用户自己的课程、资料和学习计划只保存在本地数据目录。
 
+## 发布与版本
+
+版本以 `package.json` 为源，Release Please 负责维护版本、标签和 GitHub Release。正式发行会构建 Windows NSIS、Linux DEB/AppImage 与 macOS DMG；提交版本相关改动前应运行 `npm run check:versions`。
+
 ## 文档
 
 - [产品范围](docs/PRODUCT_SCOPE.md)
 - [系统架构](docs/ARCHITECTURE.md)
+- [Tauri 跨端与 Rust 优化计划](docs/TAURI_CROSS_PLATFORM_PLAN.md)
 - [数据模型](docs/DATA_MODEL.md)
 - [设计系统](docs/DESIGN_SYSTEM.md)
 - [安全说明](docs/SECURITY.md)
 - [测试计划](docs/TEST_PLAN.md)
 - [测试报告](docs/TEST_REPORT.md)
 - [已知限制](docs/KNOWN_LIMITATIONS.md)
+- [贡献与版本发布](CONTRIBUTING.md)
 
 ## 许可证
 

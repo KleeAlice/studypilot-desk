@@ -1,3 +1,4 @@
+import os
 import sys
 import subprocess
 import time
@@ -47,11 +48,20 @@ def test_registry_discovers_known_sources_safely_deduplicates_and_caches(
     tmp_path, monkeypatch
 ) -> None:
     project = tmp_path / "project"
-    project_python = project / ".venv" / "Scripts" / "python.exe"
-    env_python = tmp_path / "env" / "Scripts" / "python.exe"
-    path_python = tmp_path / "path" / "python.exe"
-    launcher_python = tmp_path / "launcher" / "python.exe"
-    for executable in (project_python, env_python, path_python, launcher_python):
+    if os.name == "nt":
+        project_python = project / ".venv" / "Scripts" / "python.exe"
+        env_python = tmp_path / "env" / "Scripts" / "python.exe"
+        path_python = tmp_path / "path" / "python.exe"
+        launcher_python = tmp_path / "launcher" / "python.exe"
+    else:
+        project_python = project / ".venv" / "bin" / "python"
+        env_python = tmp_path / "env" / "bin" / "python"
+        path_python = tmp_path / "path" / "python"
+        launcher_python = None
+    executables = [project_python, env_python, path_python]
+    if launcher_python is not None:
+        executables.append(launcher_python)
+    for executable in executables:
         executable.parent.mkdir(parents=True, exist_ok=True)
         executable.write_bytes(b"")
 
@@ -62,7 +72,7 @@ def test_registry_discovers_known_sources_safely_deduplicates_and_caches(
         return {
             "python": str(path_python),
             "python3": str(path_python),
-            "py": "C:/Windows/py.exe",
+            "py": "C:/Windows/py.exe" if os.name == "nt" else None,
             "conda": None,
         }.get(command)
 
@@ -70,7 +80,7 @@ def test_registry_discovers_known_sources_safely_deduplicates_and_caches(
 
     def fake_run(args, **kwargs):
         calls.append((args, kwargs))
-        if args[0] == "C:/Windows/py.exe":
+        if args[0] == "C:/Windows/py.exe" and launcher_python is not None:
             return subprocess.CompletedProcess(
                 args, 0, stdout=f" -V:3.12 * {launcher_python}\n", stderr=""
             )
@@ -86,7 +96,8 @@ def test_registry_discovers_known_sources_safely_deduplicates_and_caches(
         "subprocess",
         SimpleNamespace(
             run=fake_run,
-            CREATE_NO_WINDOW=subprocess.CREATE_NO_WINDOW,
+            CREATE_NO_WINDOW=getattr(subprocess, "CREATE_NO_WINDOW", 0),
+            TimeoutExpired=subprocess.TimeoutExpired,
         ),
         raising=False,
     )
@@ -100,17 +111,24 @@ def test_registry_discovers_known_sources_safely_deduplicates_and_caches(
     assert project_python.resolve() in resolved
     assert env_python.resolve() in resolved
     assert path_python.resolve() in resolved
-    assert launcher_python.resolve() in resolved
+    if launcher_python is not None:
+        assert launcher_python.resolve() in resolved
     assert len([item for item in first if Path(item.path).resolve() == path_python.resolve()]) == 1
-    assert {item.kind for item in first} >= {"current", "project", "virtualenv", "path", "launcher"}
+    expected_kinds = {"current", "project", "virtualenv", "path"}
+    if os.name == "nt":
+        expected_kinds.add("launcher")
+    assert {item.kind for item in first} >= expected_kinds
     assert first == second
     assert len(calls) == calls_after_first
     assert all(isinstance(args, list) for args, _ in calls)
     assert all(kwargs["shell"] is False for _, kwargs in calls)
-    assert all(
-        kwargs.get("creationflags") == subprocess.CREATE_NO_WINDOW
-        for _, kwargs in calls
-    )
+    if os.name == "nt":
+        assert all(
+            kwargs.get("creationflags") == subprocess.CREATE_NO_WINDOW
+            for _, kwargs in calls
+        )
+    else:
+        assert all("creationflags" not in kwargs for _, kwargs in calls)
     assert all(kwargs["timeout"] <= 2 for _, kwargs in calls)
     assert all(
         kwargs["timeout"] == 2 for args, kwargs in calls if "-I" in args

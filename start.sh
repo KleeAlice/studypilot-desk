@@ -10,9 +10,8 @@ if ! .venv/bin/python -c 'import fastapi, uvicorn, docx, pypdf' >/dev/null 2>&1;
   .venv/bin/python -m pip install wheel
   .venv/bin/python -m pip install --no-build-isolation -e '.[dev]'
 fi
-if [ ! -d node_modules/electron ]; then
+if [ ! -d node_modules/@tauri-apps/cli ]; then
   npm install
 fi
-npm run build
-./node_modules/.bin/electron .
+npm run start:tauri
 

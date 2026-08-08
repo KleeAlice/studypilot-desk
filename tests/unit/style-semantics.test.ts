@@ -29,7 +29,7 @@ test("the split divider exposes a deliberate resize affordance", () => {
 
   expect(dividerRule).toContain("cursor: col-resize");
 });
-test("the titlebar delegates dragging to Electron native hit testing", () => {
+test("the titlebar keeps the native drag-region styling used by Tauri", () => {
   const css = readFileSync(resolve("frontend/src/styles/global.css"), "utf8");
   const dragFillRule = css.match(/^\.titlebar__drag-fill\s*\{([^}]+)\}/m)?.[1] || "";
 

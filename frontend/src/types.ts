@@ -1,8 +1,3 @@
-export interface DesktopRuntime {
-  apiBase: string;
-  dataDir: string;
-}
-
 export type CourseType = "knowledge" | "language";
 export type LanguageProficiency = "beginner" | "elementary" | "intermediate" | "advanced";
 export type LanguageTrainingFocus = "reading" | "listening" | "speaking" | "writing";
@@ -128,36 +123,6 @@ export interface PythonEnvironment {
   path: string;
   kind: string;
   current: boolean;
-}
-
-export interface DesktopBridge {
-  runtime(): Promise<DesktopRuntime>;
-  window: {
-    minimize(): Promise<void>;
-    toggleMaximize(): Promise<boolean>;
-    close(): Promise<void>;
-    isMaximized?(): Promise<boolean>;
-  };
-  files: {
-    chooseDocuments(): Promise<string[]>;
-    sourceCreatedAt?(file: File): Promise<string | null>;
-    saveExport?(request: { suggestedName: string; bytes: Uint8Array }): Promise<string | null>;
-    getExportDirectory?(): Promise<string>;
-    chooseExportDirectory?(): Promise<string | null>;
-    resetExportDirectory?(): Promise<string>;
-    saveToArchive?(request: { suggestedName: string; bytes: Uint8Array }): Promise<string>;
-    openExportDirectory?(): Promise<void>;
-  };
-  fonts?: { list(): Promise<string[]> };
-  appearance?: { setZoomFactor(factor: number): void | Promise<void> };
-  capture?: { window(): Promise<Uint8Array | null> };
-  clipboard: { readText(): Promise<string>; writeText?(text: string): Promise<void>; readImage?(): Promise<Uint8Array | null> };
-}
-
-declare global {
-  interface Window {
-    studypilot: DesktopBridge;
-  }
 }
 
 export interface WeekData {

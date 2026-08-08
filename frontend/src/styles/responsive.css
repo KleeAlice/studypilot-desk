@@ -1,0 +1,91 @@
+/* ===== Responsive layout =====
+   Loaded last so these overrides win across every view.  Uses the breakpoint
+   tokens from tokens.css: --bp-tablet (900px), --bp-mobile (720px). */
+
+/* ---- Tablet (<=900px): tighter spacing, dashboard keeps 2 columns ---- */
+@media (max-width: 900px) {
+  .page { padding-inline: clamp(14px, 3vw, 22px); }
+}
+
+/* ---- Mobile (<=720px): stack content into a single column ---- */
+@media (max-width: 720px) {
+  .page { padding: 16px 14px 32px; }
+  .page-heading { flex-direction: column; align-items: stretch; gap: 12px; }
+
+  /* Stack the primary content grids. */
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .knowledge-layout { grid-template-columns: 1fr; }
+  .lab-layout { grid-template-columns: 1fr; }
+  .studio-create { grid-template-columns: 1fr; }
+  .split-ledger { grid-template-columns: 1fr; }
+  .language-course-identity { grid-template-columns: 1fr; }
+  .course-wizard-row { grid-template-columns: 1fr; }
+  .metric-row { grid-template-columns: 1fr 1fr; }
+  .week-row { grid-template-columns: 1fr; gap: 8px; }
+  .search-bar { grid-template-columns: 1fr; }
+  .review-columns, .settings-sections { grid-template-columns: 1fr; }
+  .settings-sections > section, .review-columns > section { min-height: auto; }
+
+  /* Phase tracker: keep it horizontally scrollable instead of crushing it. */
+  .phase-track {
+    grid-template-columns: repeat(6, minmax(120px, 1fr));
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+  }
+
+  /* Agent dock: full width, slides over content from the right. */
+  .agent-host.is-agent-open { grid-template-columns: 1fr; }
+  .agent-dock {
+    position: fixed;
+    inset: var(--titlebar) 0 0 0;
+    z-index: 80;
+    border-left: 0;
+    box-shadow: -16px 0 40px rgba(18, 22, 32, .2);
+  }
+
+  /* Bigger touch targets on mobile. */
+  .navrail nav button { height: 46px; }
+  .primary-action, .quiet-action, .inline-form button,
+  .search-bar button, .editor-panel button, .editor-actions button { min-height: 44px; }
+  .titlebar__controls button { width: 34px; height: 34px; }
+
+  /* Inputs must be >=16px to avoid iOS focus zoom and keep them legible. */
+  input, textarea, select { font-size: 16px !important; }
+  .search-bar input, .editor-panel textarea, .inline-form input { font-size: 16px !important; }
+
+  /* ---- Document reader: fit the viewport and lift reading size ---- */
+  .document-reader-surface { min-width: 0; }
+  /* On phones the outline/notes panels overlay; force the body to a single
+     full-width column so the reader is never placed in a 0-width track. */
+  .document-workspace__body,
+  .document-workspace__body.is-outline-collapsed,
+  .document-workspace__body.is-notes-collapsed,
+  .document-workspace__body.is-split,
+  .document-workspace__body.is-split.is-outline-collapsed {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .document-readers { grid-template-columns: minmax(0, 1fr); }
+  .document-reader-stage { width: 100%; min-width: 0; }
+  .structured-reader, .pdf-reader, .sheet-reader, .slide-reader {
+    width: 100%; padding: 10px 0 44px;
+  }
+  .structured-reader article, .pdf-reader article,
+  .sheet-reader section, .slide-reader article {
+    padding: clamp(14px, 3.5vw, 22px);
+  }
+  .markdown-document {
+    width: 100%; margin: 12px auto 40px;
+    padding: 18px 16px 56px;
+    font-size: 16px; line-height: 1.85;
+  }
+  .document-prose { font-size: 15px; line-height: 1.9; }
+
+  /* ---- Knowledge canvas: let the graph keep its working size, panels fit ---- */
+  .knowledge-layout { grid-template-columns: 1fr; }
+  .knowledge-layout > aside { max-width: none; }
+
+  /* ---- Comfortable heading scale + spacing on phones ---- */
+  h1 { font-size: 22px; }
+  h2 { font-size: 18px; }
+  .eyebrow, .panel-index { letter-spacing: .12em; }
+}

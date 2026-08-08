@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NavRail, type ViewKey } from "../components/NavRail";
 import { TitleBar } from "../components/TitleBar";
 import { CourseSwitcher } from "../components/CourseSwitcher";
@@ -13,8 +13,7 @@ import { NotebookLibrary } from "../features/NotebookLibrary";
 import { Trash } from "../features/Trash";
 import { GlobalSettings } from "../features/GlobalSettings";
 import { Lab } from "../features/Lab";
-import { Library } from "../features/Library";
-import { DocumentWorkspace } from "../document/DocumentWorkspace";
+import { CompactLibrary, Library } from "../features/Library";
 import { CourseRoadmap } from "../features/CourseRoadmap";
 import { Settings } from "../features/Settings";
 import { Studio } from "../features/Studio";
@@ -35,8 +34,9 @@ import { AgentHost } from "../agent/AgentHost";
 import type { AgentMode, AgentSource } from "../agent/types";
 import { announceDocumentSource, storeDocumentSourceFocus, type DocumentSourceFocus } from "../document/sourceFocus";
 import type { DocumentAgentContext } from "../document/DocumentWorkspace";
-import { ApiClient } from "../services/api";
-import type { Course, CourseCreateInput, DesktopRuntime, KnowledgeNotebook, TodayData } from "../types";
+import { ApiClient, ApiError } from "../services/api";
+import type { Course, CourseCreateInput, KnowledgeNotebook, TodayData } from "../types";
+import { platform, type RuntimeConfig } from "../platform";
 import { waitForMotionFeedback } from "../ui/motion";
 import { applyTypography, normalizeUiFontScale } from "../ui/typography";
 import { applyGlassOpacity, applyWallpaper, normalizeGlassOpacity, normalizeWallpaperMode, wallpaperUrl, type WallpaperMode } from "../ui/appearance";
@@ -50,6 +50,30 @@ const EMPTY_TODAY: TodayData = {
   phase: { phase: 0, title: "尚未选择课程", gate: "NEW", acceptance: "", start_week: 1, end_week: 1 },
   tasks: [],
 };
+
+// The local service can take a moment to come up on first launch (cold Python
+// worker, WebView2 warm-up). Retry the boot fetch a few times with backoff so a
+// transient hiccup does not hard-fail the whole app.
+const BOOT_ATTEMPTS = 5;
+
+function bootErrorMessage(error: unknown): string {
+  if (error instanceof ApiError) {
+    const detail = error.details == null || error.details === "" ? "" : `（${error.details}）`;
+    return `${error.message}${detail}`;
+  }
+  return error instanceof Error ? error.message : String(error);
+}
+
+// The document workspace includes rich Word, spreadsheet, and Markdown renderers.
+// Keep it out of the boot bundle until the user opens a document.
+const DocumentWorkspace = lazy(async () => {
+  const module = await import("../document/DocumentWorkspace");
+  return { default: module.DocumentWorkspace };
+});
+
+function DocumentWorkspaceLoading() {
+  return <main className="document-workspace-loading" role="status" aria-live="polite">正在打开资料…</main>;
+}
 
 function lastCourseDocumentKey(courseId: number) {
   return `studypilot.course-library.last-document.v1.${courseId}`;
@@ -75,7 +99,7 @@ function lastCourseDocument(courseId: number) {
 }
 
 export function App() {
-  const [runtime, setRuntime] = useState<DesktopRuntime | null>(null);
+  const [runtime, setRuntime] = useState<RuntimeConfig | null>(null);
   const [settings, setSettings] = useState<Record<string, any> | null>(null);
   const [today, setToday] = useState<TodayData | null>(null);
   const [system, setSystem] = useState<Record<string, any> | null>(null);
@@ -90,6 +114,7 @@ export function App() {
   const [knowledgeMode, setKnowledgeMode] = useState<"shelf" | "canvas">("shelf");
   const [languagePracticeType, setLanguagePracticeType] = useState<LanguagePracticeType>("reading");
   const [collapsed, setCollapsed] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [fatal, setFatal] = useState("");
   const [workspaceNotice, setWorkspaceNotice] = useState("");
   const [documentNavigationOpen, setDocumentNavigationOpen] = useState(false);
@@ -107,7 +132,7 @@ export function App() {
     title: string;
     requestId: number;
   } | null>(null);
-  const api = useMemo(() => runtime ? new ApiClient(runtime.apiBase) : null, [runtime]);
+  const api = useMemo(() => runtime ? new ApiClient(runtime.apiBase, runtime.sessionToken) : null, [runtime]);
   const startupResolvedRef = useRef(false);
   const documentNavigationCloseTimerRef = useRef<number | null>(null);
   const knowledgeSourceRequestRef = useRef(0);
@@ -174,15 +199,26 @@ export function App() {
 
   useEffect(() => {
     let active = true;
-    window.studypilot.runtime().then((value) => {
-      if (!active) return;
-      setRuntime(value);
-      setExportDirectory(`${value.dataDir.replace(/[\\/]$/, "")}\\exports`);
-      window.studypilot.files.getExportDirectory?.()
-        .then((directory) => { if (active) setExportDirectory(directory); })
-        .catch(() => undefined);
-    }).catch((error) => setFatal(String(error)));
-    window.studypilot.fonts?.list()
+    const capabilities = platform();
+    const loadRuntime = (attempt: number) => {
+      capabilities.runtime().then((value) => {
+        if (!active) return;
+        setRuntime(value);
+        setExportDirectory(value.dataDir ? `${value.dataDir.replace(/[\\/]$/, "")}\\exports` : "");
+        capabilities.files.getExportDirectory()
+          .then((directory) => { if (active) setExportDirectory(directory); })
+          .catch(() => undefined);
+      }).catch((error) => {
+        if (!active) return;
+        if (attempt < BOOT_ATTEMPTS - 1) {
+          window.setTimeout(() => loadRuntime(attempt + 1), Math.min(1500, 250 * 2 ** (attempt + 1)));
+        } else {
+          setFatal(bootErrorMessage(error));
+        }
+      });
+    };
+    loadRuntime(0);
+    capabilities.fonts.list()
       .then((fonts) => {
         if (!active) return;
         setSystemFonts([...new Set(fonts
@@ -217,26 +253,53 @@ export function App() {
 
   useEffect(() => {
     if (!api) return;
-    Promise.all([
-      api.get<Record<string, any>>("/api/settings"),
-      api.get<TodayData>("/api/today").catch(() => EMPTY_TODAY),
-      api.get<Record<string, any>>("/api/system/status"),
-      api.get<Course[]>("/api/courses"),
-    ]).then(([nextSettings, nextToday, nextSystem, nextCourses]) => {
-      setSettings(nextSettings); setToday(nextToday); setSystem(nextSystem); setCourses(nextCourses);
-      applyTheme(nextSettings.theme || "system");
-      applyTypography(nextSettings.ui_font || "system", nextSettings.code_font || "system", nextSettings.ui_font_scale || 1, nextSettings.force_uniform_font_size === true);
-      applyWallpaper(api.baseUrl, nextSettings.wallpaper_mode || "none", nextSettings.wallpaper_revision || "", nextSettings.wallpaper_opacity, nextSettings.wallpaper_blur);
-      applyGlassOpacity(nextSettings.glass_opacity);
-      applyWallpaperPalette(nextSettings.wallpaper_palette, nextSettings.wallpaper_adaptive_theme === true);
-      applyUiLanguage(nextSettings.ui_language);
-    }).catch((error) => setFatal(error instanceof Error ? error.message : String(error)));
+    let active = true;
+    let attempt = 0;
+    const boot = async () => {
+      while (active) {
+        try {
+          const [nextSettings, nextToday, nextSystem, nextCourses] = await Promise.all([
+            api.get<Record<string, any>>("/api/settings"),
+            api.get<TodayData>("/api/today").catch(() => EMPTY_TODAY),
+            api.get<Record<string, any>>("/api/system/status"),
+            api.get<Course[]>("/api/courses"),
+          ]);
+          if (!active) return;
+          setSettings(nextSettings); setToday(nextToday); setSystem(nextSystem); setCourses(nextCourses);
+          applyTheme(nextSettings.theme || "system");
+          applyTypography(nextSettings.ui_font || "system", nextSettings.code_font || "system", nextSettings.ui_font_scale || 1, nextSettings.force_uniform_font_size === true);
+          applyWallpaper(api.baseUrl, nextSettings.wallpaper_mode || "none", nextSettings.wallpaper_revision || "", nextSettings.wallpaper_opacity, nextSettings.wallpaper_blur);
+          applyGlassOpacity(nextSettings.glass_opacity);
+          applyWallpaperPalette(nextSettings.wallpaper_palette, nextSettings.wallpaper_adaptive_theme === true);
+          applyUiLanguage(nextSettings.ui_language);
+          setFatal("");
+          return;
+        } catch (error) {
+          attempt += 1;
+          // Surface the error after the quick-retry burst, then keep retrying
+          // slowly in the background so the app recovers on its own when the
+          // local service comes back (connection problems never block the shell).
+          if (attempt >= BOOT_ATTEMPTS && active) {
+            setFatal(bootErrorMessage(error));
+          }
+          await new Promise((resolve) =>
+            window.setTimeout(
+              resolve,
+              attempt >= BOOT_ATTEMPTS ? 10_000 : Math.min(1500, 250 * 2 ** attempt),
+            ),
+          );
+        }
+      }
+    };
+    void boot();
+    return () => { active = false; };
   }, [api]);
 
   function applyTheme(theme: string) {
     const systemDark = typeof window.matchMedia === "function" && window.matchMedia("(prefers-color-scheme: dark)").matches;
     const resolved = theme === "system" ? (systemDark ? "dark" : "light") : theme;
     document.documentElement.dataset.theme = resolved;
+    document.documentElement.style.colorScheme = resolved;
   }
 
   function changeTheme(theme: string) {
@@ -525,20 +588,20 @@ export function App() {
   }
 
   async function chooseExportDirectory() {
-    const value = await window.studypilot.files.chooseExportDirectory?.() || null;
+    const value = await platform().files.chooseExportDirectory();
     if (value) setExportDirectory(value);
     return value;
   }
 
   async function resetExportDirectory() {
-    const value = await window.studypilot.files.resetExportDirectory?.()
+    const value = await platform().files.resetExportDirectory()
       || `${runtime!.dataDir.replace(/[\\/]$/, "")}\\exports`;
     setExportDirectory(value);
     return value;
   }
 
   async function openExportDirectory() {
-    await window.studypilot.files.openExportDirectory?.();
+    await platform().files.openExportDirectory();
   }
 
   async function createKnowledgeNotebook(input: Pick<KnowledgeNotebook, "title" | "description" | "kind" | "cover_style">) {
@@ -679,8 +742,34 @@ export function App() {
     return () => { leave(); window.removeEventListener("dragover", dragOver); window.removeEventListener("drop", drop); window.removeEventListener("dragleave", leave); };
   }, [api]);
 
-  if (fatal) return <div className="fatal-screen"><div className="brand-mark">SP</div><h1>本地服务未就绪</h1><p>{fatal}</p><button onClick={() => location.reload()}>重新连接</button></div>;
-  if (!runtime || !api || !settings || !today) return <BootScreen />;
+  if (!runtime || !api) return <BootScreen />;
+
+  // Connection problems never block the shell: render the desktop frame and
+  // show a non-blocking status panel in the content area while the local
+  // service is starting or unreachable (the boot effect keeps retrying).
+  const connectingLanguage = normalizeUiLanguage((settings as Record<string, any> | null)?.ui_language || "zh-CN");
+  if (!settings || !today || !system || !courses) {
+    return (
+      <div className="desktop-shell desktop-shell--library">
+        <TitleBar language={connectingLanguage} />
+        <div className="service-connection-panel">
+          {fatal ? (
+            <div className="service-connection-state is-error" role="alert">
+              <strong>本地服务连接失败</strong>
+              <p>{fatal}</p>
+              <button onClick={() => location.reload()}>重新连接</button>
+            </div>
+          ) : (
+            <div className="service-connection-state" role="status" aria-live="polite">
+              <span className="boot-spinner" aria-hidden="true" />
+              <strong>正在连接本地服务…</strong>
+              <p>学习数据正在后台装载</p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   const activeCourseId = Number(system?.active_course || settings.active_course || 1);
   const activeCourse = courses.find((course) => course.id === activeCourseId);
@@ -723,7 +812,7 @@ export function App() {
         wallpaperBlur={Number(settings.wallpaper_blur) || 0}
         glassOpacity={normalizeGlassOpacity(settings.glass_opacity)}
         wallpaperAdaptiveTheme={settings.wallpaper_adaptive_theme === true}
-        wallpaperImageUrl={wallpaperUrl(api.baseUrl, settings.wallpaper_mode, settings.wallpaper_revision)}
+        wallpaperImageUrl={wallpaperUrl(api.baseUrl, settings.wallpaper_mode, settings.wallpaper_revision, api.sessionToken)}
         exportDirectory={exportDirectory}
         workspaceToolbarAutoHide={settings.workspace_toolbar_auto_hide !== false}
         language={language}
@@ -788,18 +877,18 @@ export function App() {
     : <div className="linked-workspace-empty"><span>⌘</span><strong>还没有知识笔记</strong><p>先创建一本知识笔记，再从资料旁边联动查看。</p></div>;
 
   if (route.level === "course" && route.view === "library" && route.documentId) {
-    const documentReader = <DocumentWorkspace
-      key={`document-${route.documentId}-${workspaceEpoch}`}
-      api={api}
-      courseId={route.courseId}
-      documentId={route.documentId}
-      onBack={() => { rememberCourseDocument(route.courseId, null); navigate({ level: "course", courseId: route.courseId, view: "library" }); }}
-      onAgentContextChange={setDocumentAgentContext}
-      courseNavigationOpen={documentNavigationOpen}
-      onCourseNavigationChange={setCourseNavigation}
-      knowledgeSplitOpen={linkedWorkspace === "knowledge"}
-      onKnowledgeSplitChange={(open) => setLinkedWorkspace(open ? "knowledge" : null)}
-    />;
+    const documentReader = <Suspense fallback={<DocumentWorkspaceLoading />}><DocumentWorkspace
+        key={`document-${route.documentId}-${workspaceEpoch}`}
+        api={api}
+        courseId={route.courseId}
+        documentId={route.documentId}
+        onBack={() => { rememberCourseDocument(route.courseId, null); navigate({ level: "course", courseId: route.courseId, view: "library" }); }}
+        onAgentContextChange={setDocumentAgentContext}
+        courseNavigationOpen={documentNavigationOpen}
+        onCourseNavigationChange={setCourseNavigation}
+        knowledgeSplitOpen={linkedWorkspace === "knowledge"}
+        onKnowledgeSplitChange={(open) => setLinkedWorkspace(open ? "knowledge" : null)}
+      /></Suspense>;
     const documentWorkspace = linkedWorkspace === "knowledge"
       ? <StudySplitWorkspace
           primary={documentReader}
@@ -1046,7 +1135,7 @@ export function App() {
       initialWallpaperAdaptiveTheme={settings.wallpaper_adaptive_theme === true}
       initialLanguage={language}
       initialWorkspaceToolbarAutoHide={settings.workspace_toolbar_auto_hide !== false}
-      wallpaperImageUrl={wallpaperUrl(api.baseUrl, settings.wallpaper_mode, settings.wallpaper_revision)}
+      wallpaperImageUrl={wallpaperUrl(api.baseUrl, settings.wallpaper_mode, settings.wallpaper_revision, api.sessionToken)}
       exportDirectory={exportDirectory}
       onTheme={changeTheme}
       onTypography={changeTypography}
@@ -1093,15 +1182,15 @@ export function App() {
         />
     : modulePage;
   const linkedLibrary = linkedDocumentId
-    ? <DocumentWorkspace
+    ? <Suspense fallback={<DocumentWorkspaceLoading />}><DocumentWorkspace
         key={`linked-document-${linkedDocumentId}`}
         api={api}
         courseId={route.level === "course" ? route.courseId : activeCourseId}
         documentId={linkedDocumentId}
         onBack={() => { setLinkedDocumentId(null); setLinkedDocumentContext({ documentIds: [], blockKey: "", selectedText: "", locator: {} }); }}
         onAgentContextChange={setLinkedDocumentContext}
-      />
-    : <Library api={api} courseId={route.level === "course" ? route.courseId : activeCourseId} compact onOpen={(document) => setLinkedDocumentId(document.id)} />;
+      /></Suspense>
+    : <CompactLibrary api={api} courseId={route.level === "course" ? route.courseId : activeCourseId} onOpen={(document) => setLinkedDocumentId(document.id)} />;
   const presentedPage = linkedWorkspace === "library" && (workspaceView === "knowledge" || workspaceView === "learning")
     ? <StudySplitWorkspace
         primary={page}
@@ -1128,6 +1217,7 @@ export function App() {
         language={language}
         navigationCollapsed={collapsed}
         onExpandNavigation={() => setCollapsed(false)}
+        onMenuClick={() => setMobileNavOpen(true)}
       />
       <AgentHost
         api={api}
@@ -1145,7 +1235,7 @@ export function App() {
         workspaceToolbarAutoHide={settings.workspace_toolbar_auto_hide !== false}
         onOpenSource={(source) => openAgentSource(route.level === "course" ? route.courseId : activeCourseId, source)}
       >
-        <div className="desktop-body">
+        <div className={`desktop-body ${mobileNavOpen ? "is-mobile-nav-open" : ""}`}>
           <NavRail
             active={workspaceView}
             onChange={changeView}
@@ -1154,6 +1244,8 @@ export function App() {
             courseTitle={routeCourse?.title}
             onBackToLibrary={() => navigate({ level: "library" })}
             language={language}
+            mobileOpen={mobileNavOpen}
+            onCloseMobile={() => setMobileNavOpen(false)}
           />
           <main className="main-stage">
             <div className="context-strip"><CourseSwitcher courses={courses} activeCourseId={Number(system?.active_course || settings.active_course || 1)} fallbackTitle={today.phase.title} onActivate={openNotebook} onCreate={createCourse} /><i /><span>{language === "en-US" ? `Week ${today.week.week}` : `第 ${today.week.week} 周`}</span><small>{system?.status === "ready" ? (language === "en-US" ? "Local service ready" : "本地服务正常") : (language === "en-US" ? "Check local service" : "本地服务待检查")}</small></div>

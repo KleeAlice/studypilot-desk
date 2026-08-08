@@ -4,6 +4,7 @@ import type { DocumentFormat, DocumentItem, SearchItem } from "../document/types
 import type { ApiClient } from "../services/api";
 import { DocumentActionsMenu } from "../components/DocumentActionsMenu";
 import { ConfirmDialog } from "../components/ConfirmDialog";
+import { platform } from "../platform";
 
 const ACCEPTED_EXTENSIONS = new Set(["pdf", "docx", "md", "markdown", "txt", "csv", "tsv", "json", "yaml", "yml", "xml", "html", "css", "js", "jsx", "ts", "tsx", "py", "java", "c", "cpp", "h", "hpp", "sql", "log", "ini", "toml", "xlsx", "pptx", "ipynb"]);
 
@@ -90,7 +91,7 @@ function sortDocuments(items: DocumentItem[], mode: SortMode) {
 
 async function sourceCreatedAt(file: File) {
   try {
-    const nativeTime = await window.studypilot?.files?.sourceCreatedAt?.(file);
+    const nativeTime = await platform().files.sourceCreatedAt(file);
     if (nativeTime) return nativeTime;
   } catch {
     // Browser builds do not expose native filesystem metadata.
@@ -98,7 +99,14 @@ async function sourceCreatedAt(file: File) {
   return file.lastModified > 0 ? new Date(file.lastModified).toISOString() : null;
 }
 
-export function Library({ api, onOpen, onOpenKnowledgeSplit, compact = false, courseId }: { api: ApiClient; onOpen?: (document: DocumentItem) => void; onOpenKnowledgeSplit?: () => void; compact?: boolean; courseId?: number }) {
+interface DocumentLibraryProps {
+  api: ApiClient;
+  onOpen?: (document: DocumentItem) => void;
+  onOpenKnowledgeSplit?: () => void;
+  courseId?: number;
+}
+
+function DocumentLibrary({ api, onOpen, onOpenKnowledgeSplit, courseId, layout }: DocumentLibraryProps & { layout: "page" | "compact" }) {
   const rememberedView = readLibraryView(courseId);
   const [documents, setDocuments] = useState<DocumentItem[]>([]);
   const [query, setQuery] = useState(rememberedView.query);
@@ -205,14 +213,13 @@ export function Library({ api, onOpen, onOpenKnowledgeSplit, compact = false, co
     setError("");
     try {
       const artifact = await api.download(`/api/documents/${document.id}/export`, { format });
-      const nativeSave = window.studypilot?.files?.saveToArchive || window.studypilot?.files?.saveExport;
-      if (nativeSave) {
-        const savedPath = await nativeSave({ suggestedName: artifact.filename, bytes: artifact.bytes });
-        if (!savedPath) {
+      const savedPath = await platform().files.saveToArchive({ suggestedName: artifact.filename, bytes: artifact.bytes });
+      if (savedPath) {
+      } else {
+        if (platform().kind !== "web") {
           setImportNotice("已取消导出");
           return;
         }
-      } else {
         const bytes = artifact.bytes.buffer.slice(
           artifact.bytes.byteOffset,
           artifact.bytes.byteOffset + artifact.bytes.byteLength,
@@ -283,7 +290,7 @@ export function Library({ api, onOpen, onOpenKnowledgeSplit, compact = false, co
 
   return (
     <section
-      className={`page document-library ${compact ? "is-compact" : ""} ${dragging ? "is-dragging" : ""}`}
+      className={`page document-library ${layout === "compact" ? "is-compact" : ""} ${dragging ? "is-dragging" : ""}`}
       data-testid="document-library-page"
       onDragEnter={(event) => {
         if (!event.dataTransfer.types.includes("Files")) return;
@@ -341,7 +348,7 @@ export function Library({ api, onOpen, onOpenKnowledgeSplit, compact = false, co
       </section>}
 
       {importNotice && <div role="status" aria-label="资料导入结果" className="library-import-notice">{importNotice}</div>}
-      <form className="search-bar" onSubmit={search}><input aria-label="全文搜索" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索正文、术语或失败案例"/><button>全文检索</button></form>
+      <form className="search-bar" onSubmit={search}><input name="query" autoComplete="off" aria-label="全文搜索" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="搜索正文、术语或失败案例…"/><button>全文检索</button></form>
       {error && <p role="alert" className="error-message">{error}</p>}
       {results.length > 0 && <section className="search-results"><div className="panel-index">检索结果 · {results.length}</div>{results.map((item) => <article key={`${item.document_id}-${item.snippet}`}><strong>{item.title}</strong><p>{item.snippet.replace(/<\/?mark>/g, "")}</p><small>{item.filename}</small></article>)}</section>}
       {documents.length > 0 && <section className="library-controls" aria-label="书架筛选与排序">
@@ -401,4 +408,12 @@ export function Library({ api, onOpen, onOpenKnowledgeSplit, compact = false, co
       />
     </section>
   );
+}
+
+export function Library(props: DocumentLibraryProps) {
+  return <DocumentLibrary {...props} layout="page" />;
+}
+
+export function CompactLibrary(props: DocumentLibraryProps) {
+  return <DocumentLibrary {...props} layout="compact" />;
 }

@@ -47,11 +47,17 @@
   --ui-root-font-size: 16px;
   --ui-body-font-size: 14px;
   --ui-control-font-size: 13px;
+  --ui-caption-font-size: 12px;
   --ui-small-font-size: 11px;
+  --ui-micro-font-size: 10px;
   --ui-reading-font-size: 15px;
   --ui-heading-sm-font-size: 17px;
   --ui-heading-md-font-size: 20px;
   --ui-heading-lg-font-size: 28px;
+  /* Responsive breakpoints (single source of truth for layout media queries). */
+  --bp-desktop: 1100px;
+  --bp-tablet: 900px;
+  --bp-mobile: 720px;
   --app-wallpaper-image: none;
   --app-wallpaper-opacity: .82;
   --app-wallpaper-blur: 0px;

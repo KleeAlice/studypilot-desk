@@ -22,4 +22,21 @@ describe("ApiClient request timeout", () => {
     await vi.advanceTimersByTimeAsync(250);
     await rejection;
   });
+
+  test("attaches the desktop session token to API requests", async () => {
+    const fetch = vi.fn().mockResolvedValue(new Response(JSON.stringify({ data: { status: "ok" } }), { status: 200 }));
+    vi.stubGlobal("fetch", fetch);
+    const client = new ApiClient("http://127.0.0.1:8765", "desktop-session");
+
+    await client.get("/api/health");
+
+    expect(fetch).toHaveBeenCalledWith(
+      "http://127.0.0.1:8765/api/health",
+      expect.objectContaining({
+        headers: expect.objectContaining({}),
+      }),
+    );
+    const headers = new Headers((fetch.mock.calls[0][1] as RequestInit).headers);
+    expect(headers.get("x-studypilot-session")).toBe("desktop-session");
+  });
 });

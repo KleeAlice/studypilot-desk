@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ApiClient } from "../services/api";
 import type { TodayData } from "../types";
+import { platform } from "../platform";
 
 export function Dashboard({ api, today, onRefresh, embedded = false }: { api: ApiClient; today: TodayData; onRefresh: () => Promise<void>; embedded?: boolean }) {
   const [title, setTitle] = useState("");
@@ -21,7 +22,7 @@ export function Dashboard({ api, today, onRefresh, embedded = false }: { api: Ap
   async function captureClipboard() {
     setError(""); setNotice("");
     try {
-      const content = await window.studypilot.clipboard.readText();
+      const content = await platform().clipboard.readText();
       if (!content.trim()) return setError("剪贴板中没有可收集的文字");
       await api.post("/api/captures", { title: content.slice(0, 48), payload: { content, category: "inbox" } });
       setNotice("剪贴板内容已保存到收集箱");

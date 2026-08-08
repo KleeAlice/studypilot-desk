@@ -1,0 +1,27 @@
+[package]
+name = "studypilot-desk"
+version = "0.2.1"
+description = "StudyPilot Desk native shell"
+authors = ["StudyPilot"]
+edition = "2021"
+
+[workspace]
+members = ["crates/local-host", "crates/native-core"]
+resolver = "2"
+
+[lib]
+name = "studypilot_tauri"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+native-core = { path = "crates/native-core" }
+local-host = { path = "crates/local-host" }
+rand = "0.9"
+serde = { version = "1", features = ["derive"] }
+tauri = { version = "2", features = [] }
+tauri-plugin-clipboard-manager = "2"
+tauri-plugin-dialog = "2"
+tauri-plugin-opener = "2"

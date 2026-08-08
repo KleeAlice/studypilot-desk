@@ -636,7 +636,7 @@
   font: inherit;
 }
 
-.roadmap-generator__time input:focus {
+.roadmap-generator__time input:focus-visible {
   border-color: var(--blue);
   box-shadow: 0 0 0 3px var(--selection-surface);
 }
@@ -894,7 +894,7 @@
   font: inherit;
   line-height: 1.55;
 }
-.roadmap-generator__time textarea:focus { border-color: var(--blue); box-shadow: 0 0 0 3px var(--selection-surface); }
+.roadmap-generator__time textarea:focus-visible { border-color: var(--blue); box-shadow: 0 0 0 3px var(--selection-surface); }
 .roadmap-generator__documents > header > div { display: flex; align-items: center; gap: 9px; }
 .roadmap-generator__documents > header button {
   min-height: 28px;

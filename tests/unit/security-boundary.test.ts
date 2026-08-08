@@ -24,12 +24,12 @@ test("production CSP permits bundled data fonts without loosening scripts", () =
   expect(scriptDirective).not.toContain("'unsafe-eval'");
 });
 
-test("window screenshots use a narrow isolated Electron bridge", () => {
-  const preload = readFileSync(resolve("electron/preload.ts"), "utf8");
-  const main = readFileSync(resolve("electron/main.ts"), "utf8");
+test("desktop capabilities stay behind Tauri commands rather than renderer globals", () => {
+  const platform = readFileSync(resolve("frontend/src/platform/index.ts"), "utf8");
+  const native = readFileSync(resolve("src-tauri/src/lib.rs"), "utf8");
 
-  expect(preload).toContain('window: () => ipcRenderer.invoke("capture:window")');
-  expect(main).toContain('ipcMain.handle("capture:window"');
-  expect(main).toContain("mainWindow.webContents.capturePage()");
-  expect(preload).not.toContain("desktopCapturer");
+  expect(platform).toContain("tauriPlatform");
+  expect(platform).not.toContain("studypilot");
+  expect(native).toContain("tauri::generate_handler!");
+  expect(native).toContain("clipboard_read_text");
 });

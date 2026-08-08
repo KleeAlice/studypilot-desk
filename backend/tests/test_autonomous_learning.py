@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import json
-
 from backend.app.db import Database
 from backend.app.services import learning_mode
 from backend.app.services.agent import AgentService

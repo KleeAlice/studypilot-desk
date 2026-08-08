@@ -51,27 +51,9 @@ test("reserves one blank titlebar surface outside every interactive control", ()
   expect(dragFill?.nextElementSibling).toHaveClass("window-actions");
 });
 
-test("does not synthesize window geometry from blank-surface pointer movement", () => {
-  const originalBridge = window.studypilot;
-  const startDrag = vi.fn().mockResolvedValue(true);
-  const moveDrag = vi.fn();
-  const endDrag = vi.fn();
-  (window as any).studypilot = {
-    window: { startDrag, moveDrag, endDrag },
-  };
+test("marks blank titlebar surfaces as Tauri native drag regions", () => {
+  const { container } = render(<TitleBar language="zh-CN" />);
 
-  try {
-    const { container } = render(<TitleBar language="zh-CN" />);
-    const dragFill = container.querySelector(".titlebar__drag-fill")!;
-
-    fireEvent.pointerDown(dragFill, { button: 0, pointerId: 7 });
-    fireEvent.pointerMove(dragFill, { pointerId: 7 });
-    fireEvent.pointerUp(dragFill, { pointerId: 7 });
-
-    expect(startDrag).not.toHaveBeenCalled();
-    expect(moveDrag).not.toHaveBeenCalled();
-    expect(endDrag).not.toHaveBeenCalled();
-  } finally {
-    (window as any).studypilot = originalBridge;
-  }
+  expect(container.querySelector(".titlebar__drag")).toHaveAttribute("data-tauri-drag-region");
+  expect(container.querySelector(".titlebar__drag-fill")).toHaveAttribute("data-tauri-drag-region");
 });

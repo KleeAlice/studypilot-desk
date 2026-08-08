@@ -6,10 +6,14 @@ export function normalizeWallpaperMode(value: unknown): WallpaperMode {
   return WALLPAPER_MODES.includes(value as WallpaperMode) ? value as WallpaperMode : "none";
 }
 
-export function wallpaperUrl(apiBase: string, mode: unknown, revision: unknown) {
+export function wallpaperUrl(apiBase: string, mode: unknown, revision: unknown, sessionToken?: string) {
   if (normalizeWallpaperMode(mode) !== "custom") return "";
   const safeRevision = encodeURIComponent(String(revision || "0"));
-  return `${apiBase}/api/settings/wallpaper/image?revision=${safeRevision}`;
+  const base = `${apiBase}/api/settings/wallpaper/image?revision=${safeRevision}`;
+  // CSS background loads cannot send a custom header, so carry the session
+  // token as a query parameter (the Rust gateway accepts it there too).
+  if (!sessionToken) return base;
+  return `${base}&session=${encodeURIComponent(sessionToken)}`;
 }
 
 export function normalizeWallpaperOpacity(value: unknown): number {

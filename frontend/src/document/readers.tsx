@@ -1,5 +1,4 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
-import { renderAsync } from "docx-preview";
 import ReactMarkdown from "react-markdown";
 import type { Components } from "react-markdown";
 import rehypeKatex from "rehype-katex";
@@ -297,7 +296,9 @@ function WordReader(props: ReaderProps) {
         if (!response.ok) throw new Error(`Word file ${response.status}`);
         return response.arrayBuffer();
       })
-      .then((buffer) => renderAsync(buffer, target, target, {
+      .then(async (buffer) => {
+        const { renderAsync } = await import("docx-preview");
+        return renderAsync(buffer, target, target, {
         className: "studypilot-docx",
         breakPages: true,
         ignoreLastRenderedPageBreak: false,
@@ -307,7 +308,8 @@ function WordReader(props: ReaderProps) {
         renderEndnotes: true,
         renderAltChunks: false,
         useBase64URL: true,
-      }))
+        });
+      })
       .then(() => setStatus("ready"))
       .catch((error) => {
         if ((error as Error).name !== "AbortError") setStatus("error");

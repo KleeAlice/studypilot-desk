@@ -196,7 +196,7 @@ test("keeps attachment actions, model selection, and send in one compact command
 
 test("switching the model immediately synchronizes the active conversation provider", async () => {
   const api = apiFor({ withThread: true, providers: [provider, deepSeekProvider] });
-  api.patch.mockImplementation((path: string, payload: Record<string, unknown>) => Promise.resolve({
+  api.patch.mockImplementation((_path: string, payload: Record<string, unknown>) => Promise.resolve({
     id: 4,
     course_id: 2,
     title: "Saved optimizer chat",
@@ -208,6 +208,10 @@ test("switching the model immediately synchronizes the active conversation provi
   fireEvent(window, new CustomEvent("studypilot:open-agent", { detail: { view: "chat" } }));
 
   const selector = await screen.findByRole("combobox", { name: "当前模型" });
+  await waitFor(() => {
+    expect(selector).not.toBeDisabled();
+    expect(within(selector).getByRole("option", { name: /DeepSeek/ })).toBeInTheDocument();
+  });
   await userEvent.selectOptions(selector, "deepseek");
 
   await waitFor(() => expect(api.patch).toHaveBeenCalledWith(

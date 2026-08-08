@@ -63,7 +63,8 @@ test("selects a real Python environment without exposing a duplicate console the
 
   firstView.unmount();
   render(<Lab api={api} />);
-  expect(await screen.findByLabelText("Python 环境")).toHaveValue("conda-ml");
+  const restoredEnvironment = await screen.findByLabelText("Python 环境");
+  await waitFor(() => expect(restoredEnvironment).toHaveValue("conda-ml"));
 });
 
 test("renders stderr-only failures as error output", async () => {
@@ -343,7 +344,8 @@ test("labels terminal and status with the run interpreter snapshot", async () =>
   } as any;
 
   render(<Lab api={api} courseId={1} />);
-  expect(await screen.findByLabelText("Python 环境")).toHaveValue("python-b");
+  const selector = await screen.findByLabelText("Python 环境");
+  await waitFor(() => expect(selector).toHaveValue("python-b"));
   await userEvent.click(screen.getByRole("button", { name: "运行代码" }));
   expect(await screen.findByText("snapshot ok", { exact: false })).toBeInTheDocument();
   expect(within(screen.getByTestId("output-console")).getByText("Python Alpha")).toBeInTheDocument();
@@ -473,7 +475,7 @@ test("recovers when the selected Python environment no longer exists", async () 
 
   render(<Lab api={api} courseId={1} />);
   const selector = await screen.findByLabelText("Python 环境");
-  expect(selector).toHaveValue("deleted-python");
+  await waitFor(() => expect(selector).toHaveValue("deleted-python"));
   await userEvent.click(screen.getByRole("button", { name: "运行代码" }));
 
   await waitFor(() => expect(selector).toHaveValue("fallback-python"));

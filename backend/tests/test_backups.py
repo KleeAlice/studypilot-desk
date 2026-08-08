@@ -5,6 +5,7 @@ import zipfile
 
 import pytest
 
+from backend.app import __version__
 from backend.app.db import CURRENT_SCHEMA_VERSION, Database
 from backend.app.errors import AppError
 from backend.app.services.backups import BackupService
@@ -30,6 +31,7 @@ def test_backup_contains_database_files_and_manifest(tmp_path) -> None:
         manifest = json.loads(archive.read("manifest.json"))
     assert {"app.db", "documents/note.md", "media/diagram.png", "manifest.json"} <= names
     assert manifest["application"] == "StudyPilot Desk"
+    assert manifest["application_version"] == __version__
     assert manifest["schema_version"] == CURRENT_SCHEMA_VERSION
     assert any(item["path"] == "app.db" and item["sha256"] for item in manifest["files"])
 

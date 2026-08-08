@@ -1,6 +1,5 @@
 from fastapi.testclient import TestClient
 
-import backend.app.main as main_module
 import backend.app.services.documents as documents_module
 from backend.app.main import create_app
 from backend.app.services.documents import ParsedDocument
@@ -29,7 +28,6 @@ def test_document_upload_reads_the_complete_file_past_the_legacy_limit(
                 "status": "ready",
             }, False
 
-        monkeypatch.setattr(main_module, "MAX_DOCUMENT_BYTES", 8)
         monkeypatch.setattr(service, "import_bytes", record_import)
         response = client.post(
             "/api/documents/import",

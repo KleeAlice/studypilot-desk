@@ -11,6 +11,7 @@ import {
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import type { ApiClient } from "../services/api";
+import { platform } from "../platform";
 import { speakLanguageText, stopLanguageSpeech } from "../language/speech";
 import { AgentActionPlanCard } from "./AgentActionPlanCard";
 import { AgentModeSwitch } from "./AgentModeSwitch";
@@ -119,8 +120,7 @@ export function learningStreamPreview(raw: string) {
     "g",
   );
   const values: string[] = [];
-  let match: RegExpExecArray | null;
-  while ((match = fieldPattern.exec(body)) !== null) {
+  while (fieldPattern.exec(body) !== null) {
     const start = fieldPattern.lastIndex;
     let end = start;
     let escaped = false;
@@ -1002,7 +1002,7 @@ export function AgentDock({
   }
 
   async function captureCurrentWindow() {
-    const capture = window.studypilot?.capture?.window;
+    const capture = platform().captureWindow;
     if (!capture) {
       setError("当前环境不支持窗口截图");
       return;
@@ -1317,9 +1317,8 @@ export function AgentDock({
       ].join("\n");
       const bytes = new TextEncoder().encode(markdown);
       const date = new Date().toISOString().slice(0, 10);
-      const saveToArchive = window.studypilot?.files?.saveToArchive;
-      if (!saveToArchive) throw new Error("当前环境不支持存档导出");
-      const path = await saveToArchive({ suggestedName: `PILOT-对话历史-${date}.md`, bytes });
+      const path = await platform().files.saveToArchive({ suggestedName: `PILOT-对话历史-${date}.md`, bytes });
+      if (!path) throw new Error("已取消存档导出");
       setExportedHistoryPath(path);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "对话历史导出失败");
@@ -1662,7 +1661,7 @@ export function AgentDock({
           <div className="agent-history-export">
             <button aria-label="导出全部对话" disabled={threads.length === 0 || exportingHistory} onClick={() => void exportHistory()}>{exportingHistory ? "导出中…" : "⇩ 导出全部对话"}</button>
             <button className="is-danger" aria-label="删除全部对话" disabled={threads.length === 0} onClick={() => setPendingDeleteAll("threads")}>删除全部对话</button>
-            {exportedHistoryPath && <div role="status"><span>已导出到 {exportedHistoryPath}</span><button aria-label="打开导出文件夹" onClick={() => void window.studypilot.files.openExportDirectory?.()}>打开导出文件夹</button></div>}
+            {exportedHistoryPath && <div role="status"><span>已导出到 {exportedHistoryPath}</span>{platform().files.canOpenExportDirectory && <button aria-label="打开导出文件夹" onClick={() => void platform().files.openExportDirectory()}>打开导出文件夹</button>}</div>}
             {error && <p className="agent-error" role="alert">{error}</p>}
           </div>
           {!workspace && <div className="agent-history-filters" role="group" aria-label="对话模式筛选">

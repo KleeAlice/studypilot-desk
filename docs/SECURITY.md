@@ -2,9 +2,9 @@
 
 ## 已实施
 
-- FastAPI 仅绑定 `127.0.0.1`，Electron 每次启动生成会话令牌。
-- Electron 使用 `contextIsolation: true`、`nodeIntegration: false`、`sandbox: true`，并拒绝页面新开窗口。
-- preload 只暴露固定白名单能力。
+- Rust Actix-Web 是唯一绑定 `127.0.0.1` 的桌面 HTTP 进程，Tauri 每次启动生成公有会话令牌；Python Worker 不绑定 TCP 端口，且只接受 Rust 注入的私有令牌。
+- Tauri 渲染页不获得 Node.js 或任意系统 API；原生能力只通过显式 Rust command 与最小插件权限提供。
+- Tauri capabilities 仅授权默认窗口所需的核心能力；文件、剪贴板和打开目录命令在 Rust 层实施路径与大小校验。
 - CSP 限制脚本、连接、图片、字体、对象和 base URI；生产资源使用本地相对路径。
 - SQL 参数化、外键、检查约束与事务；API 有统一输入校验和错误信封。
 - 文档导入做扩展名白名单、哈希去重和受管路径复制。

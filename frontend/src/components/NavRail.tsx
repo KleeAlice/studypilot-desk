@@ -24,7 +24,7 @@ function NavIcon({ name }: { name: ViewKey }) {
   </svg>;
 }
 
-export function NavRail({ active, onChange, collapsed, onToggle, courseTitle, onBackToLibrary, language = "zh-CN" }: {
+export function NavRail({ active, onChange, collapsed, onToggle, courseTitle, onBackToLibrary, language = "zh-CN", mobileOpen = false, onCloseMobile }: {
   active: ViewKey;
   onChange: (view: ViewKey) => void;
   collapsed: boolean;
@@ -32,17 +32,19 @@ export function NavRail({ active, onChange, collapsed, onToggle, courseTitle, on
   courseTitle?: string;
   onBackToLibrary?: () => void;
   language?: UiLanguage;
+  mobileOpen?: boolean;
+  onCloseMobile?: () => void;
 }) {
   const activeIndex = Math.max(0, itemKeys.indexOf(active));
   const english = language === "en-US";
   return (
-    <aside className={`navrail ${collapsed ? "navrail--collapsed" : ""}`}>
-      {onBackToLibrary && <button className="navrail__back" aria-label={english ? "Back to course library" : "返回课程书架"} onClick={onBackToLibrary}><span>←</span><div><strong>{courseTitle || (english ? "Course Library" : "课程书架")}</strong></div></button>}
+    <aside className={`navrail ${collapsed ? "navrail--collapsed" : ""} ${mobileOpen ? "is-mobile-open" : ""}`}>
+      {onBackToLibrary && <button className="navrail__back" aria-label={english ? "Back to course library" : "返回课程书架"} onClick={() => { onBackToLibrary(); onCloseMobile?.(); }}><span>←</span><div><strong>{courseTitle || (english ? "Course Library" : "课程书架")}</strong></div></button>}
       <div className="navrail__status"><span className="status-dot" />{english ? "LOCAL READY" : "本地系统在线"}</div>
       <nav aria-label={english ? "Main navigation" : "主导航"}>
         <span className="navrail__indicator" aria-hidden="true" style={{ "--nav-active-index": activeIndex } as CSSProperties} />
         {itemKeys.map((key) => (
-          <button key={key} className={active === key ? "is-active" : ""} onClick={() => onChange(key)} aria-label={labels[language][key]} aria-current={active === key ? "page" : undefined}>
+          <button key={key} className={active === key ? "is-active" : ""} onClick={() => { onChange(key); onCloseMobile?.(); }} aria-label={labels[language][key]} aria-current={active === key ? "page" : undefined}>
             <span className="nav-code"><NavIcon name={key} /></span><span className="nav-label">{labels[language][key]}</span>
           </button>
         ))}
