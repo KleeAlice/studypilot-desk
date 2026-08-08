@@ -1,0 +1,239 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="720" viewBox="0 0 1440 720" role="img" aria-labelledby="title desc">
+  <title id="title">StudyPilot Desk — 本地优先桌面学习系统</title>
+  <desc id="desc">品牌化桌面界面插画，展示学习中心、学习路线和本地资料书架。</desc>
+  <defs>
+    <linearGradient id="bg" x1="80" y1="40" x2="1360" y2="680" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#07111F"/>
+      <stop offset="0.55" stop-color="#0B1830"/>
+      <stop offset="1" stop-color="#10223A"/>
+    </linearGradient>
+    <radialGradient id="indigoGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1048 158) rotate(141) scale(684 455)">
+      <stop stop-color="#6678FF" stop-opacity="0.32"/>
+      <stop offset="1" stop-color="#6678FF" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="mintGlow" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(333 668) rotate(-29) scale(479 292)">
+      <stop stop-color="#52D2B5" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#52D2B5" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="logo" x1="78" y1="45" x2="146" y2="120" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8290FF"/>
+      <stop offset="1" stop-color="#5365E7"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#FFFFFF" stop-opacity="0.97"/>
+      <stop offset="1" stop-color="#EEF2FF" stop-opacity="0.92"/>
+    </linearGradient>
+    <linearGradient id="lesson" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#F4F6FF"/>
+      <stop offset="1" stop-color="#EEF7F6"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#6073F4"/>
+      <stop offset="1" stop-color="#4BC7AE"/>
+    </linearGradient>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#BFD0EA" stroke-opacity="0.055"/>
+    </pattern>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="22" stdDeviation="25" flood-color="#02060D" flood-opacity="0.42"/>
+    </filter>
+    <filter id="softShadow" x="-25%" y="-25%" width="150%" height="160%">
+      <feDropShadow dx="0" dy="13" stdDeviation="15" flood-color="#0B1730" flood-opacity="0.22"/>
+    </filter>
+    <clipPath id="windowClip"><rect x="512" y="64" width="854" height="592" rx="30"/></clipPath>
+  </defs>
+
+  <rect width="1440" height="720" rx="34" fill="url(#bg)"/>
+  <rect width="1440" height="720" rx="34" fill="url(#grid)"/>
+  <rect width="1440" height="720" rx="34" fill="url(#indigoGlow)"/>
+  <rect width="1440" height="720" rx="34" fill="url(#mintGlow)"/>
+  <path d="M35 584C242 477 364 563 512 474S797 251 1006 272s253 70 399-29" fill="none" stroke="#8797FF" stroke-opacity="0.1" stroke-width="2"/>
+  <path d="M31 615C249 503 391 604 548 501s276-177 471-158 244 58 388-36" fill="none" stroke="#5AD2B9" stroke-opacity="0.08" stroke-width="2"/>
+
+  <!-- Brand column -->
+  <g font-family="'Segoe UI','Microsoft YaHei','Noto Sans CJK SC',sans-serif">
+    <g transform="translate(72 54)">
+      <rect width="70" height="70" rx="20" fill="url(#logo)"/>
+      <circle cx="35" cy="35" r="20" fill="#FFFFFF" fill-opacity="0.12" stroke="#FFFFFF" stroke-opacity="0.25"/>
+      <path d="M35 13 40 30 57 35 40 40 35 57 30 40 13 35 30 30 35 13Z" fill="#FFFFFF" fill-opacity="0.2"/>
+      <circle cx="35" cy="35" r="8.5" fill="#FFFFFF"/>
+      <circle cx="35" cy="35" r="3.5" fill="#596AE9"/>
+      <circle cx="58" cy="12" r="6" fill="#5AD2B9"/>
+    </g>
+    <text x="162" y="81" fill="#F7F9FF" font-size="23" font-weight="700" letter-spacing="0.2">StudyPilot Desk</text>
+    <text x="162" y="106" fill="#91A3BE" font-size="12" font-weight="600" letter-spacing="2.4">LOCAL LEARNING OPERATING SYSTEM</text>
+
+    <g transform="translate(72 161)" font-size="11" font-weight="700" letter-spacing="1.1">
+      <rect width="78" height="28" rx="14" fill="#7182FF" fill-opacity="0.13" stroke="#8290FF" stroke-opacity="0.34"/>
+      <text x="39" y="18" text-anchor="middle" fill="#AEB8FF">WINDOWS</text>
+      <rect x="87" width="102" height="28" rx="14" fill="#4DD0B4" fill-opacity="0.11" stroke="#52D2B5" stroke-opacity="0.32"/>
+      <text x="138" y="18" text-anchor="middle" fill="#8DE5D1">LOCAL-FIRST</text>
+      <rect x="198" width="108" height="28" rx="14" fill="#F1B563" fill-opacity="0.1" stroke="#F1B563" stroke-opacity="0.28"/>
+      <text x="252" y="18" text-anchor="middle" fill="#F5CA8E">AI-ASSISTED</text>
+    </g>
+
+    <text x="72" y="254" fill="#F8FAFF" font-size="50" font-weight="800" letter-spacing="-1.5">让每一次学习</text>
+    <text x="72" y="316" fill="#F8FAFF" font-size="50" font-weight="800" letter-spacing="-1.5">都有清晰的下一步。</text>
+    <text x="73" y="361" fill="#AAB8CC" font-size="17">把课程、资料、AI 对话、知识沉淀与复习</text>
+    <text x="73" y="389" fill="#AAB8CC" font-size="17">组织成一个持续推进的本地学习工作台。</text>
+
+    <g transform="translate(72 438)">
+      <circle cx="8" cy="9" r="8" fill="#6275F2"/>
+      <path d="M5 9l2 2 4-5" fill="none" stroke="#FFFFFF" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="28" y="14" fill="#DCE4F1" font-size="14" font-weight="600">课程上下文集中在一个桌面工作区</text>
+      <circle cx="8" cy="45" r="8" fill="#4FCBB1"/>
+      <path d="M5 45l2 2 4-5" fill="none" stroke="#071A1A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="28" y="50" fill="#DCE4F1" font-size="14" font-weight="600">从资料导入到掌握复习形成闭环</text>
+      <circle cx="8" cy="81" r="8" fill="#F0B665"/>
+      <path d="M5 81l2 2 4-5" fill="none" stroke="#241609" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      <text x="28" y="86" fill="#DCE4F1" font-size="14" font-weight="600">默认本地存储，学习数据由你掌控</text>
+    </g>
+
+    <g transform="translate(72 574)">
+      <rect width="126" height="75" rx="16" fill="#FFFFFF" fill-opacity="0.055" stroke="#FFFFFF" stroke-opacity="0.09"/>
+      <text x="17" y="28" fill="#FFFFFF" font-size="25" font-weight="800">6</text>
+      <text x="42" y="28" fill="#91A3BE" font-size="11" font-weight="700">CORE SPACES</text>
+      <text x="17" y="54" fill="#B9C5D6" font-size="12">学习工作区</text>
+      <rect x="136" width="145" height="75" rx="16" fill="#FFFFFF" fill-opacity="0.055" stroke="#FFFFFF" stroke-opacity="0.09"/>
+      <text x="153" y="28" fill="#FFFFFF" font-size="25" font-weight="800">100%</text>
+      <text x="153" y="54" fill="#B9C5D6" font-size="12">本地数据优先</text>
+      <rect x="291" width="133" height="75" rx="16" fill="#FFFFFF" fill-opacity="0.055" stroke="#FFFFFF" stroke-opacity="0.09"/>
+      <text x="308" y="28" fill="#FFFFFF" font-size="25" font-weight="800">1</text>
+      <text x="329" y="28" fill="#91A3BE" font-size="11" font-weight="700">DESKTOP</text>
+      <text x="308" y="54" fill="#B9C5D6" font-size="12">完整学习闭环</text>
+    </g>
+  </g>
+
+  <!-- Product window -->
+  <g clip-path="url(#windowClip)" font-family="'Segoe UI','Microsoft YaHei','Noto Sans CJK SC',sans-serif">
+    <rect x="512" y="64" width="854" height="592" rx="30" fill="#F7F8FC"/>
+    <rect x="512" y="64" width="854" height="62" fill="#FFFFFF"/>
+    <line x1="512" y1="126" x2="1366" y2="126" stroke="#DDE3EE"/>
+    <circle cx="540" cy="95" r="6" fill="#FF857A"/>
+    <circle cx="560" cy="95" r="6" fill="#F2C96B"/>
+    <circle cx="580" cy="95" r="6" fill="#5FD1B1"/>
+    <rect x="607" y="80" width="28" height="28" rx="8" fill="#596AE9"/>
+    <text x="621" y="99" text-anchor="middle" fill="#FFFFFF" font-size="11" font-weight="800">SP</text>
+    <text x="647" y="99" fill="#1B2433" font-size="14" font-weight="700">线性代数基础</text>
+    <rect x="798" y="79" width="108" height="31" rx="15.5" fill="#EEF1FF"/>
+    <circle cx="817" cy="94.5" r="5" fill="#57CDB2"/>
+    <text x="830" y="99" fill="#536077" font-size="11" font-weight="600">本地服务正常</text>
+    <rect x="1248" y="79" width="88" height="31" rx="10" fill="#F3F5F9" stroke="#DCE2EC"/>
+    <text x="1292" y="99" text-anchor="middle" fill="#536077" font-size="11" font-weight="600">第 3 周</text>
+
+    <rect x="512" y="126" width="146" height="530" fill="#EEF1F6"/>
+    <g fill="#7D899B" font-size="11" font-weight="600">
+      <rect x="528" y="148" width="114" height="42" rx="12" fill="#DDE4FF"/>
+      <circle cx="548" cy="169" r="7" fill="#6073F4"/>
+      <text x="565" y="173" fill="#485BD1">学习中心</text>
+      <circle cx="548" cy="218" r="7" fill="none" stroke="#93A0B2" stroke-width="2"/>
+      <text x="565" y="222">学习路线</text>
+      <rect x="541" y="247" width="14" height="15" rx="2" fill="none" stroke="#93A0B2" stroke-width="1.7"/>
+      <text x="565" y="260">资料书架</text>
+      <path d="M541 294h14m-7-7v14" stroke="#93A0B2" stroke-width="1.7" stroke-linecap="round"/>
+      <text x="565" y="299">知识笔记</text>
+      <path d="M541 335h14l-3 12h-8Z" fill="none" stroke="#93A0B2" stroke-width="1.7"/>
+      <text x="565" y="344">Python 实验</text>
+      <circle cx="548" cy="382" r="7" fill="none" stroke="#93A0B2" stroke-width="1.7"/>
+      <path d="M548 375v7l5 3" fill="none" stroke="#93A0B2" stroke-width="1.5" stroke-linecap="round"/>
+      <text x="565" y="386">复习统计</text>
+    </g>
+    <rect x="528" y="591" width="114" height="43" rx="12" fill="#F8FAFC" stroke="#DDE3EC"/>
+    <circle cx="548" cy="612" r="8" fill="#4FCBB1" fill-opacity="0.18"/>
+    <circle cx="548" cy="612" r="3.5" fill="#41BFA4"/>
+    <text x="565" y="609" fill="#465166" font-size="10" font-weight="700">自动保存</text>
+    <text x="565" y="622" fill="#929CAB" font-size="8.5">所有数据在本机</text>
+
+    <g transform="translate(682 150)">
+      <text x="0" y="14" fill="#172033" font-size="18" font-weight="800">学习中心</text>
+      <text x="0" y="38" fill="#7C8799" font-size="11">围绕本周目标，每次只推进一个知识点。</text>
+      <rect x="548" y="-2" width="97" height="34" rx="11" fill="#5C6FEF"/>
+      <text x="596.5" y="19" text-anchor="middle" fill="#FFFFFF" font-size="11" font-weight="700">继续学习 →</text>
+
+      <rect x="0" y="58" width="645" height="82" rx="16" fill="#101B2E"/>
+      <text x="18" y="81" fill="#8E9EFF" font-size="9" font-weight="800" letter-spacing="1.5">COURSE LEARNING PATH</text>
+      <text x="18" y="105" fill="#F4F7FC" font-size="14" font-weight="700">矩阵与线性变换 · 12 周路线</text>
+      <rect x="18" y="117" width="410" height="6" rx="3" fill="#2A3850"/>
+      <rect x="18" y="117" width="158" height="6" rx="3" fill="url(#accent)"/>
+      <text x="444" y="122" fill="#AEB9C9" font-size="9">第 3 / 12 周</text>
+      <g transform="translate(548 72)">
+        <circle cx="25" cy="25" r="24" fill="#FFFFFF" fill-opacity="0.06" stroke="#7080F4" stroke-opacity="0.45"/>
+        <path d="M25 8a17 17 0 1 1-13 6" fill="none" stroke="#55CDB3" stroke-width="4" stroke-linecap="round"/>
+        <text x="25" y="29" text-anchor="middle" fill="#FFFFFF" font-size="10" font-weight="800">31%</text>
+      </g>
+
+      <rect x="0" y="157" width="422" height="322" rx="18" fill="url(#lesson)" stroke="#DCE3F0"/>
+      <rect x="0" y="157" width="4" height="322" rx="2" fill="#6073F4"/>
+      <text x="20" y="184" fill="#5B6EEA" font-size="9" font-weight="800" letter-spacing="1.4">这次只学一个点</text>
+      <text x="20" y="215" fill="#182033" font-size="20" font-weight="800">矩阵乘法的几何意义</text>
+      <text x="20" y="243" fill="#5F6A7C" font-size="11">把矩阵看作空间变换，而不仅是一组数字。</text>
+      <rect x="20" y="260" width="380" height="61" rx="12" fill="#FFFFFF" fill-opacity="0.82" stroke="#DCE3EE"/>
+      <rect x="34" y="275" width="3" height="31" rx="1.5" fill="#5ACDB3"/>
+      <text x="48" y="287" fill="#566174" font-size="9.5">一个矩阵先改变基向量，再把同样的变化</text>
+      <text x="48" y="302" fill="#566174" font-size="9.5">扩展到整个空间中的每个向量。</text>
+      <text x="20" y="348" fill="#6475EB" font-size="9" font-weight="800" letter-spacing="1.2">选择题 · 四选一</text>
+      <text x="20" y="374" fill="#20283A" font-size="12" font-weight="700">下列哪一项最准确描述矩阵乘法？</text>
+      <g font-size="9.5" fill="#4E596B">
+        <rect x="20" y="389" width="184" height="34" rx="9" fill="#FFFFFF" stroke="#D9E0EB"/>
+        <circle cx="36" cy="406" r="6" fill="none" stroke="#99A3B2"/>
+        <text x="50" y="410">按顺序组合空间变换</text>
+        <rect x="214" y="389" width="186" height="34" rx="9" fill="#FFFFFF" stroke="#D9E0EB"/>
+        <circle cx="230" cy="406" r="6" fill="none" stroke="#99A3B2"/>
+        <text x="244" y="410">只对数字进行加法</text>
+      </g>
+      <rect x="20" y="436" width="380" height="28" rx="9" fill="#5D70EF"/>
+      <text x="210" y="454" text-anchor="middle" fill="#FFFFFF" font-size="10" font-weight="700">提交答案</text>
+
+      <rect x="438" y="157" width="207" height="322" rx="18" fill="#FFFFFF" stroke="#DCE3EE"/>
+      <text x="458" y="185" fill="#1E2738" font-size="13" font-weight="800">本次参考资料</text>
+      <text x="609" y="185" text-anchor="end" fill="#6A79E9" font-size="9" font-weight="700">已选 3 份</text>
+      <g transform="translate(458 205)">
+        <rect width="167" height="62" rx="11" fill="#F6F8FC" stroke="#E1E6EF"/>
+        <rect x="10" y="11" width="29" height="40" rx="6" fill="#E4E8FF"/>
+        <text x="24.5" y="35" text-anchor="middle" fill="#5D70EA" font-size="8" font-weight="800">PDF</text>
+        <text x="50" y="25" fill="#30394B" font-size="9.5" font-weight="700">线性代数讲义</text>
+        <text x="50" y="42" fill="#8C96A5" font-size="8.5">第 3 章 · 变换</text>
+        <rect y="72" width="167" height="62" rx="11" fill="#F6F8FC" stroke="#E1E6EF"/>
+        <rect x="10" y="83" width="29" height="40" rx="6" fill="#DFF4EF"/>
+        <text x="24.5" y="107" text-anchor="middle" fill="#31A98F" font-size="8" font-weight="800">MD</text>
+        <text x="50" y="97" fill="#30394B" font-size="9.5" font-weight="700">课堂笔记</text>
+        <text x="50" y="114" fill="#8C96A5" font-size="8.5">矩阵乘法示例</text>
+        <rect y="144" width="167" height="62" rx="11" fill="#F6F8FC" stroke="#E1E6EF"/>
+        <rect x="10" y="155" width="29" height="40" rx="6" fill="#FDEDD8"/>
+        <text x="24.5" y="179" text-anchor="middle" fill="#D88932" font-size="8" font-weight="800">DOC</text>
+        <text x="50" y="169" fill="#30394B" font-size="9.5" font-weight="700">习题与解析</text>
+        <text x="50" y="186" fill="#8C96A5" font-size="8.5">例题 08—15</text>
+      </g>
+      <rect x="458" y="430" width="167" height="31" rx="9" fill="#EEF1FF"/>
+      <text x="541.5" y="450" text-anchor="middle" fill="#586BE6" font-size="9.5" font-weight="700">打开资料书架</text>
+    </g>
+  </g>
+  <rect x="512" y="64" width="854" height="592" rx="30" fill="none" stroke="#FFFFFF" stroke-opacity="0.18"/>
+
+  <!-- Floating library card -->
+  <g transform="translate(488 438)" font-family="'Segoe UI','Microsoft YaHei','Noto Sans CJK SC',sans-serif">
+    <rect width="235" height="177" rx="20" fill="url(#glass)" stroke="#FFFFFF" stroke-opacity="0.85"/>
+    <rect x="17" y="17" width="34" height="34" rx="10" fill="#15243A"/>
+    <path d="M27 26h14v18H27zM30 30h8M30 34h8M30 38h5" fill="none" stroke="#78D9C4" stroke-width="1.5" stroke-linecap="round"/>
+    <text x="62" y="32" fill="#1B2434" font-size="12.5" font-weight="800">本地资料书架</text>
+    <text x="62" y="48" fill="#7E899A" font-size="8.5">28 份资料 · 全文可检索</text>
+    <rect x="17" y="67" width="201" height="31" rx="9" fill="#FFFFFF" stroke="#DDE3ED"/>
+    <circle cx="32" cy="82" r="5" fill="none" stroke="#8C97A8"/>
+    <path d="M36 86l4 4" stroke="#8C97A8" stroke-width="1.4"/>
+    <text x="47" y="86" fill="#9AA4B2" font-size="8.5">搜索资料与正文</text>
+    <g transform="translate(17 111)">
+      <rect width="58" height="48" rx="9" fill="#E9ECFF"/>
+      <text x="10" y="17" fill="#596DE8" font-size="7.5" font-weight="800">PDF</text>
+      <rect x="10" y="25" width="38" height="3" rx="1.5" fill="#AEB8EE"/>
+      <rect x="10" y="33" width="30" height="3" rx="1.5" fill="#C6CDF2"/>
+      <rect x="71" width="58" height="48" rx="9" fill="#E3F5F1"/>
+      <text x="81" y="17" fill="#2BA28A" font-size="7.5" font-weight="800">MD</text>
+      <rect x="81" y="25" width="38" height="3" rx="1.5" fill="#9CD7CA"/>
+      <rect x="81" y="33" width="30" height="3" rx="1.5" fill="#BCE4DB"/>
+      <rect x="142" width="59" height="48" rx="9" fill="#F9EBD8"/>
+      <text x="152" y="17" fill="#C98335" font-size="7.5" font-weight="800">DOCX</text>
+      <rect x="152" y="25" width="38" height="3" rx="1.5" fill="#E3BD8B"/>
+      <rect x="152" y="33" width="30" height="3" rx="1.5" fill="#EDD2AC"/>
+    </g>
+  </g>
+</svg>

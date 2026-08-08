@@ -1,0 +1,270 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="960" viewBox="0 0 1440 960" role="img" aria-labelledby="title desc">
+  <title id="title">StudyPilot Desk 六大功能与学习闭环</title>
+  <desc id="desc">六个品牌化界面分镜展示课程路线、资料书架、AI 学习、知识笔记、Python 实验和复习统计。</desc>
+  <defs>
+    <linearGradient id="bg" x1="70" y1="40" x2="1370" y2="930" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#091321"/>
+      <stop offset="0.52" stop-color="#0E1B2D"/>
+      <stop offset="1" stop-color="#10263A"/>
+    </linearGradient>
+    <radialGradient id="glowA" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(249 111) rotate(33) scale(625 327)">
+      <stop stop-color="#6375F2" stop-opacity="0.2"/>
+      <stop offset="1" stop-color="#6375F2" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="glowB" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(1215 822) rotate(-144) scale(594 340)">
+      <stop stop-color="#4CC9AF" stop-opacity="0.16"/>
+      <stop offset="1" stop-color="#4CC9AF" stop-opacity="0"/>
+    </radialGradient>
+    <pattern id="grid" width="36" height="36" patternUnits="userSpaceOnUse">
+      <path d="M36 0H0V36" fill="none" stroke="#BBD0E8" stroke-opacity="0.04"/>
+    </pattern>
+    <linearGradient id="card" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#152338"/>
+      <stop offset="1" stop-color="#111D30"/>
+    </linearGradient>
+    <linearGradient id="flow" x1="116" y1="0" x2="1325" y2="0" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#6678F5"/>
+      <stop offset="0.5" stop-color="#6C87F5"/>
+      <stop offset="1" stop-color="#4FC9AF"/>
+    </linearGradient>
+    <filter id="shadow" x="-15%" y="-15%" width="130%" height="145%">
+      <feDropShadow dx="0" dy="16" stdDeviation="18" flood-color="#02060C" flood-opacity="0.34"/>
+    </filter>
+  </defs>
+
+  <rect width="1440" height="960" rx="34" fill="url(#bg)"/>
+  <rect width="1440" height="960" rx="34" fill="url(#grid)"/>
+  <rect width="1440" height="960" rx="34" fill="url(#glowA)"/>
+  <rect width="1440" height="960" rx="34" fill="url(#glowB)"/>
+
+  <g font-family="'Segoe UI','Microsoft YaHei','Noto Sans CJK SC',sans-serif">
+    <text x="68" y="76" fill="#8292FF" font-size="12" font-weight="800" letter-spacing="2.6">ONE WORKSPACE · ONE LEARNING LOOP</text>
+    <text x="68" y="122" fill="#F6F8FD" font-size="34" font-weight="800">六个工作区，连接从资料到掌握的全过程</text>
+    <text x="68" y="153" fill="#A7B5C8" font-size="15">不是分散的工具集合，而是一条可以持续推进、回看和验证的学习路径。</text>
+    <g transform="translate(1138 65)">
+      <rect width="234" height="70" rx="18" fill="#FFFFFF" fill-opacity="0.055" stroke="#FFFFFF" stroke-opacity="0.1"/>
+      <circle cx="35" cy="35" r="18" fill="#6073F1" fill-opacity="0.25" stroke="#7182F7"/>
+      <circle cx="35" cy="35" r="6" fill="#72DCC5"/>
+      <text x="65" y="31" fill="#F5F7FC" font-size="12" font-weight="800">LOCAL BY DEFAULT</text>
+      <text x="65" y="49" fill="#98A8BC" font-size="10">课程、资料与记录保存在本机</text>
+    </g>
+
+    <!-- Learning loop rail -->
+    <g transform="translate(68 181)">
+      <rect width="1304" height="76" rx="20" fill="#FFFFFF" fill-opacity="0.045" stroke="#FFFFFF" stroke-opacity="0.09"/>
+      <path d="M64 38H1240" stroke="#263750" stroke-width="4" stroke-linecap="round"/>
+      <path d="M64 38H1240" stroke="url(#flow)" stroke-width="4" stroke-linecap="round" stroke-dasharray="157 39"/>
+      <g font-size="11" font-weight="800" text-anchor="middle">
+        <g transform="translate(64 0)"><circle cy="38" r="14" fill="#6174F2"/><text y="42" fill="#FFFFFF">1</text><text y="66" fill="#AEBBCE">导入</text></g>
+        <path d="M161 34l8 4-8 4" fill="none" stroke="#566A87" stroke-width="2"/>
+        <g transform="translate(260 0)"><circle cy="38" r="14" fill="#6679F2"/><text y="42" fill="#FFFFFF">2</text><text y="66" fill="#AEBBCE">规划</text></g>
+        <path d="M357 34l8 4-8 4" fill="none" stroke="#566A87" stroke-width="2"/>
+        <g transform="translate(456 0)"><circle cy="38" r="14" fill="#6A82F2"/><text y="42" fill="#FFFFFF">3</text><text y="66" fill="#AEBBCE">学习</text></g>
+        <path d="M553 34l8 4-8 4" fill="none" stroke="#566A87" stroke-width="2"/>
+        <g transform="translate(652 0)"><circle cy="38" r="14" fill="#698EF0"/><text y="42" fill="#FFFFFF">4</text><text y="66" fill="#AEBBCE">沉淀</text></g>
+        <path d="M749 34l8 4-8 4" fill="none" stroke="#566A87" stroke-width="2"/>
+        <g transform="translate(848 0)"><circle cy="38" r="14" fill="#5DA5D7"/><text y="42" fill="#FFFFFF">5</text><text y="66" fill="#AEBBCE">验证</text></g>
+        <path d="M945 34l8 4-8 4" fill="none" stroke="#566A87" stroke-width="2"/>
+        <g transform="translate(1044 0)"><circle cy="38" r="14" fill="#54BDAF"/><text y="42" fill="#071B1B">6</text><text y="66" fill="#AEBBCE">复习</text></g>
+        <path d="M1141 34l8 4-8 4" fill="none" stroke="#566A87" stroke-width="2"/>
+        <g transform="translate(1240 0)"><circle cy="38" r="14" fill="#52CEB2"/><path d="M-5 0l4 4 7-9" fill="none" stroke="#071B1B" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/><text y="66" fill="#AEBBCE">掌握</text></g>
+      </g>
+    </g>
+
+    <!-- Card 01: Roadmap -->
+    <g transform="translate(68 286)">
+      <rect width="410" height="276" rx="22" fill="url(#card)" stroke="#6679F2" stroke-opacity="0.38"/>
+      <rect x="20" y="19" width="38" height="38" rx="11" fill="#6477F2" fill-opacity="0.18"/>
+      <path d="M31 45V31h16v14M34 35h10M34 39h7" fill="none" stroke="#8594FF" stroke-width="1.7" stroke-linecap="round"/>
+      <text x="73" y="34" fill="#8997FF" font-size="10" font-weight="800" letter-spacing="1.4">01 · COURSE ROADMAP</text>
+      <text x="73" y="53" fill="#F4F7FC" font-size="15" font-weight="800">课程与学习路线</text>
+      <text x="20" y="83" fill="#9EADC0" font-size="10.5">由课程目标、历史对话与选定资料生成可执行计划。</text>
+      <rect x="20" y="103" width="370" height="145" rx="15" fill="#0D1829" stroke="#293A52"/>
+      <text x="37" y="126" fill="#F0F3F9" font-size="10.5" font-weight="700">线性代数 · 12 周计划</text>
+      <text x="352" y="126" text-anchor="end" fill="#7F8DA0" font-size="8.5">3 / 12 周</text>
+      <rect x="37" y="139" width="315" height="5" rx="2.5" fill="#25364E"/>
+      <rect x="37" y="139" width="94" height="5" rx="2.5" fill="#6A7CF5"/>
+      <g transform="translate(37 162)">
+        <rect width="72" height="65" rx="10" fill="#6578F2"/>
+        <text x="10" y="18" fill="#DDE2FF" font-size="7.5" font-weight="800">WEEK 03</text>
+        <text x="10" y="37" fill="#FFFFFF" font-size="9.5" font-weight="700">线性变换</text>
+        <text x="10" y="53" fill="#D8DEFF" font-size="7.5">3 个任务</text>
+        <rect x="82" width="72" height="65" rx="10" fill="#17263B" stroke="#2B3C54"/>
+        <text x="92" y="18" fill="#7E8DA2" font-size="7.5" font-weight="800">WEEK 04</text>
+        <text x="92" y="37" fill="#C8D1DE" font-size="9.5" font-weight="700">特征空间</text>
+        <text x="92" y="53" fill="#7E8DA2" font-size="7.5">待开始</text>
+        <rect x="164" width="72" height="65" rx="10" fill="#17263B" stroke="#2B3C54"/>
+        <text x="174" y="18" fill="#7E8DA2" font-size="7.5" font-weight="800">WEEK 05</text>
+        <text x="174" y="37" fill="#C8D1DE" font-size="9.5" font-weight="700">正交投影</text>
+        <text x="174" y="53" fill="#7E8DA2" font-size="7.5">待开始</text>
+        <rect x="246" width="72" height="65" rx="10" fill="#17263B" stroke="#2B3C54"/>
+        <text x="256" y="18" fill="#7E8DA2" font-size="7.5" font-weight="800">WEEK 06</text>
+        <text x="256" y="37" fill="#C8D1DE" font-size="9.5" font-weight="700">阶段复盘</text>
+        <text x="256" y="53" fill="#7E8DA2" font-size="7.5">阶段门</text>
+      </g>
+    </g>
+
+    <!-- Card 02: Library -->
+    <g transform="translate(515 286)">
+      <rect width="410" height="276" rx="22" fill="url(#card)" stroke="#50CBB1" stroke-opacity="0.34"/>
+      <rect x="20" y="19" width="38" height="38" rx="11" fill="#4FC8AE" fill-opacity="0.16"/>
+      <path d="M31 29h16v18H31zM34 34h10M34 38h10M34 42h7" fill="none" stroke="#71D9C2" stroke-width="1.7" stroke-linecap="round"/>
+      <text x="73" y="34" fill="#66D5BD" font-size="10" font-weight="800" letter-spacing="1.4">02 · LOCAL LIBRARY</text>
+      <text x="73" y="53" fill="#F4F7FC" font-size="15" font-weight="800">本地资料书架</text>
+      <text x="20" y="83" fill="#9EADC0" font-size="10.5">导入、检索、阅读、编辑与引用都围绕原资料发生。</text>
+      <rect x="20" y="103" width="370" height="32" rx="10" fill="#0D1829" stroke="#2A3A50"/>
+      <circle cx="37" cy="119" r="5" fill="none" stroke="#738196"/>
+      <path d="M41 123l5 5" stroke="#738196" stroke-width="1.4"/>
+      <text x="52" y="123" fill="#708095" font-size="8.5">搜索标题、正文或知识点</text>
+      <rect x="323" y="111" width="52" height="17" rx="6" fill="#4FC8AE" fill-opacity="0.16"/>
+      <text x="349" y="123" text-anchor="middle" fill="#68D6BE" font-size="7.5" font-weight="700">全文检索</text>
+      <g transform="translate(20 148)">
+        <rect width="112" height="100" rx="12" fill="#13243A" stroke="#2B4057"/>
+        <rect x="10" y="10" width="32" height="44" rx="6" fill="#6376F1" fill-opacity="0.22"/>
+        <text x="26" y="36" text-anchor="middle" fill="#8B99FF" font-size="8" font-weight="800">PDF</text>
+        <text x="10" y="70" fill="#E8EDF5" font-size="8.5" font-weight="700">线性代数讲义</text>
+        <text x="10" y="85" fill="#7F8EA2" font-size="7.5">126 页 · 已收藏</text>
+        <circle cx="99" cy="15" r="5" fill="#F1B865"/>
+        <rect x="129" width="112" height="100" rx="12" fill="#13243A" stroke="#2B4057"/>
+        <rect x="139" y="10" width="32" height="44" rx="6" fill="#4FC8AE" fill-opacity="0.2"/>
+        <text x="155" y="36" text-anchor="middle" fill="#71D9C2" font-size="8" font-weight="800">MD</text>
+        <text x="139" y="70" fill="#E8EDF5" font-size="8.5" font-weight="700">课堂整理笔记</text>
+        <text x="139" y="85" fill="#7F8EA2" font-size="7.5">可编辑 · 12 书签</text>
+        <rect x="258" width="112" height="100" rx="12" fill="#13243A" stroke="#2B4057"/>
+        <rect x="268" y="10" width="32" height="44" rx="6" fill="#F1B865" fill-opacity="0.18"/>
+        <text x="284" y="36" text-anchor="middle" fill="#F2C787" font-size="8" font-weight="800">DOC</text>
+        <text x="268" y="70" fill="#E8EDF5" font-size="8.5" font-weight="700">习题与解析</text>
+        <text x="268" y="85" fill="#7F8EA2" font-size="7.5">28 处批注</text>
+      </g>
+    </g>
+
+    <!-- Card 03: AI learning -->
+    <g transform="translate(962 286)">
+      <rect width="410" height="276" rx="22" fill="url(#card)" stroke="#F0B565" stroke-opacity="0.32"/>
+      <rect x="20" y="19" width="38" height="38" rx="11" fill="#F0B565" fill-opacity="0.14"/>
+      <circle cx="39" cy="38" r="10" fill="none" stroke="#F2C98E" stroke-width="1.6"/>
+      <path d="M35 38h8M39 34v8" stroke="#F2C98E" stroke-width="1.6" stroke-linecap="round"/>
+      <text x="73" y="34" fill="#F0C58B" font-size="10" font-weight="800" letter-spacing="1.4">03 · GUIDED LEARNING</text>
+      <text x="73" y="53" fill="#F4F7FC" font-size="15" font-weight="800">AI 引导学习</text>
+      <text x="20" y="83" fill="#9EADC0" font-size="10.5">每次一个知识点：讲解、提问、反馈，再进入下一步。</text>
+      <rect x="20" y="103" width="370" height="145" rx="15" fill="#0D1829" stroke="#2B3A50"/>
+      <text x="37" y="125" fill="#F1BF7A" font-size="8" font-weight="800" letter-spacing="1">这次只学一个点</text>
+      <text x="37" y="146" fill="#F0F3F8" font-size="11.5" font-weight="800">特征向量为什么方向不变？</text>
+      <rect x="37" y="158" width="336" height="31" rx="8" fill="#15253A"/>
+      <rect x="47" y="167" width="3" height="13" rx="1.5" fill="#F0B565"/>
+      <rect x="59" y="168" width="222" height="4" rx="2" fill="#A4AFBE"/>
+      <rect x="59" y="177" width="182" height="4" rx="2" fill="#64748A"/>
+      <text x="37" y="207" fill="#7888F3" font-size="7.5" font-weight="800">选择题 · 四选一</text>
+      <rect x="37" y="215" width="157" height="21" rx="6" fill="#1A2B42" stroke="#31445C"/>
+      <circle cx="49" cy="225.5" r="4" fill="none" stroke="#7C8A9E"/>
+      <rect x="60" y="223" width="94" height="4" rx="2" fill="#8290A3"/>
+      <rect x="203" y="215" width="170" height="21" rx="6" fill="#5F72EE"/>
+      <circle cx="215" cy="225.5" r="4" fill="#FFFFFF" fill-opacity="0.2" stroke="#FFFFFF"/>
+      <path d="M213 225l2 2 3-4" fill="none" stroke="#FFFFFF" stroke-width="1.2"/>
+      <rect x="226" y="223" width="103" height="4" rx="2" fill="#D8DEFF"/>
+    </g>
+
+    <!-- Card 04: Knowledge -->
+    <g transform="translate(68 590)">
+      <rect width="410" height="276" rx="22" fill="url(#card)" stroke="#E382AE" stroke-opacity="0.32"/>
+      <rect x="20" y="19" width="38" height="38" rx="11" fill="#E382AE" fill-opacity="0.14"/>
+      <circle cx="31" cy="32" r="4" fill="none" stroke="#EF9CC0" stroke-width="1.5"/>
+      <circle cx="47" cy="31" r="4" fill="none" stroke="#EF9CC0" stroke-width="1.5"/>
+      <circle cx="39" cy="46" r="4" fill="none" stroke="#EF9CC0" stroke-width="1.5"/>
+      <path d="M34 33l9-1M33 35l4 8M45 35l-4 8" stroke="#EF9CC0" stroke-width="1.3"/>
+      <text x="73" y="34" fill="#EE9DC1" font-size="10" font-weight="800" letter-spacing="1.4">04 · KNOWLEDGE SPACE</text>
+      <text x="73" y="53" fill="#F4F7FC" font-size="15" font-weight="800">知识笔记与图谱</text>
+      <text x="20" y="83" fill="#9EADC0" font-size="10.5">把解释、引用、便签和记忆卡连接成自己的知识结构。</text>
+      <rect x="20" y="103" width="370" height="145" rx="15" fill="#0D1829" stroke="#2B3A50"/>
+      <path d="M91 168L154 136M91 168l69 48m-6-80 86 27m-80 53 80-53m0 0 74 38m-74-38 62-46" fill="none" stroke="#52647F" stroke-width="1.5"/>
+      <g>
+        <rect x="37" y="145" width="108" height="47" rx="10" fill="#583C59" stroke="#BD719B"/>
+        <text x="49" y="163" fill="#F2C3D8" font-size="8" font-weight="800">核心概念</text>
+        <text x="49" y="179" fill="#F8E7EF" font-size="9.5" font-weight="700">特征空间</text>
+        <rect x="121" y="113" width="95" height="43" rx="10" fill="#1E3150" stroke="#5D76A0"/>
+        <text x="134" y="130" fill="#9FB4D6" font-size="8" font-weight="800">资料引用</text>
+        <text x="134" y="145" fill="#D9E2EF" font-size="8.5">讲义 P.42</text>
+        <rect x="126" y="198" width="93" height="36" rx="9" fill="#40394C" stroke="#8C7292"/>
+        <text x="139" y="220" fill="#E4CCE7" font-size="8.5" font-weight="700">为什么方向不变？</text>
+        <rect x="216" y="143" width="88" height="42" rx="21" fill="#5E70E8"/>
+        <text x="260" y="168" text-anchor="middle" fill="#FFFFFF" font-size="9.5" font-weight="800">线性变换</text>
+        <rect x="276" y="98" width="82" height="36" rx="9" fill="#274C49" stroke="#4EA59A"/>
+        <text x="317" y="120" text-anchor="middle" fill="#A8E0D8" font-size="8.5" font-weight="700">记忆卡</text>
+        <rect x="297" y="188" width="69" height="36" rx="9" fill="#4A412D" stroke="#A48A54"/>
+        <text x="331.5" y="210" text-anchor="middle" fill="#E9D29E" font-size="8.5" font-weight="700">例题</text>
+      </g>
+    </g>
+
+    <!-- Card 05: Python -->
+    <g transform="translate(515 590)">
+      <rect width="410" height="276" rx="22" fill="url(#card)" stroke="#58A8DE" stroke-opacity="0.33"/>
+      <rect x="20" y="19" width="38" height="38" rx="11" fill="#58A8DE" fill-opacity="0.15"/>
+      <path d="M30 34c0-5 4-8 9-8h5v9H33v5h-4Zm18 8c0 5-4 8-9 8h-5v-9h11v-5h4Z" fill="none" stroke="#78BCE8" stroke-width="1.6" stroke-linejoin="round"/>
+      <circle cx="41" cy="30" r="1.4" fill="#78BCE8"/>
+      <circle cx="37" cy="46" r="1.4" fill="#78BCE8"/>
+      <text x="73" y="34" fill="#76BCE8" font-size="10" font-weight="800" letter-spacing="1.4">05 · PYTHON LAB</text>
+      <text x="73" y="53" fill="#F4F7FC" font-size="15" font-weight="800">Python 实验室</text>
+      <text x="20" y="83" fill="#9EADC0" font-size="10.5">在课程上下文里写代码、运行验证，并保存实验快照。</text>
+      <rect x="20" y="103" width="370" height="145" rx="15" fill="#091320" stroke="#2A3B50"/>
+      <rect x="20" y="103" width="370" height="25" rx="15" fill="#172337"/>
+      <rect x="20" y="116" width="370" height="12" fill="#172337"/>
+      <circle cx="36" cy="115" r="3" fill="#FF8177"/>
+      <circle cx="47" cy="115" r="3" fill="#F1C368"/>
+      <circle cx="58" cy="115" r="3" fill="#54CFAF"/>
+      <text x="75" y="118" fill="#8997AA" font-size="7.5">main.py</text>
+      <rect x="20" y="128" width="247" height="120" fill="#0E1827"/>
+      <rect x="267" y="128" width="123" height="120" fill="#101E2C"/>
+      <g font-family="'Cascadia Mono','Consolas',monospace" font-size="7.5">
+        <text x="32" y="146" fill="#5E6C81">1</text><text x="49" y="146" fill="#B8C5D6">import</text><text x="80" y="146" fill="#75BDE8"> numpy</text><text x="108" y="146" fill="#B8C5D6"> as np</text>
+        <text x="32" y="161" fill="#5E6C81">2</text><text x="49" y="161" fill="#D68CB6">A</text><text x="58" y="161" fill="#B8C5D6"> = np.array([[</text><text x="114" y="161" fill="#F0BE78">2, 1</text><text x="133" y="161" fill="#B8C5D6">], [</text><text x="151" y="161" fill="#F0BE78">1, 2</text><text x="170" y="161" fill="#B8C5D6">]])</text>
+        <text x="32" y="176" fill="#5E6C81">3</text><text x="49" y="176" fill="#D68CB6">values</text><text x="82" y="176" fill="#B8C5D6">, vectors =</text>
+        <text x="49" y="191" fill="#B8C5D6">np.linalg.eig(A)</text>
+        <text x="32" y="211" fill="#5E6C81">5</text><text x="49" y="211" fill="#75BDE8">print</text><text x="71" y="211" fill="#B8C5D6">(values)</text>
+      </g>
+      <text x="280" y="147" fill="#65D2B8" font-size="7" font-weight="800">PYTHON OUTPUT</text>
+      <text x="280" y="166" fill="#C1CCDA" font-size="8" font-family="'Cascadia Mono','Consolas',monospace">[3. 1.]</text>
+      <rect x="280" y="183" width="72" height="18" rx="6" fill="#5B70EB"/>
+      <text x="316" y="195" text-anchor="middle" fill="#FFFFFF" font-size="7.5" font-weight="700">运行成功</text>
+      <text x="280" y="220" fill="#718096" font-size="7">0.42 s · 已保存快照</text>
+    </g>
+
+    <!-- Card 06: Review -->
+    <g transform="translate(962 590)">
+      <rect width="410" height="276" rx="22" fill="url(#card)" stroke="#74C87F" stroke-opacity="0.32"/>
+      <rect x="20" y="19" width="38" height="38" rx="11" fill="#74C87F" fill-opacity="0.14"/>
+      <circle cx="39" cy="38" r="10" fill="none" stroke="#8BD696" stroke-width="1.6"/>
+      <path d="M39 31v7l5 3" fill="none" stroke="#8BD696" stroke-width="1.6" stroke-linecap="round"/>
+      <text x="73" y="34" fill="#8CD697" font-size="10" font-weight="800" letter-spacing="1.4">06 · REVIEW &amp; INSIGHT</text>
+      <text x="73" y="53" fill="#F4F7FC" font-size="15" font-weight="800">复习与学习统计</text>
+      <text x="20" y="83" fill="#9EADC0" font-size="10.5">用掌握度和复习队列决定今天该回到哪些知识点。</text>
+      <rect x="20" y="103" width="370" height="145" rx="15" fill="#0D1829" stroke="#2B3A50"/>
+      <g transform="translate(36 119)">
+        <text fill="#7E8EA3" font-size="7.5" font-weight="800">近 7 天学习</text>
+        <line x1="0" y1="91" x2="152" y2="91" stroke="#2E4057"/>
+        <g fill="#5F73EF"><rect x="8" y="68" width="12" height="23" rx="3"/><rect x="30" y="50" width="12" height="41" rx="3"/><rect x="52" y="58" width="12" height="33" rx="3"/><rect x="74" y="30" width="12" height="61" rx="3"/><rect x="96" y="43" width="12" height="48" rx="3"/><rect x="118" y="20" width="12" height="71" rx="3"/><rect x="140" y="36" width="12" height="55" rx="3" fill="#55CDAF"/></g>
+        <g fill="#637288" font-size="6.5" text-anchor="middle"><text x="14" y="104">一</text><text x="36" y="104">二</text><text x="58" y="104">三</text><text x="80" y="104">四</text><text x="102" y="104">五</text><text x="124" y="104">六</text><text x="146" y="104">日</text></g>
+      </g>
+      <g transform="translate(219 120)">
+        <circle cx="45" cy="42" r="35" fill="none" stroke="#26384F" stroke-width="9"/>
+        <path d="M45 7a35 35 0 1 1-30 17" fill="none" stroke="#61CC8A" stroke-width="9" stroke-linecap="round"/>
+        <text x="45" y="40" text-anchor="middle" fill="#F2F6FA" font-size="14" font-weight="800">78%</text>
+        <text x="45" y="54" text-anchor="middle" fill="#7F8EA3" font-size="7">总体掌握度</text>
+        <rect x="92" y="5" width="59" height="28" rx="8" fill="#15263B"/>
+        <text x="101" y="17" fill="#8DD69A" font-size="7" font-weight="800">今日复习</text>
+        <text x="101" y="27" fill="#E1E7EF" font-size="9" font-weight="800">8 个</text>
+        <rect x="92" y="40" width="59" height="28" rx="8" fill="#15263B"/>
+        <text x="101" y="52" fill="#8393F5" font-size="7" font-weight="800">连续学习</text>
+        <text x="101" y="62" fill="#E1E7EF" font-size="9" font-weight="800">12 天</text>
+        <rect x="92" y="75" width="59" height="28" rx="8" fill="#15263B"/>
+        <text x="101" y="87" fill="#E5B575" font-size="7" font-weight="800">待巩固</text>
+        <text x="101" y="97" fill="#E1E7EF" font-size="9" font-weight="800">3 项</text>
+      </g>
+    </g>
+
+    <g transform="translate(68 899)">
+      <rect width="1304" height="1" fill="#FFFFFF" fill-opacity="0.08"/>
+      <text y="32" fill="#74859A" font-size="10" letter-spacing="1.4">STUDYPILOT DESK</text>
+      <text x="1304" y="32" text-anchor="end" fill="#9BAABD" font-size="11">从分散资料到完整学习闭环 · From materials to mastery</text>
+    </g>
+  </g>
+</svg>
