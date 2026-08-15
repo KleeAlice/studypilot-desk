@@ -28,7 +28,7 @@ jobs:
       tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
       - id: release
-        uses: googleapis/release-please-action@v4
+        uses: googleapis/release-please-action@v5
         with:
           token: ${{ secrets.RELEASE_PLEASE_TOKEN || github.token }}
           config-file: release-please-config.json
@@ -61,14 +61,14 @@ jobs:
             bundles: dmg
             artifact-path: src-tauri/target/release/bundle/dmg/*.dmg
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || needs.release_please.outputs.tag_name }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 20
           cache: npm
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: pip
@@ -88,7 +88,7 @@ jobs:
       - run: npm run build:backend-runtime
       - run: python scripts/check_packaged_worker.py
       - run: node ./node_modules/@tauri-apps/cli/tauri.js build --bundles ${{ matrix.bundles }}
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: studypilot-${{ matrix.name }}-${{ github.event_name == 'workflow_dispatch' && inputs.release_tag || needs.release_please.outputs.tag_name }}
           path: ${{ matrix.artifact-path }}
@@ -103,7 +103,7 @@ jobs:
     needs: [release_please, build]
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v8
         with:
           path: release-assets
           merge-multiple: true
