@@ -6,7 +6,7 @@ description = "Rust Actix-Web local API host for StudyPilot desktop"
 
 [dependencies]
 actix-web = { version = "4", default-features = false, features = ["macros"] }
-base64 = "0.22"
+base64 = "0.23"
 futures-channel = "0.3"
 futures-util = "0.3"
 serde = { version = "1", features = ["derive"] }
